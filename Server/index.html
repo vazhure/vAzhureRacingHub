@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/main.css">
+    <title>Arduino Motion Telemetry</title>
+</head>
+
+<body>
+    <section class="SessionData">
+        <div class="SessionType"><text id="sessionType"></text>
+            <hr class="Flag" id="flag"><text id="remainingTime"></text>
+        </div>
+        <div class="LapTime">
+            <div>Current</div>
+            <div id="currenlaptime">0:00.000</div>
+        </div>
+        <div class="LapTime">
+            <div id="last">Last</div>
+            <div id="lastlaptime">0:00.000</div>
+        </div>
+        <div class="LapTime">
+            <div id="best">Best</div>
+            <div id="bestlaptime">0:00.000</div>
+        </div>
+        <div class="Position">
+            <div>POS</div>
+            <div class="none" id="position"></div>
+        </div>
+        <div class="Lap">
+            <div>LAP</div>
+            <div id="lap"></div>
+        </div>
+    </section>
+    <section class="CarData">
+        <section class="Telemetry">
+            <div class="Gear">
+                <div id="gear">N</div>
+            </div>
+            <div class="Speed">
+                <div id="speed">000</div>
+            </div>
+        </section>
+        <section class="PedalsInput">
+            <div class="PedalLabel">0%</div>
+            <div class="PedalLabel">0%</div>
+            <div class="PedalLabel">0%</div>
+            <div class="InputContainer">
+                <div id="clutch"></div>
+            </div>
+            <div class="InputContainer">
+                <div id="brake"></div>
+            </div>
+            <div class="InputContainer">
+                <div id="throttle"></div>
+            </div>
+        </section>
+        <section class="Electronics">
+            <div><img src="img/fuel48px.png" alt=""></div>
+            <div id="fuelLevel">0.00l</div>
+        </section>
+    </section>
+    <section class="Driver">
+        <div class="DriverPhoto"><img src="img/favicon.ico" alt=""></div>
+        <div class="DriverAndCar">
+            <div>
+                <H1 id="driverName"></H1>
+            </div>
+            <div id="carName"></div>
+        </div>
+        <div class="CarNumber" id="carNumber"></div>
+        <div class="DeltaBar">
+            <div id="delta"></div>
+            <div id="lblSector1">Sector 1</div>
+            <div id="lblSector2">Sector 2</div>
+            <div id="lblSector3">Sector 3</div>
+            <div id="sector1"></div>
+            <div id="sector2"></div>
+            <div id="sector3"></div>
+        </div>
+    </section>
+    <section class="Subscribe">
+        <div>SUBSCRIBE</div>
+    </section>
+    <section class="Weathercast">
+        <div>
+            <div><img src="img/temp48px.png" alt=""></div>
+            <div id="airtemp">21&degC</div>
+        </div>
+        <div>
+            <div><img src="img/road48px.png" alt=""></div>
+            <div id="roadtemp">35&degC</div>
+        </div>
+        <div class="Forecast">
+            <span>Forecast</span>
+            <div>
+                <div><img id="forecast-img1" src="img/sunny48px.png" alt=""></div>
+                <div id="forecast-temp1">25&degC</div>
+            </div>
+            <div>
+                <div><img id="forecast-img2" src="img/cloudy48px.png" alt=""></div>
+                <div id="forecast-temp2">20&degC</div>
+            </div>
+            <div>
+                <div><img id="forecast-img3" src="img/overcast48px.png" alt=""></div>
+                <div id="forecast-temp3">18&degC</div>
+            </div>
+        </div>
+    </section>
+    <section class="Caravangoes">
+        <div>
+            <img src="img/Caravangoes.png" alt="">
+        </div>
+    </section>
+    <section class="Winner">
+        <div><img src="img/cup256px.png" alt=""></div>
+    </section>
+    <section class="Results">
+        <h1>Session Results</h1>
+        <!-- <div class="ResultItem">
+            <div>P1</div>
+            <div>Andrey Zhuravlev</div>
+            <div>Porsche 911 GT3 Cup</div>
+            <div>#777</div>
+        </div>
+        <div class="ResultItem">
+            <div>P2</div>
+            <div>Artem Voskovskiy</div>
+            <div>Porsche 911 GT3 Cup</div>
+            <div>#001</div>
+        </div>
+        <div class="ResultItem">
+            <div>P3</div>
+            <div>Dmitry Moskvin</div>
+            <div>Porsche 911 GT3 Cup</div>
+            <div>#555</div>
+        </div> -->
+    </section>
+</body>
+
+<script src="./main.js"></script>
+
+</html>

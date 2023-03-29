@@ -1,0 +1,668 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+:root{
+    --yt-spec-brand-button-background: #c00;
+    --acc-green-color: #00bc00;
+    --acc-red-color: #c10c0c;
+    --acc-purple-color: #bc00bc;
+    --acc-light-gray-color:#e1e1e1;
+    --acc-dark-gray-color:#313131;
+    --dark-gray-color:#525252;
+    --brake: 0%;
+    --throttle: 0%;
+    --clutch: 0%;
+    --top-pos: 260px;
+    --rounding: 4px;
+
+    --flag-img: url("../img/chequered.png");
+    --flag-chequered-img: url("../img/chequered.png");
+    --flag-green-img: url("../img/green.png");
+    --flag-blue-img: url("../img/blue.png");
+    --flag-yellow-img: url("../img/yellow.png");
+    --flag-black-img: url("../img/black.png");
+    --flag-white-img: url("../img/white.png");
+
+    --gear-color:white;
+    --delta-color: transparent;
+    --sector1-color: transparent;
+    --sector2-color: transparent;
+    --sector3-color: transparent;
+}
+
+body{
+    background-color:transparent;
+    color: white;
+    font-family: 'Roboto';
+}
+
+body.Finished{
+    .SessionData{
+        .Lap, .Position, .LapTime{
+            display: none;
+        }
+    }
+    .CarData{
+        display: none;
+    }
+    .Driver{
+        .DeltaBar{
+            display: none;
+        }
+    }
+    .Results{
+        display: none;//flex;
+    }
+    .Weathercast{
+        display: none;
+    }
+}
+
+.SessionData{
+    display: flex;
+    flex-wrap: wrap;
+    width: 220px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: transparent;
+    justify-content: space-between;
+    align-self: center;
+    align-items: center;
+}
+
+.Flag{
+    border: 1px solid var(--acc-light-gray-color);
+}
+
+.FlagActive{
+    background: var(--flag-img) repeat 50% 50%;
+    height: 10px;
+    animation: showflag 1s ease-in-out;
+    border-radius: var(--rounding);
+    border: 0px;
+    overflow: hidden;
+}
+
+@keyframes showflag{
+    from {
+        height: 1px;
+      }
+    to{
+        height: 10px;
+    }
+    75%{
+        height: 20px;
+    }
+}
+
+.SessionType{
+    background-color: rgba($color: #000000, $alpha: 0.7);    
+    border-radius: var(--rounding);
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    padding: 0.5em 0.5em 0.5em 0.5em;
+    line-height: 80%;
+    width: 100%;
+}
+
+.Lap,.Position{
+    display: flex;
+    background-color: rgba($color: #000000, $alpha: 0.7);    
+    margin-bottom: 5px;
+    list-style-type: none;
+    border-radius: var(--rounding);
+    letter-spacing: 0.1em;
+    width: 49%;
+    :first-child{
+        display: flex;
+        justify-content: flex-start;
+        padding: 0 15px 0 10%;
+        background-color: var(--acc-green-color); 
+        clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+        width: 40%;
+    }
+    :not(first-child){
+        display: flex;
+        width: 50%;
+        background-color:transparent;
+        justify-content: center;
+    }
+    .active{
+        color:var(--acc-green-color);
+        animation-duration: 1s;
+        animation-name: deactivate;
+    }
+}
+
+.LapTime{
+    display: flex;
+    width: 100%;
+    background-color: rgba($color: #000000, $alpha: 0.7);    
+    margin-bottom: 5px;
+    border-radius: var(--rounding);
+    letter-spacing: 0.1em;
+    :first-child{
+        display: flex;
+        justify-content: flex-start;
+        background-color: var(--acc-dark-gray-color);
+        padding: 0 15px 0 10px;
+        clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+        width: 30%;
+    }
+    :not(first-child){
+        padding: 0 5px 0 20px;
+    }
+    [id="best"]{
+        background-color: var(--acc-purple-color); 
+    }
+}
+
+.LapTime.Active{
+    [id="bestlaptime"]{
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        left: 40%;
+        width: 60%;
+        padding: 0;
+        border-radius: var(--rounding);
+        background-color: var(--acc-purple-color);
+        animation-duration: 1s;
+        animation-name: new-best-lap;
+    }
+    [id="best"]
+    {
+        animation-duration: 1s;
+        animation-name: new-best-lap-label;
+    }
+    background: transparent;
+}
+
+@keyframes new-best-lap{
+    from{
+        left: 30%;
+    }
+    75%{
+        left: 70%;
+      }
+      to{
+          left: 30%;
+      }
+}
+
+@keyframes new-best-lap-label{
+    75%{
+        width: 70%;
+        clip-path: polygon( 0 0, 100% 0, 100% 100%, 0 100%);
+      }
+}
+
+.CarData{
+    display: flex;
+    position: absolute;
+    justify-content: space-between;
+    bottom: var(--top-pos);
+    left: 20px;
+    width: 320px;
+    height: 120px;
+}
+
+.PedalsInput
+{
+    background-color: rgba($color: #000000, $alpha: 0.7);
+    width: 45%;
+    border-radius: var(--rounding);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+
+    .InputContainer{
+        display: flex;
+        justify-content: space-evenly;
+        align-self: flex-end;
+        align-items: flex-end;
+        width: 20%;
+        height: 70%;
+        position: relative;
+        bottom: 10%;
+        border: 1px solid var(--acc-light-gray-color);
+        padding: 1px 1px 1px 1px;
+    
+        [id="clutch"]{
+            width: 100%;
+            background-color: #007af3;
+            height: var(--clutch);
+        }
+        
+        [id="brake"]{
+            width: 100%;
+            background-color: #c10c0c;
+            height: var(--brake);
+        }
+        
+        [id="throttle"]{
+            width: 100%;
+            background-color: #00bc00;
+            height: var(--throttle);
+        }
+    }
+
+    .PedalLabel{
+        width: 20%;
+        height: 12%;
+        display: flex;
+        align-items: center;
+        align-self: center;
+        justify-content: space-evenly;
+        padding: 0 5% 0 5%;
+        font-size: 60%;
+    }
+}
+
+ .Telemetry{
+    display: flex; 
+    flex-wrap: wrap;
+    width: 25%;
+    height: 100%;
+    background-color: rgba($color: #000000, $alpha: 0.7);   
+    border-radius: var(--rounding);
+    .Gear{
+        width: 100%;
+        height: 75%;
+        text-align: center;
+        align-items: center;
+        font-size: 550%;
+        color: var(--gear-color);
+    }
+    .Speed{
+        width: 100%;
+        height: 25%;
+        text-align: center;
+        vertical-align: middle;
+    }
+}
+
+.Electronics{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 25%;
+    height: 100%;
+    background-color: rgba($color: #000000, $alpha: 0.7);   
+    border-radius: var(--rounding);
+    div{
+        display: flex;
+        width: 100%;
+        justify-content: center;
+    }
+    :not(:first-child){
+        height: 25%;
+    }
+}
+
+.Driver{
+    display: flex;
+    align-content: space-between;
+    align-items: center;
+    justify-content: center;
+    width: 50vw;
+    height: 8vh;
+    position: absolute;
+    bottom: 8vh;
+    left: 50%;
+    margin-right: -50%;    
+    transform: translate(-50%, 0);
+    div{
+        background-color: rgba($color: #000000, $alpha: 0.7);   
+        border-radius: var(--rounding);
+        height: 100%;
+        margin: 0 2px 0 2px;
+    }
+    .DriverPhoto{
+        width: 15%;
+        text-align: center;
+        img{
+            height: 100%;
+            animation: rotation 30s infinite ease-in-out;
+        }
+    }
+    .DriverAndCar{
+        display: flex;
+        flex-wrap: wrap;
+        width: 35%;
+        display:flex;
+        align-items: center;
+        justify-content: center;
+        div{
+            background-color: transparent;
+            width: 100%;
+            height: 40%;
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.1em;
+        }
+    }
+    .CarNumber{
+        width: 15%;
+        font-size: 250%;
+        display:flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .DeltaBar
+    {
+        display: flex;
+        flex-wrap: wrap;
+        width: 35%;
+        justify-content: space-evenly;
+        color: white;
+        div:first-child{
+            margin: 1.5% 2% 0 2%;
+            width: 100%;
+            height: 25%;
+            background-color: var(--delta-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        div:not(first-child){
+            width: 30%;
+            height: 25%;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.1em;
+        }
+        [id="sector1"]{
+            background-color: var(--sector1-color);
+        }
+        [id="sector2"]{
+            background-color: var(--sector2-color);
+        }
+        [id="sector3"]{
+            background-color: var(--sector3-color);
+        }
+    }
+}
+
+@keyframes rotation {
+    0%{
+        transform: scale(1);
+     }
+     90%{
+        transform: scale(1);
+     }
+     95%{
+        transform: scale(1.5) rotate(-15deg);
+     }
+  }
+
+  .Subscribe{
+    font-family: 'Roboto';
+    background-color:var(--yt-spec-brand-button-background);
+    color:white;
+    width: fit-content;
+    padding: 1em;
+    border-radius: 0.25em;
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    margin-right: -50%;    
+    opacity: 0;
+    transform: translate(-50%, 0);
+    letter-spacing: 0.1em;
+    animation: ani-show 100s ease-in-out 15s infinite;
+}
+
+@keyframes ani-show {
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 0;
+    }
+    1%{
+        opacity: 1;
+        transform: translate(-100%, -20px) rotate(-5deg);
+    }
+    2%{
+        transform: translate(-50%, -20px) rotate(5deg) scale(0.9);
+        opacity: 1;
+    }
+    3%{
+        transform: translate(-50%, 0%);
+        opacity: 1;
+    }
+    4%{
+        transform: translate(-50%, 0%);
+        opacity: 1;
+    }    
+    5%{
+        opacity: 0;
+    }
+}
+
+.Weathercast{
+    font-family: 'Roboto';
+    display: flex;
+    position: absolute;
+    align-items: center;
+    align-content: center;
+    justify-content: space-evenly;
+    right: 20px;
+    top: 20px;
+    font-size: 75%;
+    
+    .Forecast{
+        display: none;
+        align-items: center;
+        align-content: center;
+        justify-content: space-evenly;
+        background-color: rgba($color: #000000, $alpha: 0.7);
+        span{
+            border-right: 1px solid var(--acc-light-gray-color);
+            border-radius: 0;
+            padding: 0em 1em 0 1em;
+        }
+        img{
+            filter: invert(1);
+        }
+    }
+    
+    div{
+        display: flex;
+        align-items: center;
+        align-content: center;
+        background-color: rgba($color: #000000, $alpha: 0.7);
+        height: 36px;
+        padding: 0.1em;
+        border-radius: var(--rounding);
+        margin: 0.1em;
+        letter-spacing: 0.1em;
+        div{
+            background-color: transparent;
+        }
+        img{
+            height: 80%;
+            filter: invert(1);
+        }
+    }
+}
+
+.Caravangoes{
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    opacity: 0;
+    img{
+        width: 200px;
+        border-radius: var(--rounding);
+    }
+    animation: caravan_ad 120s ease-in-out 120s infinite normal;
+}
+
+@keyframes caravan_ad{
+    0%{
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    2%{
+        opacity: 0.9;
+        transform: translateX(10%) scale(1.2);
+    }
+    3%{
+        opacity: 0.9;
+        transform: translateX(0%);
+    }
+    6%{
+        opacity: 0.9;
+        transform: translateX(0%);
+    }
+    7%{
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to{
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+.Winner{
+    display: flex;
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0;
+    div{
+        position: relative;
+        left: -50%;
+        top: -50%;
+    }
+}
+
+.Winner.Active
+{
+    animation: show-cup 10s ease-in-out;
+} 
+
+@keyframes show-cup{
+    from{
+        opacity: 0;
+        transform: scale(0.25);
+    }
+    30%{
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    35%{
+        opacity: 0.8;
+        transform: scale(1.25) ;
+    }
+    40%{
+        opacity: 0.8;
+        transform: scale(1) rotate(-15deg);
+    }
+    60%{
+        opacity: 0.8;
+        transform: scale(1.25) rotate(15deg);
+    }
+    to{
+        opacity: 0;
+        transform: scale(0.25);
+    }
+}
+
+.Results{
+    display: none;
+    flex-wrap: wrap;
+    position: absolute;
+    justify-self: center;
+    justify-content: center;
+    width: 30vw;
+    left: 50vw;
+    top: 5vw;
+    transform: translate(-50%, 0);
+    h1{
+        background-color: black;
+        border-radius: var(--rounding);
+        width: 100%;
+        letter-spacing: 0.2em;
+        text-align: center;
+        padding: 5px;
+        opacity: 0.7;
+        animation: results-header-appearing 1s ease-in;
+    }
+    .ResultItem{
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        opacity: 0.8;
+        letter-spacing: .1rem;
+        text-align: center;
+        div:nth-child(1){
+            display: flex;
+            width: 15%;
+            justify-content: center;
+            border-right: var(--acc-light-gray-color) solid 1px;
+            background-color: var(--acc-red-color);
+            clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+            padding: 0.25em;
+        }
+        div:nth-child(2),div:nth-child(3){
+            display: flex;
+            width: 35%;
+            justify-content: center;
+            border-right: var(--acc-light-gray-color) solid 1px;
+            background-color: var(--acc-dark-gray-color);
+            padding: 0.25em;
+        }
+        div:nth-child(4){
+            display: flex;
+            width: 15%;
+            justify-content: center;
+            background-color: var(--acc-dark-gray-color);
+            clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+            padding: 0.25em;
+        }
+    }
+    .ResultItem:nth-child(odd){
+        margin-bottom: 5px;
+        animation: results-item-appearing 2s ease-in;
+    }
+    .ResultItem:nth-child(even){
+        margin-bottom: 5px;
+        animation: results-item-appearing 1.5s ease-in;
+    }
+}
+
+@keyframes results-item-appearing{
+    from{
+        display: flex;
+        position: relative;
+        transform: translate(25%, 0) rotateY(-15deg);
+        opacity: 0;
+    }
+    75%{
+        display: flex;
+        position: relative;
+        transform: translate(-5%, 0) rotateY(15deg);
+        opacity: 0.8;
+    }
+    to{
+        display: flex;
+        opacity: 0.8;
+    }
+}
+
+@keyframes results-header-appearing{
+    from{
+        display: flex;
+        position: relative;
+        transform: rotateX(-90deg);
+        opacity: 0;
+    }
+}
