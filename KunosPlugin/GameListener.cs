@@ -289,9 +289,11 @@ namespace KunosPlugin
 
                             MotionData.LocalAcceleration = physics.accG;
                             MotionData.LocalVelocity = physics.localVelocity;
+
                             MotionData.Pitch = physics.pitch;
                             MotionData.Roll = physics.roll;
                             MotionData.Yaw = physics.heading;
+
                             MotionData.ABSVibration = physics.absVibrations;
 
                             CarData.Tires = new AMTireData[]
