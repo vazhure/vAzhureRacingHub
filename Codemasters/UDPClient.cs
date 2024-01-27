@@ -1,5 +1,6 @@
 ﻿using Codemasters.Structs;
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using vAzhureRacingAPI;
 
@@ -18,19 +19,24 @@ namespace Codemasters
             dataset = new TelemetryDataSet(game);
         }
 
-        public override void OnDataRecieved(ref byte[] bytes)
+        private float _vZ = 0;
+        private DateTime _tm = DateTime.Now;
+
+        public override void OnDataReceived(ref byte[] bytes)
         {
             if (bytes?.Length == structSize)
             {
                 try
                 {
+                    TimeSpan ts = DateTime.Now - _tm;
+
                     DIRT_4_DATA_MODE3 data = DIRT_4_DATA_MODE3.FromBytes(bytes);
                     AMCarData carData = dataset.CarData;
                     AMSessionInfo sessionInfo = dataset.SessionInfo;
                     AMWeatherData aMWeatherData = dataset.WeatherData;
                     AMMotionData aMMotionData = dataset.CarData.MotionData;
 
-                    aMMotionData.LocalAcceleration = new float[] { data.gforce_lateral, data.gforce_longitudinal, data.gforce_longitudinal };
+                    aMMotionData.LocalAcceleration = new float[] { 0, 0, 0 };
 
                     carData.Gear = data.gear > 9 ? (short)0 : (short)(data.gear + 1); // Rear gear == 10
                     carData.Lap = (int)data.lap;
@@ -86,6 +92,19 @@ namespace Codemasters
                     carData.Throttle = data.throttle_input;
                     carData.Clutch = data.clutch_input;
                     carData.Steering = data.steering_input * (float)Math.PI;
+
+                    Vector3 f = Vector3.Normalize(new Vector3(data.forward_dir[0], data.forward_dir[1], data.forward_dir[2]));
+                    Vector3 l = Vector3.Normalize(new Vector3(data.left_dir[0], data.left_dir[1], data.left_dir[2]));
+
+                    float accZ = data.speed > 10 ? 1000.0f * (data.velocity[1] - _vZ) / (float)ts.TotalMilliseconds : 0;
+                    _vZ = data.velocity[1];
+                    _tm = DateTime.Now;
+
+                    aMMotionData.Pitch = (float)Math2.Clamp(Math.Asin(f.Y), -Math2.halfPI, Math2.halfPI);
+                    aMMotionData.Roll = (float)Math2.Clamp(Math.Asin(-l.Y), -Math2.halfPI, Math2.halfPI);
+                    aMMotionData.Sway = data.gforce_lateral;
+                    aMMotionData.Surge = data.gforce_longitudinal;
+                    aMMotionData.Heave = (float)accZ;
 
                     carData.Tires = new AMTireData[]
                     {
