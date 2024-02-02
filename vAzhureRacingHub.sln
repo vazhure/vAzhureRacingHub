@@ -45,6 +45,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codemasters", "Codemasters\
 		{B9FCF55F-72AA-4C47-99BC-3FCCF9904FF6} = {B9FCF55F-72AA-4C47-99BC-3FCCF9904FF6}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotionPlatform3", "MotionPlatform3\MotionPlatform3.csproj", "{6F2FB510-4897-4CE7-8C50-C603CCA90713}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B9FCF55F-72AA-4C47-99BC-3FCCF9904FF6} = {B9FCF55F-72AA-4C47-99BC-3FCCF9904FF6}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KartKraft", "KartKraft\KartKraft.csproj", "{FCB3EBE1-6E07-41BB-8182-A2AC03D54FF3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +94,14 @@ Global
 		{60382F1B-B5C2-4DA3-8DE6-CD2316D9D353}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60382F1B-B5C2-4DA3-8DE6-CD2316D9D353}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60382F1B-B5C2-4DA3-8DE6-CD2316D9D353}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F2FB510-4897-4CE7-8C50-C603CCA90713}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F2FB510-4897-4CE7-8C50-C603CCA90713}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F2FB510-4897-4CE7-8C50-C603CCA90713}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F2FB510-4897-4CE7-8C50-C603CCA90713}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCB3EBE1-6E07-41BB-8182-A2AC03D54FF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCB3EBE1-6E07-41BB-8182-A2AC03D54FF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCB3EBE1-6E07-41BB-8182-A2AC03D54FF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCB3EBE1-6E07-41BB-8182-A2AC03D54FF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

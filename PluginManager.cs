@@ -32,7 +32,8 @@ namespace vAzhureRacingHub
 
                                 if (constructorInfoObj != null)
                                 {
-                                    if (constructorInfoObj.Invoke(null) is ICustomPlugin custom)
+                                    var obj = constructorInfoObj.Invoke(null);
+                                    if (obj is ICustomPlugin custom)
                                         return custom;
                                 }
                             }
