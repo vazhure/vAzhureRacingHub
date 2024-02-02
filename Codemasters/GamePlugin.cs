@@ -23,6 +23,7 @@ namespace Codemasters
                     case CodemastersGame.DIRT4: return "DiRT 4";
                     case CodemastersGame.DIRTRALLY: return "DiRT Rally";
                     case CodemastersGame.DIRTRALLY20: return "DiRT Rally 2.0";
+                    case CodemastersGame.WRCG: return "WRC Generations";
                 }
                 return "error";
             }
@@ -37,6 +38,7 @@ namespace Codemasters
                     case CodemastersGame.DIRT4: return 421020U;
                     case CodemastersGame.DIRTRALLY: return 310560U;
                     case CodemastersGame.DIRTRALLY20: return 690790U;
+                    case CodemastersGame.WRCG: return 1953520U;
                 }
                 return 0U;
             }
@@ -51,6 +53,7 @@ namespace Codemasters
                     case CodemastersGame.DIRT4: return new string[] { "dirt4" };
                     case CodemastersGame.DIRTRALLY: return new string[] { "drt" };
                     case CodemastersGame.DIRTRALLY20: return new string[] { "dirtrally2" };
+                    case CodemastersGame.WRCG: return new string[] { "WRCG" };
                 }
                 return new string[] { };
             }
@@ -67,17 +70,16 @@ namespace Codemasters
         public event EventHandler OnGameStateChanged;
         public event EventHandler OnGameIconChanged;
 
-        public enum CodemastersGame { DIRT4, DIRTRALLY, DIRTRALLY20 };
+        public enum CodemastersGame { DIRT4, DIRTRALLY, DIRTRALLY20, WRCG };
         public GamePlugin(CodemastersGame game)
         {
             _game = game;
-            _client = new UDPClient(this);
+            _client = new UDPClient(this, game);
             _client.OnDataArrived += OnDataArrived;
 
             monitor = new ProcessMonitor(ExecutableProcessName, 500);
             monitor.OnProcessRunningStateChanged += delegate (object o, bool bRunning)
             {
-                bIsRunning = bRunning;
                 if (bRunning)
                     _client?.Run(Port);
                 else
@@ -91,8 +93,6 @@ namespace Codemasters
         {
             OnTelemetry?.Invoke(this, e);
         }
-
-        private bool bIsRunning = false;
 
         public void Start(IVAzhureRacingApp app)
         {
@@ -116,6 +116,7 @@ namespace Codemasters
                 case CodemastersGame.DIRT4: return Properties.Resources.dirt4;
                 case CodemastersGame.DIRTRALLY: return Properties.Resources.drt_rally;
                 case CodemastersGame.DIRTRALLY20: return Properties.Resources.dirtrally2;
+                case CodemastersGame.WRCG: return Properties.Resources.WRCG;
             }
         }
 

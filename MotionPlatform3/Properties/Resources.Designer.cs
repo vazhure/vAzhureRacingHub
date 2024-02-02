@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Codemasters.Properties {
+namespace MotionPlatform3.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Codemasters.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Codemasters.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MotionPlatform3.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,41 +61,21 @@ namespace Codemasters.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Icon dirt4 {
+        internal static System.Drawing.Bitmap _3dof {
             get {
-                object obj = ResourceManager.GetObject("dirt4", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
+                object obj = ResourceManager.GetObject("_3dof", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon dirtrally2 {
+        internal static System.Drawing.Icon ico_3dof {
             get {
-                object obj = ResourceManager.GetObject("dirtrally2", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-        /// </summary>
-        internal static System.Drawing.Icon drt_rally {
-            get {
-                object obj = ResourceManager.GetObject("drt_rally", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-        /// </summary>
-        internal static System.Drawing.Icon WRCG {
-            get {
-                object obj = ResourceManager.GetObject("WRCG", resourceCulture);
+                object obj = ResourceManager.GetObject("ico_3dof", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

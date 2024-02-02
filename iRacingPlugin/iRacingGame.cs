@@ -52,18 +52,22 @@ namespace iRacingPlugin
         {
             dataSet = new TelemetryDataSet(this);
 
-            wrapper = new SdkWrapper
+            try
             {
-                EventRaiseType = SdkWrapper.EventRaiseTypes.CurrentThread,
-                TelemetryUpdateFrequency = 60
-            };
+                wrapper = new SdkWrapper
+                {
+                    EventRaiseType = SdkWrapper.EventRaiseTypes.CurrentThread,
+                    TelemetryUpdateFrequency = 60
+                };
 
-            wrapper.TelemetryUpdated += Wrapper_TelemetryUpdated;
-            wrapper.Connected += Wrapper_Connected;
-            wrapper.Disconnected += Wrapper_Disconnected;
-            wrapper.SessionInfoUpdated += Wrapper_SessionInfoUpdated;
+                wrapper.TelemetryUpdated += Wrapper_TelemetryUpdated;
+                wrapper.Connected += Wrapper_Connected;
+                wrapper.Disconnected += Wrapper_Disconnected;
+                wrapper.SessionInfoUpdated += Wrapper_SessionInfoUpdated;
 
-            wrapper.Start();
+                wrapper.Start();
+            }
+            catch { }
         }
 
         private void Wrapper_SessionInfoUpdated(object sender, SdkWrapper.SessionInfoUpdatedEventArgs e)
@@ -98,7 +102,7 @@ namespace iRacingPlugin
             motionData.Surge = ti.LongAccel.Value / 9.81f;
             motionData.Heave = ti.VertAccel.Value / 9.81f;
             motionData.Sway = ti.LatAccel.Value / 9.81f;
-            motionData.LocalAcceleration = new float[] { ti.LatAccel.Value, ti.LongAccel.Value, ti.VertAccel.Value };
+            //motionData.LocalAcceleration = new float[] { ti.LatAccel.Value, ti.VertAccel.Value, ti.LongAccel.Value };
 
             int idx = ti.PlayerCarIdx.Value;
 
@@ -289,7 +293,7 @@ namespace iRacingPlugin
 
         public void Quit(IVAzhureRacingApp _)
         {
-            if (wrapper != null)
+            try
             {
                 wrapper.TelemetryUpdated -= Wrapper_TelemetryUpdated;
                 wrapper.Connected -= Wrapper_Connected;
@@ -297,6 +301,7 @@ namespace iRacingPlugin
                 wrapper.SessionInfoUpdated -= Wrapper_SessionInfoUpdated;
                 wrapper.Stop();
             }
+            catch { }
         }
 
         public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;

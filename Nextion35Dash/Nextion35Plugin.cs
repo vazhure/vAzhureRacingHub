@@ -73,12 +73,12 @@ namespace Nextion35Dash
 
             app.OnDeviceRemoveComplete += delegate (object sender, DeviceChangeEventsArgs e)
             {
-                if (!nextionDevice.IsConnected)
+                if (nextionDevice.IsConnected)
                 {
                     if ($"COM{nextionDevice.Settings.ComPort}" == e.Port.ToUpper())
                         nextionDevice.Disconnect();
                 }
-                if (!alpineDevice.IsConnected)
+                if (alpineDevice.IsConnected)
                 {
                     if ($"COM{alpineDevice.Settings.ComPort}" == e.Port.ToUpper())
                         alpineDevice.Disconnect();

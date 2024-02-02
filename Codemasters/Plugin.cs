@@ -16,8 +16,13 @@ namespace Codemasters
             return true;
         }
 
-        private readonly List<GamePlugin> games = new List<GamePlugin>() { new GamePlugin(GamePlugin.CodemastersGame.DIRT4), new GamePlugin(GamePlugin.CodemastersGame.DIRTRALLY), new GamePlugin(GamePlugin.CodemastersGame.DIRTRALLY20) };
-
+        private readonly List<GamePlugin> games = new List<GamePlugin>() 
+        { 
+            new GamePlugin(GamePlugin.CodemastersGame.DIRT4), 
+            new GamePlugin(GamePlugin.CodemastersGame.DIRTRALLY), 
+            new GamePlugin(GamePlugin.CodemastersGame.DIRTRALLY20),
+            new GamePlugin(GamePlugin.CodemastersGame.WRCG)
+        };
 
         public bool Initialize(IVAzhureRacingApp app)
         {

@@ -50,6 +50,88 @@ namespace Codemasters.Structs
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public class DIRT_4_DATA_MODE2
+    {
+        public float total_time;
+        public float lap_time;
+        public float lap_distance;
+        public float total_distance;
+        public float position_x;
+        public float position_y;
+        public float position_z;
+        public float speed;
+        public float velocity_x;
+        public float velocity_y;
+        public float velocity_z;
+        public float left_dir_x;
+        public float left_dir_y;
+        public float left_dir_z;
+        public float forward_dir_x;
+        public float forward_dir_y;
+        public float forward_dir_z;
+        public float suspension_position_bl;
+        public float suspension_position_br;
+        public float suspension_position_fl;
+        public float suspension_position_fr;
+        public float suspension_velocity_bl;
+        public float suspension_velocity_br;
+        public float suspension_velocity_fl;
+        public float suspension_velocity_fr;
+        public float wheel_patch_speed_bl;
+        public float wheel_patch_speed_br;
+        public float wheel_patch_speed_fl;
+        public float wheel_patch_speed_fr;
+        public float throttle_input;
+        public float steering_input;
+        public float brake_input;
+        public float clutch_input;
+        public float gear;
+        public float gforce_lateral;
+        public float gforce_longitudinal;
+        public float lap;
+        public float engine_rate;
+        public float native_sli_support;
+        public float race_position;
+        public float kers_level;
+        public float kers_level_max;
+        public float drs;
+        public float traction_control;
+        public float abs;
+        public float fuel_in_tank;
+        public float fuel_capacity;
+        public float in_pits;
+        public float race_sector;
+        public float sector_time_1;
+        public float sector_time_2;
+        public float brake_temp_bl;
+        public float brake_temp_br;
+        public float brake_temp_fl;
+        public float brake_temp_fr;
+        public float tyre_pressure_bl;
+        public float tyre_pressure_br;
+        public float tyre_pressure_fl;
+        public float tyre_pressure_fr;
+        public float laps_completed;
+        public float total_laps;
+        public float track_length;
+        public float last_lap_time;
+
+        public static DIRT_4_DATA_MODE2 FromBytes(byte[] data)
+        {
+            DIRT_4_DATA_MODE2 d4 = new DIRT_4_DATA_MODE2();
+            try
+            {
+                GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
+                d4 = (DIRT_4_DATA_MODE2)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(DIRT_4_DATA_MODE2));
+                h.Free();
+            }
+            catch { }
+
+            return d4;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public class DIRT_4_DATA_MODE3
     {
         [MarshalAs(UnmanagedType.R4)]
@@ -123,7 +205,7 @@ namespace Codemasters.Structs
         [MarshalAs(UnmanagedType.R4)]
         public float lap;
         [MarshalAs(UnmanagedType.R4)]
-        public float engine_rate;
+        public float engine_rate; // speed of engine  [rpm / 10]
         [MarshalAs(UnmanagedType.R4)]
         public float native_sli_support;
         [MarshalAs(UnmanagedType.R4)]

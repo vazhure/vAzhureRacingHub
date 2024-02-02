@@ -138,7 +138,7 @@ namespace Nextion35Dash
 
         bool bEnabled = false;
 
-        public bool EnableDevice
+        public bool DeviceEnabled
         {
             get
             {

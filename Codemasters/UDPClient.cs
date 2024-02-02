@@ -1,7 +1,9 @@
 ﻿using Codemasters.Structs;
 using System;
+using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Text;
 using vAzhureRacingAPI;
 
 namespace Codemasters
@@ -13,24 +15,30 @@ namespace Codemasters
         readonly int structSize;
         readonly TelemetryDataSet dataset;
 
-        public UDPClient(GamePlugin game)
+        readonly GamePlugin.CodemastersGame gameid;
+
+        public UDPClient(GamePlugin game, GamePlugin.CodemastersGame id)
         {
-            structSize = Marshal.SizeOf(typeof(DIRT_4_DATA_MODE3));
+            gameid = id;
             dataset = new TelemetryDataSet(game);
+            structSize = Marshal.SizeOf(typeof(DIRT_4_DATA_MODE3));
         }
 
-        private float _vZ = 0;
+        private float _vY = 0;
+        private float _acc = 0;
         private DateTime _tm = DateTime.Now;
 
         public override void OnDataReceived(ref byte[] bytes)
         {
-            if (bytes?.Length == structSize)
+            if (bytes?.Length >= structSize)
             {
                 try
                 {
                     TimeSpan ts = DateTime.Now - _tm;
+                    _tm = DateTime.Now;
 
                     DIRT_4_DATA_MODE3 data = DIRT_4_DATA_MODE3.FromBytes(bytes);
+
                     AMCarData carData = dataset.CarData;
                     AMSessionInfo sessionInfo = dataset.SessionInfo;
                     AMWeatherData aMWeatherData = dataset.WeatherData;
@@ -65,11 +73,11 @@ namespace Codemasters
                     switch (data.in_pits)
                     {
                         default:
-                        case 0: 
-                            sessionInfo.SessionState = ""; 
+                        case 0:
+                            sessionInfo.SessionState = "";
                             break;
                         case 1:
-                            sessionInfo.SessionState = "Pitting"; 
+                            sessionInfo.SessionState = "Pitting";
                             carData.PitState = 2;
                             break;
                         case 2:
@@ -78,13 +86,13 @@ namespace Codemasters
                             sessionInfo.SessionState = "In Pits";
                             break;
                         case 9.5f:
-                            sessionInfo.SessionState = "Race"; 
+                            sessionInfo.SessionState = "Race";
                             break;
                         case 10f:
-                            sessionInfo.SessionState = "Time attack"; 
+                            sessionInfo.SessionState = "Time attack";
                             break;
                         case 170f:
-                            sessionInfo.SessionState = "Qualifying"; 
+                            sessionInfo.SessionState = "Qualifying";
                             break;
                     }
 
@@ -93,18 +101,34 @@ namespace Codemasters
                     carData.Clutch = data.clutch_input;
                     carData.Steering = data.steering_input * (float)Math.PI;
 
-                    Vector3 f = Vector3.Normalize(new Vector3(data.forward_dir[0], data.forward_dir[1], data.forward_dir[2]));
-                    Vector3 l = Vector3.Normalize(new Vector3(data.left_dir[0], data.left_dir[1], data.left_dir[2]));
+                    if (gameid == GamePlugin.CodemastersGame.WRCG)
+                    {
+                        float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[2] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
+                        _vY = data.velocity[2];
 
-                    float accZ = data.speed > 10 ? 1000.0f * (data.velocity[1] - _vZ) / (float)ts.TotalMilliseconds : 0;
-                    _vZ = data.velocity[1];
-                    _tm = DateTime.Now;
+                        aMMotionData.Pitch = data.forward_dir[2];
+                        aMMotionData.Roll = data.left_dir[2];
 
-                    aMMotionData.Pitch = (float)Math2.Clamp(Math.Asin(f.Y), -Math2.halfPI, Math2.halfPI);
-                    aMMotionData.Roll = (float)Math2.Clamp(Math.Asin(-l.Y), -Math2.halfPI, Math2.halfPI);
-                    aMMotionData.Sway = data.gforce_lateral;
-                    aMMotionData.Surge = data.gforce_longitudinal;
-                    aMMotionData.Heave = (float)accZ;
+                        aMMotionData.Heave = _acc = accZ;
+                        aMMotionData.Sway = data.gforce_lateral;
+                        aMMotionData.Surge = -data.gforce_longitudinal;
+                    }
+                    else
+                    {
+                        Vector3 f = Vector3.Normalize(new Vector3(data.forward_dir[0], data.forward_dir[1], data.forward_dir[2]));
+                        Vector3 l = Vector3.Normalize(new Vector3(data.left_dir[0], data.left_dir[1], data.left_dir[2]));
+
+                        float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[1] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
+                        _vY = data.velocity[1];
+
+                        aMMotionData.Pitch = (float)Math2.Clamp(Math.Asin(f.Y), -Math2.halfPI, Math2.halfPI);
+                        aMMotionData.Roll = (float)Math2.Clamp(Math.Asin(-l.Y), -Math2.halfPI, Math2.halfPI);
+
+                        aMMotionData.Heave = _acc = accZ;
+                        aMMotionData.Sway = data.gforce_lateral;
+                        aMMotionData.Surge = data.gforce_longitudinal;
+                    }
+
 
                     carData.Tires = new AMTireData[]
                     {
