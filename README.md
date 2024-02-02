@@ -1,3 +1,5 @@
 # vAzhureRacingHub
 Application for Sim Racing Games. Supporting plugins and external devices via Serial Port
-![2023-03-29_12-31-05](https://user-images.githubusercontent.com/124382776/228491555-11a65b42-4fbe-4e3e-9634-029c37123d97.png)
+![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/d83ec7da-60b7-47c8-a628-cbe3eb0df6e1)
+![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/7b188e8d-4314-4c0f-b754-9073ec5943b3)
+
