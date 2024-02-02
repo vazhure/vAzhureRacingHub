@@ -24,7 +24,7 @@ namespace vAzhureRacingAPI
             if (_udpstate.client == null)
             {
                 _udpstate.client = new UdpClient(listenPort);
-                _udpstate.lep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), listenPort);
+                _udpstate.lep = new IPEndPoint(IPAddress.Any, listenPort);
             }
             try
             {
@@ -45,7 +45,7 @@ namespace vAzhureRacingAPI
             _udpstate.lep = null;
         }
 
-        public virtual void OnDataRecieved(ref byte[] bytes)
+        public virtual void OnDataReceived(ref byte[] bytes)
         {
             OnDataRecievedEvent?.Invoke(this, bytes);
         }
@@ -60,7 +60,7 @@ namespace vAzhureRacingAPI
 
                     byte[] bytes = s.client.EndReceive(result, ref s.lep);
 
-                    OnDataRecieved(ref bytes);
+                    OnDataReceived(ref bytes);
                 }
                 catch
                 {

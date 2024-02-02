@@ -33,6 +33,8 @@ namespace vAzhureRacingAPI
             }
         }
 
+        public const double halfPI = 1.57;
+
         /// <summary>
         /// Расстояние между точками
         /// </summary>
@@ -42,6 +44,39 @@ namespace vAzhureRacingAPI
         internal static double Distance(int x1, int y1, int x2, int y2)
         {
             return Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="forward"></param>
+        /// <param name="up"></param>
+        /// <returns>{yaw, pitch, roll} in radians</returns>
+        public static float[] RadiansFromVectors(ref float[] forward, ref float[] up)
+        {
+            // Yaw is the bearing of the forward vector's shadow in the xy plane.
+            float yaw = (float)Math.Atan2(forward[1], forward[0]);
+
+            // Pitch is the altitude of the forward vector off the xy plane, toward the down direction.
+            float pitch = (float)-Math.Asin(forward[2]);
+
+            // Find the vector in the xy plane 90 degrees to the right of our bearing.
+            float planeRightX = (float)Math.Sin(yaw);
+            float planeRightY = (float)-Math.Cos(yaw);
+
+            // Roll is the rightward lean of our up vector, computed here using a dot product.
+            float roll = (float)Math.Asin(up[0] * planeRightX + up[1] * planeRightY);
+
+            // If we're twisted upside-down, return a roll in the range +-(pi/2, pi)
+            if (up[2] < 0)
+                try
+                {
+                    roll = (float)(Math.Sign(roll) * Math.PI - roll);
+                }
+                catch { }
+
+            // Convert radians to degrees.
+            return new float[] { yaw, pitch, roll };
         }
     }
 }

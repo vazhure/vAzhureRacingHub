@@ -367,35 +367,42 @@ namespace vAzhureRacingAPI
         }
     }
 
+    [Serializable]
     public class AMMotionData : ICloneable
     {
         public double[] Position { get; set; } = { 0, 0, 0 };
+        /// <summary>
+        /// forward and back
+        /// </summary>
         public float Pitch { get; set; } = 0;
+        /// <summary>
+        /// Left and right
+        /// </summary>
         public float Roll { get; set; } = 0;
+        /// <summary>
+        /// Rotation
+        /// </summary>
         public float Yaw { get; set; } = 0;
-        public float Surge { get; set; } = 0;
-        public float Heave { get; set; } = 0;
-        public float Sway { get; set; } = 0;
         /// <summary>
-        /// Longitudinal acceleration
+        /// Longitudinal acceleration // Surge
         /// </summary>
-        public float LongAccel
-        {
-            get => LocalAcceleration[1];
-            set => LocalAcceleration[1] = value;
-        }
-        /// <summary>
-        /// Vertical acceleration
-        /// </summary>
-        public float VertAccel
+        public float Surge
         {
             get => LocalAcceleration[2];
             set => LocalAcceleration[2] = value;
         }
         /// <summary>
-        /// Lateral acceleration
+        /// Up / Down movements
         /// </summary>
-        public float LatAccel
+        public float Heave
+        {
+            get => LocalAcceleration[1];
+            set => LocalAcceleration[1] = value;
+        }
+        /// <summary>
+        /// Lateral acceleration / Sway
+        /// </summary>
+        public float Sway
         {
             get => LocalAcceleration[0];
             set => LocalAcceleration[0] = value;

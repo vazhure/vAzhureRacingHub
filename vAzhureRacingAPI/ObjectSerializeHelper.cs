@@ -16,5 +16,12 @@ namespace vAzhureRacingAPI
             return JsonSerializer.Deserialize<T>(json);
         }
 
+        public static T DeserializeJson<T>(string json, JavaScriptConverter[] converters)
+        {
+            JsonSerializer.RegisterConverters(converters);
+
+            return JsonSerializer.Deserialize<T>(json);
+        }
+
     }
 }

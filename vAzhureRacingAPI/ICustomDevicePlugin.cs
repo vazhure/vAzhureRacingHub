@@ -36,7 +36,7 @@ namespace vAzhureRacingAPI
         /// <summary>
         /// Разрешение устройства
         /// </summary>
-        bool EnableDevice { get; set; }
+        bool DeviceEnabled { get; set; }
 
         /// <summary>
         /// Пиктограмма устройства
