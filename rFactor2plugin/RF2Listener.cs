@@ -113,10 +113,9 @@ namespace rFactor2plugin
                             motionData.Roll = (float)vt.mLocalRot.y;
                             motionData.Yaw = (float)vt.mLocalRot.z;
                             motionData.Sway = vt.Sway;
-                            motionData.Surge = vt.Surge;
+                            motionData.Surge = -vt.Surge;
                             motionData.Heave = vt.Heave;
                             motionData.Position = vt.mPos;
-                            motionData.LocalAcceleration = vt.mLocalAccel;
                             motionData.LocalVelocity = vt.mLocalVel;
                             motionData.LocalRotAcceleration = vt.mLocalRotAccel;
                             motionData.LocalRot = vt.mLocalRot;
