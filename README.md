@@ -16,6 +16,7 @@ Supported Game Titles:
 * RaceRoom Racing Experience
 * rFactor 2
 * WRC Generations
+* BeamNG.Drive
 
 WIP:
 * F1 2018
