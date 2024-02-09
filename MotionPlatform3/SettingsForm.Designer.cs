@@ -29,13 +29,14 @@ namespace MotionPlatform3
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pbRL = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.lblRearRightState = new System.Windows.Forms.Label();
             this.lblFrontState = new System.Windows.Forms.Label();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.pbFR = new System.Windows.Forms.PictureBox();
+            this.pbRR = new System.Windows.Forms.PictureBox();
             this.lblRearLeftState = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -53,14 +54,14 @@ namespace MotionPlatform3
             this.chkEnabled = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.label4 = new System.Windows.Forms.Label();
             this.sliderPitch = new vAzhureRacingAPI.VAzhureSliderControl();
-            this.label5 = new System.Windows.Forms.Label();
+            this.labelPitch = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
             this.lblPitch = new System.Windows.Forms.Label();
             this.sliderRoll = new vAzhureRacingAPI.VAzhureSliderControl();
-            this.label8 = new System.Windows.Forms.Label();
+            this.labelRoll = new System.Windows.Forms.Label();
             this.lblRoll = new System.Windows.Forms.Label();
             this.sliderHeave = new vAzhureRacingAPI.VAzhureSliderControl();
-            this.label10 = new System.Windows.Forms.Label();
+            this.labelHeave = new System.Windows.Forms.Label();
             this.lblHeave = new System.Windows.Forms.Label();
             this.sliderSurge = new vAzhureRacingAPI.VAzhureSliderControl();
             this.label12 = new System.Windows.Forms.Label();
@@ -89,22 +90,24 @@ namespace MotionPlatform3
             this.sliderLinearity = new vAzhureRacingAPI.VAzhureSliderControl();
             this.label9 = new System.Windows.Forms.Label();
             this.lblLinearity = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.toolTips = new System.Windows.Forms.ToolTip(this.components);
+            this.btnTestSpeed = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbRR)).BeginInit();
             this.SuspendLayout();
             // 
-            // pictureBox1
+            // pbRL
             // 
-            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox1.Image = global::MotionPlatform3.Properties.Resources._3dof;
-            this.pictureBox1.Location = new System.Drawing.Point(3, 43);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(144, 301);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.pbRL.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pbRL.Image = global::MotionPlatform3.Properties.Resources._3dof;
+            this.pbRL.Location = new System.Drawing.Point(3, 43);
+            this.pbRL.Name = "pbRL";
+            this.pbRL.Size = new System.Drawing.Size(144, 301);
+            this.pbRL.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbRL.TabIndex = 0;
+            this.pbRL.TabStop = false;
             // 
             // tableLayoutPanel1
             // 
@@ -117,9 +120,9 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33486F));
             this.tableLayoutPanel1.Controls.Add(this.lblRearRightState, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.lblFrontState, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.pictureBox1, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.pictureBox2, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.pictureBox3, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.pbRL, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.pbFR, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.pbRR, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.lblRearLeftState, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.label2, 1, 2);
@@ -139,7 +142,7 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(453, 417);
-            this.tableLayoutPanel1.TabIndex = 1;
+            this.tableLayoutPanel1.TabIndex = 8;
             // 
             // lblRearRightState
             // 
@@ -147,7 +150,7 @@ namespace MotionPlatform3
             this.lblRearRightState.Location = new System.Drawing.Point(304, 0);
             this.lblRearRightState.Name = "lblRearRightState";
             this.lblRearRightState.Size = new System.Drawing.Size(146, 40);
-            this.lblRearRightState.TabIndex = 2;
+            this.lblRearRightState.TabIndex = 8;
             this.lblRearRightState.Text = "Unknown state";
             this.lblRearRightState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -157,31 +160,31 @@ namespace MotionPlatform3
             this.lblFrontState.Location = new System.Drawing.Point(153, 0);
             this.lblFrontState.Name = "lblFrontState";
             this.lblFrontState.Size = new System.Drawing.Size(145, 40);
-            this.lblFrontState.TabIndex = 1;
+            this.lblFrontState.TabIndex = 4;
             this.lblFrontState.Text = "Unknown state";
             this.lblFrontState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // pictureBox2
+            // pbFR
             // 
-            this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox2.Image = global::MotionPlatform3.Properties.Resources._3dof;
-            this.pictureBox2.Location = new System.Drawing.Point(153, 43);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(145, 301);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox2.TabIndex = 0;
-            this.pictureBox2.TabStop = false;
+            this.pbFR.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pbFR.Image = global::MotionPlatform3.Properties.Resources._3dof;
+            this.pbFR.Location = new System.Drawing.Point(153, 43);
+            this.pbFR.Name = "pbFR";
+            this.pbFR.Size = new System.Drawing.Size(145, 301);
+            this.pbFR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbFR.TabIndex = 0;
+            this.pbFR.TabStop = false;
             // 
-            // pictureBox3
+            // pbRR
             // 
-            this.pictureBox3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox3.Image = global::MotionPlatform3.Properties.Resources._3dof;
-            this.pictureBox3.Location = new System.Drawing.Point(304, 43);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(146, 301);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox3.TabIndex = 0;
-            this.pictureBox3.TabStop = false;
+            this.pbRR.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pbRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
+            this.pbRR.Location = new System.Drawing.Point(304, 43);
+            this.pbRR.Name = "pbRR";
+            this.pbRR.Size = new System.Drawing.Size(146, 301);
+            this.pbRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbRR.TabIndex = 0;
+            this.pbRR.TabStop = false;
             // 
             // lblRearLeftState
             // 
@@ -199,7 +202,7 @@ namespace MotionPlatform3
             this.label1.Location = new System.Drawing.Point(3, 347);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(144, 30);
-            this.label1.TabIndex = 3;
+            this.label1.TabIndex = 1;
             this.label1.Text = "Rear Left";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -209,7 +212,7 @@ namespace MotionPlatform3
             this.label2.Location = new System.Drawing.Point(153, 347);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(145, 30);
-            this.label2.TabIndex = 4;
+            this.label2.TabIndex = 5;
             this.label2.Text = "Front";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -219,7 +222,7 @@ namespace MotionPlatform3
             this.label3.Location = new System.Drawing.Point(304, 347);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(146, 30);
-            this.label3.TabIndex = 5;
+            this.label3.TabIndex = 9;
             this.label3.Text = "Rear Right";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -229,7 +232,7 @@ namespace MotionPlatform3
             this.lblPosRL.Location = new System.Drawing.Point(3, 377);
             this.lblPosRL.Name = "lblPosRL";
             this.lblPosRL.Size = new System.Drawing.Size(144, 20);
-            this.lblPosRL.TabIndex = 3;
+            this.lblPosRL.TabIndex = 2;
             this.lblPosRL.Text = "-";
             this.lblPosRL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -239,7 +242,7 @@ namespace MotionPlatform3
             this.lblPosFront.Location = new System.Drawing.Point(153, 377);
             this.lblPosFront.Name = "lblPosFront";
             this.lblPosFront.Size = new System.Drawing.Size(145, 20);
-            this.lblPosFront.TabIndex = 3;
+            this.lblPosFront.TabIndex = 6;
             this.lblPosFront.Text = "-";
             this.lblPosFront.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -249,7 +252,7 @@ namespace MotionPlatform3
             this.lblPosRR.Location = new System.Drawing.Point(304, 377);
             this.lblPosRR.Name = "lblPosRR";
             this.lblPosRR.Size = new System.Drawing.Size(146, 20);
-            this.lblPosRR.TabIndex = 3;
+            this.lblPosRR.TabIndex = 10;
             this.lblPosRR.Text = "-";
             this.lblPosRR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -269,7 +272,7 @@ namespace MotionPlatform3
             this.lblTargetFront.Location = new System.Drawing.Point(153, 397);
             this.lblTargetFront.Name = "lblTargetFront";
             this.lblTargetFront.Size = new System.Drawing.Size(145, 20);
-            this.lblTargetFront.TabIndex = 3;
+            this.lblTargetFront.TabIndex = 7;
             this.lblTargetFront.Text = "-";
             this.lblTargetFront.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -279,7 +282,7 @@ namespace MotionPlatform3
             this.lblTargetRR.Location = new System.Drawing.Point(304, 397);
             this.lblTargetRR.Name = "lblTargetRR";
             this.lblTargetRR.Size = new System.Drawing.Size(146, 20);
-            this.lblTargetRR.TabIndex = 3;
+            this.lblTargetRR.TabIndex = 11;
             this.lblTargetRR.Text = "-";
             this.lblTargetRR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -291,6 +294,7 @@ namespace MotionPlatform3
             this.btnHome.Size = new System.Drawing.Size(147, 44);
             this.btnHome.TabIndex = 0;
             this.btnHome.Text = "HOME";
+            this.toolTips.SetToolTip(this.btnHome, "Home linear actuators");
             this.btnHome.UseVisualStyleBackColor = true;
             this.btnHome.Click += new System.EventHandler(this.BtnHome_Click);
             // 
@@ -301,8 +305,9 @@ namespace MotionPlatform3
             this.btnClose.Location = new System.Drawing.Point(767, 12);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(147, 44);
-            this.btnClose.TabIndex = 2;
+            this.btnClose.TabIndex = 5;
             this.btnClose.Text = "CLOSE";
+            this.toolTips.SetToolTip(this.btnClose, "Close Dialog");
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.BtnClose_Click);
             // 
@@ -314,6 +319,7 @@ namespace MotionPlatform3
             this.btnPark.Size = new System.Drawing.Size(147, 44);
             this.btnPark.TabIndex = 1;
             this.btnPark.Text = "PARK";
+            this.toolTips.SetToolTip(this.btnPark, "Move linear actuators to park position");
             this.btnPark.UseVisualStyleBackColor = true;
             this.btnPark.Click += new System.EventHandler(this.ButtonPark_Click);
             // 
@@ -322,8 +328,8 @@ namespace MotionPlatform3
             this.sliderSpeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.sliderSpeed.BigStep = 10;
             this.sliderSpeed.Location = new System.Drawing.Point(542, 116);
-            this.sliderSpeed.Maximum = 250;
-            this.sliderSpeed.Minimum = 27;
+            this.sliderSpeed.Maximum = 100;
+            this.sliderSpeed.Minimum = 10;
             this.sliderSpeed.MinimumSize = new System.Drawing.Size(16, 16);
             this.sliderSpeed.Name = "sliderSpeed";
             this.sliderSpeed.Padding = new System.Windows.Forms.Padding(1);
@@ -331,8 +337,9 @@ namespace MotionPlatform3
             this.sliderSpeed.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderSpeed.SmallStep = 5;
             this.sliderSpeed.Steps = 10;
-            this.sliderSpeed.TabIndex = 5;
-            this.sliderSpeed.Value = 250;
+            this.sliderSpeed.TabIndex = 11;
+            this.toolTips.SetToolTip(this.sliderSpeed, "Speed override");
+            this.sliderSpeed.Value = 90;
             this.sliderSpeed.Vertical = false;
             this.sliderSpeed.OnValueChanged += new System.EventHandler(this.SliderSpeed_OnValueChanged);
             // 
@@ -349,7 +356,8 @@ namespace MotionPlatform3
             this.chkEnabled.StateOff = ((System.Drawing.Image)(resources.GetObject("chkEnabled.StateOff")));
             this.chkEnabled.StateOn = ((System.Drawing.Image)(resources.GetObject("chkEnabled.StateOn")));
             this.chkEnabled.SwitchText = "Enabled";
-            this.chkEnabled.TabIndex = 3;
+            this.chkEnabled.TabIndex = 9;
+            this.toolTips.SetToolTip(this.chkEnabled, "Enable movements");
             this.chkEnabled.OnSwitch += new System.EventHandler(this.ChkEnabled_OnSwitch);
             // 
             // label4
@@ -359,7 +367,7 @@ namespace MotionPlatform3
             this.label4.Location = new System.Drawing.Point(471, 124);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(38, 13);
-            this.label4.TabIndex = 4;
+            this.label4.TabIndex = 10;
             this.label4.Text = "Speed";
             // 
             // sliderPitch
@@ -376,20 +384,24 @@ namespace MotionPlatform3
             this.sliderPitch.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderPitch.SmallStep = 5;
             this.sliderPitch.Steps = 10;
-            this.sliderPitch.TabIndex = 8;
+            this.sliderPitch.TabIndex = 18;
+            this.toolTips.SetToolTip(this.sliderPitch, "Pitch ratio");
             this.sliderPitch.Value = 20;
             this.sliderPitch.Vertical = false;
             this.sliderPitch.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
             // 
-            // label5
+            // labelPitch
             // 
-            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(471, 194);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(31, 13);
-            this.label5.TabIndex = 7;
-            this.label5.Text = "Pitch";
+            this.labelPitch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelPitch.AutoSize = true;
+            this.labelPitch.Location = new System.Drawing.Point(471, 194);
+            this.labelPitch.Name = "labelPitch";
+            this.labelPitch.Size = new System.Drawing.Size(31, 13);
+            this.labelPitch.TabIndex = 17;
+            this.labelPitch.Text = "Pitch";
+            this.labelPitch.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
+            this.labelPitch.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
+            this.labelPitch.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
             // 
             // lblSpeed
             // 
@@ -397,9 +409,9 @@ namespace MotionPlatform3
             this.lblSpeed.AutoSize = true;
             this.lblSpeed.Location = new System.Drawing.Point(726, 124);
             this.lblSpeed.Name = "lblSpeed";
-            this.lblSpeed.Size = new System.Drawing.Size(33, 13);
-            this.lblSpeed.TabIndex = 6;
-            this.lblSpeed.Text = "100%";
+            this.lblSpeed.Size = new System.Drawing.Size(66, 13);
+            this.lblSpeed.TabIndex = 12;
+            this.lblSpeed.Text = "100 mm/sec";
             // 
             // lblPitch
             // 
@@ -408,7 +420,7 @@ namespace MotionPlatform3
             this.lblPitch.Location = new System.Drawing.Point(726, 194);
             this.lblPitch.Name = "lblPitch";
             this.lblPitch.Size = new System.Drawing.Size(27, 13);
-            this.lblPitch.TabIndex = 9;
+            this.lblPitch.TabIndex = 19;
             this.lblPitch.Text = "20%";
             // 
             // sliderRoll
@@ -425,20 +437,24 @@ namespace MotionPlatform3
             this.sliderRoll.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderRoll.SmallStep = 5;
             this.sliderRoll.Steps = 10;
-            this.sliderRoll.TabIndex = 8;
+            this.sliderRoll.TabIndex = 22;
+            this.toolTips.SetToolTip(this.sliderRoll, "Roll ratio");
             this.sliderRoll.Value = 20;
             this.sliderRoll.Vertical = false;
             this.sliderRoll.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
             // 
-            // label8
+            // labelRoll
             // 
-            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(471, 229);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(25, 13);
-            this.label8.TabIndex = 7;
-            this.label8.Text = "Roll";
+            this.labelRoll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelRoll.AutoSize = true;
+            this.labelRoll.Location = new System.Drawing.Point(471, 229);
+            this.labelRoll.Name = "labelRoll";
+            this.labelRoll.Size = new System.Drawing.Size(25, 13);
+            this.labelRoll.TabIndex = 21;
+            this.labelRoll.Text = "Roll";
+            this.labelRoll.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
+            this.labelRoll.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
+            this.labelRoll.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
             // 
             // lblRoll
             // 
@@ -447,7 +463,7 @@ namespace MotionPlatform3
             this.lblRoll.Location = new System.Drawing.Point(726, 229);
             this.lblRoll.Name = "lblRoll";
             this.lblRoll.Size = new System.Drawing.Size(27, 13);
-            this.lblRoll.TabIndex = 9;
+            this.lblRoll.TabIndex = 23;
             this.lblRoll.Text = "20%";
             // 
             // sliderHeave
@@ -464,20 +480,24 @@ namespace MotionPlatform3
             this.sliderHeave.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderHeave.SmallStep = 5;
             this.sliderHeave.Steps = 10;
-            this.sliderHeave.TabIndex = 8;
+            this.sliderHeave.TabIndex = 26;
+            this.toolTips.SetToolTip(this.sliderHeave, "Heave ratio");
             this.sliderHeave.Value = 20;
             this.sliderHeave.Vertical = false;
             this.sliderHeave.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
             // 
-            // label10
+            // labelHeave
             // 
-            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(471, 264);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(39, 13);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Heave";
+            this.labelHeave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelHeave.AutoSize = true;
+            this.labelHeave.Location = new System.Drawing.Point(471, 264);
+            this.labelHeave.Name = "labelHeave";
+            this.labelHeave.Size = new System.Drawing.Size(39, 13);
+            this.labelHeave.TabIndex = 25;
+            this.labelHeave.Text = "Heave";
+            this.labelHeave.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
+            this.labelHeave.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
+            this.labelHeave.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
             // 
             // lblHeave
             // 
@@ -486,7 +506,7 @@ namespace MotionPlatform3
             this.lblHeave.Location = new System.Drawing.Point(726, 264);
             this.lblHeave.Name = "lblHeave";
             this.lblHeave.Size = new System.Drawing.Size(27, 13);
-            this.lblHeave.TabIndex = 9;
+            this.lblHeave.TabIndex = 27;
             this.lblHeave.Text = "20%";
             // 
             // sliderSurge
@@ -503,7 +523,8 @@ namespace MotionPlatform3
             this.sliderSurge.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderSurge.SmallStep = 5;
             this.sliderSurge.Steps = 10;
-            this.sliderSurge.TabIndex = 8;
+            this.sliderSurge.TabIndex = 30;
+            this.toolTips.SetToolTip(this.sliderSurge, "Surge ratio");
             this.sliderSurge.Value = 20;
             this.sliderSurge.Vertical = false;
             this.sliderSurge.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
@@ -515,7 +536,7 @@ namespace MotionPlatform3
             this.label12.Location = new System.Drawing.Point(471, 299);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(35, 13);
-            this.label12.TabIndex = 7;
+            this.label12.TabIndex = 29;
             this.label12.Text = "Surge";
             // 
             // lblSurge
@@ -525,7 +546,7 @@ namespace MotionPlatform3
             this.lblSurge.Location = new System.Drawing.Point(726, 299);
             this.lblSurge.Name = "lblSurge";
             this.lblSurge.Size = new System.Drawing.Size(27, 13);
-            this.lblSurge.TabIndex = 9;
+            this.lblSurge.TabIndex = 31;
             this.lblSurge.Text = "20%";
             // 
             // sliderSway
@@ -542,7 +563,8 @@ namespace MotionPlatform3
             this.sliderSway.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderSway.SmallStep = 5;
             this.sliderSway.Steps = 10;
-            this.sliderSway.TabIndex = 8;
+            this.sliderSway.TabIndex = 34;
+            this.toolTips.SetToolTip(this.sliderSway, "Sway ratio");
             this.sliderSway.Value = 20;
             this.sliderSway.Vertical = false;
             this.sliderSway.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
@@ -554,7 +576,7 @@ namespace MotionPlatform3
             this.label14.Location = new System.Drawing.Point(471, 334);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(33, 13);
-            this.label14.TabIndex = 7;
+            this.label14.TabIndex = 33;
             this.label14.Text = "Sway";
             // 
             // lblSway
@@ -564,7 +586,7 @@ namespace MotionPlatform3
             this.lblSway.Location = new System.Drawing.Point(726, 334);
             this.lblSway.Name = "lblSway";
             this.lblSway.Size = new System.Drawing.Size(27, 13);
-            this.lblSway.TabIndex = 9;
+            this.lblSway.TabIndex = 35;
             this.lblSway.Text = "20%";
             // 
             // chkInvertPitch
@@ -580,7 +602,8 @@ namespace MotionPlatform3
             this.chkInvertPitch.StateOff = ((System.Drawing.Image)(resources.GetObject("chkInvertPitch.StateOff")));
             this.chkInvertPitch.StateOn = ((System.Drawing.Image)(resources.GetObject("chkInvertPitch.StateOn")));
             this.chkInvertPitch.SwitchText = "Invert";
-            this.chkInvertPitch.TabIndex = 3;
+            this.chkInvertPitch.TabIndex = 20;
+            this.toolTips.SetToolTip(this.chkInvertPitch, "Invert input value");
             // 
             // chkInvertRoll
             // 
@@ -595,7 +618,8 @@ namespace MotionPlatform3
             this.chkInvertRoll.StateOff = ((System.Drawing.Image)(resources.GetObject("chkInvertRoll.StateOff")));
             this.chkInvertRoll.StateOn = ((System.Drawing.Image)(resources.GetObject("chkInvertRoll.StateOn")));
             this.chkInvertRoll.SwitchText = "Invert";
-            this.chkInvertRoll.TabIndex = 3;
+            this.chkInvertRoll.TabIndex = 24;
+            this.toolTips.SetToolTip(this.chkInvertRoll, "Invert input value");
             // 
             // chkInvertHeave
             // 
@@ -610,7 +634,8 @@ namespace MotionPlatform3
             this.chkInvertHeave.StateOff = ((System.Drawing.Image)(resources.GetObject("chkInvertHeave.StateOff")));
             this.chkInvertHeave.StateOn = ((System.Drawing.Image)(resources.GetObject("chkInvertHeave.StateOn")));
             this.chkInvertHeave.SwitchText = "Invert";
-            this.chkInvertHeave.TabIndex = 3;
+            this.chkInvertHeave.TabIndex = 28;
+            this.toolTips.SetToolTip(this.chkInvertHeave, "Invert input value");
             // 
             // chkInvertSurge
             // 
@@ -625,7 +650,8 @@ namespace MotionPlatform3
             this.chkInvertSurge.StateOff = ((System.Drawing.Image)(resources.GetObject("chkInvertSurge.StateOff")));
             this.chkInvertSurge.StateOn = ((System.Drawing.Image)(resources.GetObject("chkInvertSurge.StateOn")));
             this.chkInvertSurge.SwitchText = "Invert";
-            this.chkInvertSurge.TabIndex = 3;
+            this.chkInvertSurge.TabIndex = 32;
+            this.toolTips.SetToolTip(this.chkInvertSurge, "Invert input value");
             // 
             // chkInvertSway
             // 
@@ -640,7 +666,8 @@ namespace MotionPlatform3
             this.chkInvertSway.StateOff = ((System.Drawing.Image)(resources.GetObject("chkInvertSway.StateOff")));
             this.chkInvertSway.StateOn = ((System.Drawing.Image)(resources.GetObject("chkInvertSway.StateOn")));
             this.chkInvertSway.SwitchText = "Invert";
-            this.chkInvertSway.TabIndex = 3;
+            this.chkInvertSway.TabIndex = 36;
+            this.toolTips.SetToolTip(this.chkInvertSway, "Invert input value");
             // 
             // sliderOveralEffects
             // 
@@ -656,7 +683,8 @@ namespace MotionPlatform3
             this.sliderOveralEffects.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderOveralEffects.SmallStep = 5;
             this.sliderOveralEffects.Steps = 10;
-            this.sliderOveralEffects.TabIndex = 8;
+            this.sliderOveralEffects.TabIndex = 15;
+            this.toolTips.SetToolTip(this.sliderOveralEffects, "Overal effects override");
             this.sliderOveralEffects.Value = 100;
             this.sliderOveralEffects.Vertical = false;
             this.sliderOveralEffects.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
@@ -668,7 +696,7 @@ namespace MotionPlatform3
             this.label16.Location = new System.Drawing.Point(471, 159);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(38, 13);
-            this.label16.TabIndex = 7;
+            this.label16.TabIndex = 14;
             this.label16.Text = "Overal";
             // 
             // lblOveralEffects
@@ -678,7 +706,7 @@ namespace MotionPlatform3
             this.lblOveralEffects.Location = new System.Drawing.Point(726, 159);
             this.lblOveralEffects.Name = "lblOveralEffects";
             this.lblOveralEffects.Size = new System.Drawing.Size(33, 13);
-            this.lblOveralEffects.TabIndex = 9;
+            this.lblOveralEffects.TabIndex = 16;
             this.lblOveralEffects.Text = "100%";
             // 
             // btnApply
@@ -688,7 +716,7 @@ namespace MotionPlatform3
             this.btnApply.Location = new System.Drawing.Point(767, 441);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(147, 44);
-            this.btnApply.TabIndex = 2;
+            this.btnApply.TabIndex = 46;
             this.btnApply.Text = "APPLY";
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.ButtonApply_Click);
@@ -706,7 +734,8 @@ namespace MotionPlatform3
             this.chkCollect.StateOff = ((System.Drawing.Image)(resources.GetObject("chkCollect.StateOff")));
             this.chkCollect.StateOn = ((System.Drawing.Image)(resources.GetObject("chkCollect.StateOn")));
             this.chkCollect.SwitchText = "Collect data";
-            this.chkCollect.TabIndex = 3;
+            this.chkCollect.TabIndex = 44;
+            this.toolTips.SetToolTip(this.chkCollect, "Activate telemetry collection mode");
             this.chkCollect.OnSwitch += new System.EventHandler(this.ChkCollect_OnSwitch);
             // 
             // btnAlarmReset
@@ -715,8 +744,9 @@ namespace MotionPlatform3
             this.btnAlarmReset.Location = new System.Drawing.Point(318, 12);
             this.btnAlarmReset.Name = "btnAlarmReset";
             this.btnAlarmReset.Size = new System.Drawing.Size(147, 44);
-            this.btnAlarmReset.TabIndex = 1;
+            this.btnAlarmReset.TabIndex = 2;
             this.btnAlarmReset.Text = "RESET";
+            this.toolTips.SetToolTip(this.btnAlarmReset, "Reset linear actuators (in case of alarm)");
             this.btnAlarmReset.UseVisualStyleBackColor = true;
             this.btnAlarmReset.Click += new System.EventHandler(this.BtnAlarmReset_Click);
             // 
@@ -734,7 +764,8 @@ namespace MotionPlatform3
             this.sliderSmooth.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderSmooth.SmallStep = 5;
             this.sliderSmooth.Steps = 10;
-            this.sliderSmooth.TabIndex = 5;
+            this.sliderSmooth.TabIndex = 38;
+            this.toolTips.SetToolTip(this.sliderSmooth, "Input filtering ratio");
             this.sliderSmooth.Value = 90;
             this.sliderSmooth.Vertical = false;
             this.sliderSmooth.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
@@ -746,7 +777,7 @@ namespace MotionPlatform3
             this.label6.Location = new System.Drawing.Point(471, 369);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(43, 13);
-            this.label6.TabIndex = 4;
+            this.label6.TabIndex = 37;
             this.label6.Text = "Smooth";
             // 
             // lblSmooth
@@ -756,7 +787,7 @@ namespace MotionPlatform3
             this.lblSmooth.Location = new System.Drawing.Point(726, 369);
             this.lblSmooth.Name = "lblSmooth";
             this.lblSmooth.Size = new System.Drawing.Size(33, 13);
-            this.lblSmooth.TabIndex = 6;
+            this.lblSmooth.TabIndex = 39;
             this.lblSmooth.Text = "100%";
             // 
             // comboComPort
@@ -770,7 +801,8 @@ namespace MotionPlatform3
             this.comboComPort.Location = new System.Drawing.Point(474, 35);
             this.comboComPort.Name = "comboComPort";
             this.comboComPort.Size = new System.Drawing.Size(128, 21);
-            this.comboComPort.TabIndex = 11;
+            this.comboComPort.TabIndex = 4;
+            this.toolTips.SetToolTip(this.comboComPort, "Device COM Port");
             // 
             // label7
             // 
@@ -779,7 +811,7 @@ namespace MotionPlatform3
             this.label7.Location = new System.Drawing.Point(471, 12);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(53, 13);
-            this.label7.TabIndex = 10;
+            this.label7.TabIndex = 3;
             this.label7.Text = "COM Port";
             // 
             // lblGame
@@ -789,7 +821,7 @@ namespace MotionPlatform3
             this.lblGame.Location = new System.Drawing.Point(474, 434);
             this.lblGame.Name = "lblGame";
             this.lblGame.Size = new System.Drawing.Size(68, 13);
-            this.lblGame.TabIndex = 12;
+            this.lblGame.TabIndex = 43;
             this.lblGame.Text = "Active Game";
             // 
             // btnResetData
@@ -799,8 +831,9 @@ namespace MotionPlatform3
             this.btnResetData.Location = new System.Drawing.Point(594, 458);
             this.btnResetData.Name = "btnResetData";
             this.btnResetData.Size = new System.Drawing.Size(92, 27);
-            this.btnResetData.TabIndex = 1;
+            this.btnResetData.TabIndex = 45;
             this.btnResetData.Text = "RESET";
+            this.toolTips.SetToolTip(this.btnResetData, "Reset collected game telemetry data to defaults");
             this.btnResetData.UseVisualStyleBackColor = true;
             this.btnResetData.Click += new System.EventHandler(this.BtnResetData_Click);
             // 
@@ -818,7 +851,7 @@ namespace MotionPlatform3
             this.sliderLinearity.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
             this.sliderLinearity.SmallStep = 5;
             this.sliderLinearity.Steps = 10;
-            this.sliderLinearity.TabIndex = 5;
+            this.sliderLinearity.TabIndex = 41;
             this.sliderLinearity.Value = 0;
             this.sliderLinearity.Vertical = false;
             this.sliderLinearity.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
@@ -830,7 +863,7 @@ namespace MotionPlatform3
             this.label9.Location = new System.Drawing.Point(471, 404);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(46, 13);
-            this.label9.TabIndex = 4;
+            this.label9.TabIndex = 40;
             this.label9.Text = "Linearity";
             // 
             // lblLinearity
@@ -840,8 +873,21 @@ namespace MotionPlatform3
             this.lblLinearity.Location = new System.Drawing.Point(726, 404);
             this.lblLinearity.Name = "lblLinearity";
             this.lblLinearity.Size = new System.Drawing.Size(33, 13);
-            this.lblLinearity.TabIndex = 6;
+            this.lblLinearity.TabIndex = 42;
             this.lblLinearity.Text = "100%";
+            // 
+            // btnTestSpeed
+            // 
+            this.btnTestSpeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTestSpeed.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTestSpeed.Location = new System.Drawing.Point(822, 117);
+            this.btnTestSpeed.Name = "btnTestSpeed";
+            this.btnTestSpeed.Size = new System.Drawing.Size(92, 27);
+            this.btnTestSpeed.TabIndex = 13;
+            this.btnTestSpeed.Text = "TEST";
+            this.toolTips.SetToolTip(this.btnTestSpeed, "Run speed test: Heave, Pitch, Roll");
+            this.btnTestSpeed.UseVisualStyleBackColor = true;
+            this.btnTestSpeed.Click += new System.EventHandler(this.BtnTestSpeed_Click);
             // 
             // SettingsForm
             // 
@@ -862,10 +908,10 @@ namespace MotionPlatform3
             this.Controls.Add(this.lblPitch);
             this.Controls.Add(this.label14);
             this.Controls.Add(this.label12);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.label8);
+            this.Controls.Add(this.labelHeave);
+            this.Controls.Add(this.labelRoll);
             this.Controls.Add(this.label16);
-            this.Controls.Add(this.label5);
+            this.Controls.Add(this.labelPitch);
             this.Controls.Add(this.sliderSway);
             this.Controls.Add(this.sliderSurge);
             this.Controls.Add(this.sliderHeave);
@@ -890,6 +936,7 @@ namespace MotionPlatform3
             this.Controls.Add(this.chkEnabled);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.btnClose);
+            this.Controls.Add(this.btnTestSpeed);
             this.Controls.Add(this.btnResetData);
             this.Controls.Add(this.btnAlarmReset);
             this.Controls.Add(this.btnPark);
@@ -905,10 +952,10 @@ namespace MotionPlatform3
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SettingsForm";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbRL)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbFR)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbRR)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -916,12 +963,12 @@ namespace MotionPlatform3
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pbRL;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label lblRearRightState;
         private System.Windows.Forms.Label lblFrontState;
-        private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.PictureBox pbFR;
+        private System.Windows.Forms.PictureBox pbRR;
         private System.Windows.Forms.Label lblRearLeftState;
         private System.Windows.Forms.Button btnHome;
         private System.Windows.Forms.Button btnClose;
@@ -933,14 +980,14 @@ namespace MotionPlatform3
         private vAzhureRacingAPI.VAzhureSwitchButton chkEnabled;
         private System.Windows.Forms.Label label4;
         private vAzhureRacingAPI.VAzhureSliderControl sliderPitch;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label labelPitch;
         private System.Windows.Forms.Label lblSpeed;
         private System.Windows.Forms.Label lblPitch;
         private vAzhureRacingAPI.VAzhureSliderControl sliderRoll;
-        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label labelRoll;
         private System.Windows.Forms.Label lblRoll;
         private vAzhureRacingAPI.VAzhureSliderControl sliderHeave;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label labelHeave;
         private System.Windows.Forms.Label lblHeave;
         private vAzhureRacingAPI.VAzhureSliderControl sliderSurge;
         private System.Windows.Forms.Label label12;
@@ -975,5 +1022,7 @@ namespace MotionPlatform3
         private vAzhureRacingAPI.VAzhureSliderControl sliderLinearity;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label lblLinearity;
+        private System.Windows.Forms.ToolTip toolTips;
+        private System.Windows.Forms.Button btnTestSpeed;
     }
 }

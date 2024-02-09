@@ -135,6 +135,25 @@ namespace MotionPlatform3
             }
         }
 
+        internal void Move(int ff, int rl, int rr)
+        {
+            if (!IsConnected || !IsDeviceReady)
+                return;
+
+            lock (serialPort)
+            {
+                try
+                {
+                    ff = Math2.Clamp(ff, FrontAxisState.min, FrontAxisState.max);
+                    rl = Math2.Clamp(rl, RearLeftAxisState.min, RearLeftAxisState.max);
+                    rr = Math2.Clamp(rr, RearRightAxisState.min, RearRightAxisState.max);
+                    byte[] data = GenerateCommand(COMMAND.CMD_MOVE, ff, rl, rr);
+                    serialPort.Write(data, 0, PCCMD_SIZE);
+                }
+                catch { }
+            }
+        }
+
         internal void Home()
         {
             if (!IsConnected)
@@ -171,10 +190,7 @@ namespace MotionPlatform3
             Connect();
         }
 
-        public readonly int cMIN_DELAY = 27;
-        public readonly int cMAX_DELAY = 250;
-
-        internal void SetPulseDelay(int delay)
+        internal void SetSpeed(int speed, bool bLow = false)
         {
             if (!IsConnected)
                 return;
@@ -182,8 +198,8 @@ namespace MotionPlatform3
             {
                 try
                 {
-                    delay = Math2.Clamp(delay, cMIN_DELAY, cMAX_DELAY);
-                    byte[] data = GenerateCommand(COMMAND.CMD_SET_SPEED, delay, delay, delay);
+                    speed = Math2.Clamp(speed, settings.MinSpeed, settings.MaxSpeed);
+                    byte[] data = GenerateCommand(bLow ? COMMAND.CMD_SET_LOW_SPEED : COMMAND.CMD_SET_SPEED, speed, speed, speed);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
@@ -240,11 +256,12 @@ namespace MotionPlatform3
             Status = serialPort.IsOpen ? DeviceStatus.Connected : DeviceStatus.ConnectionError;
             OnConnected?.Invoke(this, new EventArgs());
 
+            SetSpeed(settings.SpeedOverride);
+            SetSpeed(settings.LowSpeedOverride, true);
             RequestState();
-            SetPulseDelay(settings.SpeedOverride);
         }
 
-        byte[] GenerateCommand(COMMAND cmd, int par1, int par2, int par3, byte reserved = 0)
+        byte[] GenerateCommand(COMMAND cmd, int par1, int par2, int par3, int par4 = 0)
         {
             byte[] arr = new byte[PCCMD_SIZE];
 
@@ -253,7 +270,7 @@ namespace MotionPlatform3
             try
             {
                 h = GCHandle.Alloc(arr, GCHandleType.Pinned);
-                PCCMD cpmd = new PCCMD() { header = 0, cmd = cmd, len = (byte)PCCMD_SIZE, data = new int[] { par1, par2, par3 }, reserved = reserved };
+                PCCMD cpmd = new PCCMD() { header = 0, cmd = cmd, len = (byte)PCCMD_SIZE, data = new int[] { par1, par2, par3, par4 } };
                 Marshal.StructureToPtr<PCCMD>(cpmd, h.AddrOfPinnedObject(), false);
                 return arr;
             }
@@ -423,6 +440,51 @@ namespace MotionPlatform3
             }
         }
 
+        internal void DoHeave(float delta)
+        {
+            float pitch = 0;
+            float roll = 0;
+            float sway = 0;
+            float surge = 0;
+            float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
+
+            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
+            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
+            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
+
+            Move(posFront, posRL, posRR);
+        }
+
+        internal void DoRoll(float delta)
+        {
+            float pitch = 0;
+            float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f); ;
+            float sway = 0;
+            float surge = 0;
+            float heave = 0;
+
+            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
+            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
+            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
+
+            Move(posFront, posRL, posRR);
+        }
+
+        internal void DoPitch(float delta)
+        {
+            float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
+            float roll = 0;
+            float sway = 0;
+            float surge = 0;
+            float heave = 0;
+
+            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
+            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
+            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
+
+            Move(posFront, posRL, posRR);
+        }
+
         private void ProcessTelemetry()
         {
             if (!settings.Enabled || !IsConnected)
@@ -445,25 +507,21 @@ namespace MotionPlatform3
                     float swayAmoun = settings.SwayCoefficient / 100.0f;
                     float surgeAmount = settings.SurgeCoefficient / 100.0f;
 
-                    float pitch = overal * (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch, -absPitch, absPitch, -1.0f, 1.0f);
-                    float roll = overal * (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll, -absRoll, absRoll, -1.0f, 1.0f);
-                    float heave = overal * (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave, -absHeave, absHeave, -1.0f, 1.0f);
-                    float sway = overal * (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway, -absSway, absSway, -1.0f, 1.0f);
-                    float surge = overal * (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge, -absSurge, absSurge, -1.0f, 1.0f);
+                    float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch, -absPitch, absPitch, -1.0f, 1.0f, true);
+                    float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll, -absRoll, absRoll, -1.0f, 1.0f, true);
+                    float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave, -absHeave, absHeave, -1.0f, 1.0f, true);
+                    float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway, -absSway, absSway, -1.0f, 1.0f, true);
+                    float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge, -absSurge, absSurge, -1.0f, 1.0f, true);
 
                     pitch = (float)((float)Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
-                    roll = (float)((float)Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
+                    roll =  (float)((float)Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
                     heave = (float)((float)Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
-                    sway = (float)((float)Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
+                    sway =  (float)((float)Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
                     surge = (float)((float)Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
 
-                    int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
-                    int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
-                    int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
-
-                    posFront = Math2.Clamp(posFront, FrontAxisState.min, FrontAxisState.max);
-                    posRL = Math2.Clamp(posRL, RearLeftAxisState.min, RearLeftAxisState.max);
-                    posRR = Math2.Clamp(posRR, RearRightAxisState.min, RearRightAxisState.max);
+                    int posFront = (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
+                    int posRL = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge + roll + sway, -overal, overal), -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
+                    int posRR = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge - roll - sway, -overal, overal), -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
 
                     double coeff = settings.SmoothCoefficient / 100.0;
                     posFront = (int)FrontFilter.Smooth(posFront, coeff);
@@ -702,6 +760,9 @@ namespace MotionPlatform3
         /// </summary>
         public bool Enabled { get; set; } = true;
         public int SpeedOverride { get; set; } = 100;
+        public int MaxSpeed { get; set; } = 150;
+        public int MinSpeed { get; set; } = 10;
+        public int LowSpeedOverride { get; set; } = 40;
         public int PitchCoefficient { get; set; } = 100;
         public int RollCoefficient { get; set; } = 100;
         public int HeaveCoefficient { get; set; } = 100;
@@ -709,8 +770,8 @@ namespace MotionPlatform3
         public int SwayCoefficient { get; set; } = 100;
         public int OveralCoefficient { get; set; } = 100;
         public float Linearity { get; set; } = 1.0f;
-
         public int SmoothCoefficient { get; set; } = 50;
+        public float StepsPerMM { get; set; } = 200;
         /// <summary>
         /// Inversion flags
         /// </summary>
@@ -764,12 +825,33 @@ namespace MotionPlatform3
     [StructLayout(LayoutKind.Sequential)]
     public struct AXIS_STATE
     {
+        /// <summary>
+        /// Linear actuator mode
+        /// </summary>
         public DEVICE_MODE mode; // MODE
+        /// <summary>
+        /// Linear actuator flags
+        /// </summary>
         public DEVICE_FLAGS flags; // FLAGS
-        public byte pulseDelay;
+        /// <summary>
+        /// Target speed, mm per second
+        /// </summary>
+        public byte speedMMperSEC;
+        /// <summary>
+        /// Current position, pulses
+        /// </summary>
         public int currentpos;
+        /// <summary>
+        /// Target position, pulses
+        /// </summary>
         public int targetpos;
+        /// <summary>
+        /// Minimal position, pulses
+        /// </summary>
         public int min;
+        /// <summary>
+        /// Maximal position, pulses
+        /// </summary>
         public int max;
     }
 
@@ -779,9 +861,9 @@ namespace MotionPlatform3
         public byte header;
         public byte len;
         public COMMAND cmd;
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I4, SizeConst = 3)]
+        public byte reserved; // alignment byte
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I4, SizeConst = 4)]
         public int[] data;
-        public byte reserved;
     }
 
     public enum COMMAND : byte
@@ -794,6 +876,8 @@ namespace MotionPlatform3
         CMD_GET_STATE,
         CMD_CLEAR_ALARM,
         CMD_PARK,
+        SET_ALARM,
+        CMD_SET_LOW_SPEED
     };
 
     public enum DEVICE_MODE : byte
