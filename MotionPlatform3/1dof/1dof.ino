@@ -1,6 +1,6 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2024-02-06
+// version from 2024-02-09
 
 //#define DEBUG
 // Board: STM32F103C8T6 4 pcs (master + 3 slave)
@@ -59,6 +59,7 @@ enum COMMAND : uint8_t { CMD_HOME,
                          CMD_CLEAR_ALARM,
                          CMD_PARK,
                          SET_ALARM,
+                         CMD_SET_SLOW_SPEED,
 };
 
 enum FLAGS : uint8_t { NONE = 0,
@@ -225,6 +226,7 @@ void loop() {
       case COMMAND::CMD_PARK:
       case COMMAND::CMD_MOVE:
       case COMMAND::CMD_SET_SPEED:
+      case COMMAND::CMD_SET_SLOW_SPEED:
         {
 #if (LINEAR_ACTUATORS == 4)
           TransmitCMD(SLAVE_ADDR_FL, pccmd.cmd, pccmd.data[0]);
@@ -298,14 +300,17 @@ const uint8_t HOME_DIRECTION = HIGH;
 
 #define MMPERSEC2DELAY(mmps) 1000000 / (STEPS_PER_REVOLUTIONS * mmps / MM_PER_REV)
 
-#define MAX_SPEED_MM_SEC 100
+#define MAX_SPEED_MM_SEC 150
 #define MIN_SPEED_MM_SEC 10
+#define SLOW_SPEED_MM_SEC 20
+#define DEFAULT_SPEED_MM_SEC 90
 
-const int HOMEING_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(10) - MIN_PULSE_DELAY);  // us
-const int FAST_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(MAX_SPEED_MM_SEC) - MIN_PULSE_DELAY);    // us
-const int SLOW_PULSE_DELAY = MAX(FAST_PULSE_DELAY * 2, (int)MMPERSEC2DELAY(20));                  // us
+const int HOMEING_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(MIN_SPEED_MM_SEC) - MIN_PULSE_DELAY);    // us
+const int FAST_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(DEFAULT_SPEED_MM_SEC) - MIN_PULSE_DELAY);       // us
+const int SLOW_PULSE_DELAY = MAX(FAST_PULSE_DELAY * 2, (int)MMPERSEC2DELAY(SLOW_SPEED_MM_SEC) - MIN_PULSE_DELAY); // us
 
 volatile int iFastPulseDelay = FAST_PULSE_DELAY;
+volatile int iSlowPulseDelay = SLOW_PULSE_DELAY;
 int iFastPulseDelayMM = MAX_SPEED_MM_SEC;
 
 volatile int32_t targetPos = (MIN_POS + MAX_POS) / 2;
@@ -373,6 +378,9 @@ void receiveEvent(int size) {
       case COMMAND::CMD_SET_SPEED:
         iFastPulseDelayMM = data = std::clamp((int)data, MIN_SPEED_MM_SEC, MAX_SPEED_MM_SEC);
         iFastPulseDelay = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(data) - MIN_PULSE_DELAY);    // us
+        break;
+      case COMMAND::CMD_SET_SLOW_SPEED:
+        iSlowPulseDelay = MAX(iFastPulseDelay, (int)MMPERSEC2DELAY(data) - MIN_PULSE_DELAY);    // us
         break;
       case COMMAND::SET_ALARM:
         bHomed = false;
@@ -462,7 +470,7 @@ void loop() {
       {
         if (targetPos != currentPos) {
           long dist = constrain(abs(targetPos - currentPos), 0, STEPS_PER_REVOLUTIONS);
-          int delay = map(dist, 0, STEPS_PER_REVOLUTIONS, SLOW_PULSE_DELAY, iFastPulseDelay);
+          int delay = map(dist, 0, STEPS_PER_REVOLUTIONS, iSlowPulseDelay, iFastPulseDelay);
           Step(targetPos > currentPos ? HIGH : LOW, delay);
         }
       }
