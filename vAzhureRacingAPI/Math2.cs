@@ -9,11 +9,19 @@ namespace vAzhureRacingAPI
             return v.CompareTo(min) < 0 ? min : v.CompareTo(max) > 0 ? max : v;
         }
 
-        public static float Mapf(float x, float in_min, float in_max, float out_min, float out_max)
+        public static float Mapf(float x, float in_min, float in_max, float out_min, float out_max, bool bClampInput = false, bool bClampOutput = false)
         {
             try
             {
-                return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+                if (bClampInput)
+                    x = Clamp(x, in_min, in_max);
+                
+                x = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+
+                if (bClampOutput)
+                    x = Clamp(x, out_min, out_max);
+                
+                return x;
             }
             catch
             {
@@ -21,11 +29,19 @@ namespace vAzhureRacingAPI
             }
         }
 
-        public static double Mapd(double x, double in_min, double in_max, double out_min, double out_max)
+        public static double Mapd(double x, double in_min, double in_max, double out_min, double out_max, bool bClampInput = false, bool bClampOutput = false)
         {
             try
             {
-                return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+                if (bClampInput)
+                    x = Clamp(x, in_min, in_max);
+
+                x = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+
+                if (bClampOutput)
+                    x = Clamp(x, out_min, out_max);
+
+                return x;
             }
             catch
             {
