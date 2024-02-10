@@ -1,6 +1,6 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2024-02-09
+// version from 2024-02-10
 
 //#define DEBUG
 // Board: STM32F103C8T6 4 pcs (master + 3 slave)
@@ -288,6 +288,7 @@ const uint8_t limiterPinNC = PA7;
 
 uint32_t accel = 900;
 const int32_t STEPS_PER_REVOLUTIONS = 1000;                                // Steps per revolution
+#define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4                       // Distance in steps
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;              // Safe traveling distance in steps
 const float MM_PER_REV = 5.0f;                                             // distance in mm per revolution
 const float MAX_REVOLUTIONS = 18;                                          // maximum revolutions
@@ -480,7 +481,9 @@ void loop() {
     case MODE::READY:
       {
         if (targetPos != currentPos) {
-          Step(targetPos > currentPos ? HIGH : LOW, iFastPulseDelay);
+          long dist = constrain(abs(targetPos - currentPos), 0, STEPS_CONTROL_DIST);
+          int delay = map(dist, 0, STEPS_CONTROL_DIST, iSlowPulseDelay, iFastPulseDelay);
+          Step(targetPos > currentPos ? HIGH : LOW, delay);
         }
       }
       break;
