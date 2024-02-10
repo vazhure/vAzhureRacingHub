@@ -674,7 +674,7 @@ namespace MotionPlatform3
             this.sliderOveralEffects.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.sliderOveralEffects.BigStep = 10;
             this.sliderOveralEffects.Location = new System.Drawing.Point(542, 151);
-            this.sliderOveralEffects.Maximum = 200;
+            this.sliderOveralEffects.Maximum = 100;
             this.sliderOveralEffects.Minimum = 0;
             this.sliderOveralEffects.MinimumSize = new System.Drawing.Size(16, 16);
             this.sliderOveralEffects.Name = "sliderOveralEffects";

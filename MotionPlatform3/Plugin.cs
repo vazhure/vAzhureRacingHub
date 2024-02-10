@@ -206,6 +206,22 @@ namespace MotionPlatform3
             }
         }
 
+
+        internal void SetAcceleration(int acc)
+        {
+            if (!IsConnected)
+                return;
+            lock (serialPort)
+            {
+                try
+                {
+                    byte[] data = GenerateCommand(COMMAND.CMD_SET_ACCEL, acc, acc, acc);
+                    serialPort.Write(data, 0, PCCMD_SIZE);
+                }
+                catch { }
+            }
+        }
+
         private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
         volatile bool bTaskRunning = false;
         private Task mainLoop;
@@ -258,6 +274,7 @@ namespace MotionPlatform3
 
             SetSpeed(settings.SpeedOverride);
             SetSpeed(settings.LowSpeedOverride, true);
+            SetAcceleration(settings.Acceleration);
             RequestState();
         }
 
@@ -760,6 +777,7 @@ namespace MotionPlatform3
         /// </summary>
         public bool Enabled { get; set; } = true;
         public int SpeedOverride { get; set; } = 100;
+        public int Acceleration { get; set; } = 900;
         public int MaxSpeed { get; set; } = 150;
         public int MinSpeed { get; set; } = 10;
         public int LowSpeedOverride { get; set; } = 40;
@@ -877,7 +895,8 @@ namespace MotionPlatform3
         CMD_CLEAR_ALARM,
         CMD_PARK,
         SET_ALARM,
-        CMD_SET_LOW_SPEED
+        CMD_SET_LOW_SPEED,
+        CMD_SET_ACCEL
     };
 
     public enum DEVICE_MODE : byte
