@@ -28,9 +28,9 @@
 
 #ifndef I2CMASTER
 //#define SLAVE_ADDR SLAVE_ADDR_FL
-#define SLAVE_ADDR SLAVE_ADDR_FR
+//#define SLAVE_ADDR SLAVE_ADDR_FR
 //#define SLAVE_ADDR SLAVE_ADDR_RL
-//#define SLAVE_ADDR SLAVE_ADDR_RR
+#define SLAVE_ADDR SLAVE_ADDR_RR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -60,6 +60,7 @@ enum COMMAND : uint8_t { CMD_HOME,
                          CMD_PARK,
                          SET_ALARM,
                          CMD_SET_SLOW_SPEED,
+                         CMD_SET_ACCEL
 };
 
 enum FLAGS : uint8_t { NONE = 0,
@@ -227,6 +228,7 @@ void loop() {
       case COMMAND::CMD_MOVE:
       case COMMAND::CMD_SET_SPEED:
       case COMMAND::CMD_SET_SLOW_SPEED:
+      case COMMAND::CMD_SET_ACCEL:
         {
 #if (LINEAR_ACTUATORS == 4)
           TransmitCMD(SLAVE_ADDR_FL, pccmd.cmd, pccmd.data[0]);
@@ -284,7 +286,7 @@ const uint8_t limiterPinNC = PA7;
 
 #define ANALOG_INPUT_MAX 4095
 
-#define ACCEL 15000
+uint32_t accel = 900;
 const int32_t STEPS_PER_REVOLUTIONS = 1000;                                // Steps per revolution
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;              // Safe traveling distance in steps
 const float MM_PER_REV = 5.0f;                                             // distance in mm per revolution
@@ -305,9 +307,9 @@ const uint8_t HOME_DIRECTION = HIGH;
 #define SLOW_SPEED_MM_SEC 20
 #define DEFAULT_SPEED_MM_SEC 90
 
-const int HOMEING_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(MIN_SPEED_MM_SEC) - MIN_PULSE_DELAY);    // us
-const int FAST_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(DEFAULT_SPEED_MM_SEC) - MIN_PULSE_DELAY);       // us
-const int SLOW_PULSE_DELAY = MAX(FAST_PULSE_DELAY * 2, (int)MMPERSEC2DELAY(SLOW_SPEED_MM_SEC) - MIN_PULSE_DELAY); // us
+const int HOMEING_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(MIN_SPEED_MM_SEC) - MIN_PULSE_DELAY);     // us
+const int FAST_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(DEFAULT_SPEED_MM_SEC) - MIN_PULSE_DELAY);    // us
+const int SLOW_PULSE_DELAY = MAX(FAST_PULSE_DELAY * 2, (int)MMPERSEC2DELAY(SLOW_SPEED_MM_SEC) - MIN_PULSE_DELAY);  // us
 
 volatile int iFastPulseDelay = FAST_PULSE_DELAY;
 volatile int iSlowPulseDelay = SLOW_PULSE_DELAY;
@@ -325,15 +327,21 @@ uint32_t last_step_time = 0;
 inline void Step(uint8_t dir, int delay) {
   if (limitSwitchState == HIGH && dir == HOME_DIRECTION)
     return;  // ON LIMIT SWITCH
+
   digitalWrite(dirPin, dir);
   if (_oldDir != dir) {
+    last_step_time = 0;
     delayMicroseconds(MIN_REVERSE_DELAY);
     _oldDir = dir;
   }
+
+  float delta = MIN((micros() - last_step_time), iSlowPulseDelay);
+  uint32_t pulse = MAX(delay, ceil(delta - (float)accel / delta));
+
   digitalWrite(stepPin, HIGH);
   delayMicroseconds(MIN_PULSE_DELAY);
   digitalWrite(stepPin, LOW);
-  delayMicroseconds(delay);
+  delayMicroseconds(pulse);
   currentPos += dir == HIGH ? 1 : -1;
   last_step_time = micros();
 }
@@ -377,10 +385,13 @@ void receiveEvent(int size) {
         break;
       case COMMAND::CMD_SET_SPEED:
         iFastPulseDelayMM = data = std::clamp((int)data, MIN_SPEED_MM_SEC, MAX_SPEED_MM_SEC);
-        iFastPulseDelay = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(data) - MIN_PULSE_DELAY);    // us
+        iFastPulseDelay = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(data) - MIN_PULSE_DELAY);  // us
         break;
       case COMMAND::CMD_SET_SLOW_SPEED:
-        iSlowPulseDelay = MAX(iFastPulseDelay, (int)MMPERSEC2DELAY(data) - MIN_PULSE_DELAY);    // us
+        iSlowPulseDelay = MAX(iFastPulseDelay, (int)MMPERSEC2DELAY(data) - MIN_PULSE_DELAY);  // us
+        break;
+      case COMMAND::CMD_SET_ACCEL:
+        accel = data;
         break;
       case COMMAND::SET_ALARM:
         bHomed = false;
@@ -407,7 +418,7 @@ void setup() {
   targetPos = (MIN_POS + MAX_POS) / 2;
 
   limitSwitchState = digitalRead(limiterPinNO);
-  
+
   attachInterrupt(limiterPinNO, OnLimitSwitch, CHANGE);
 
   Wire.begin(SLAVE_ADDR);
@@ -469,9 +480,7 @@ void loop() {
     case MODE::READY:
       {
         if (targetPos != currentPos) {
-          long dist = constrain(abs(targetPos - currentPos), 0, STEPS_PER_REVOLUTIONS);
-          int delay = map(dist, 0, STEPS_PER_REVOLUTIONS, iSlowPulseDelay, iFastPulseDelay);
-          Step(targetPos > currentPos ? HIGH : LOW, delay);
+          Step(targetPos > currentPos ? HIGH : LOW, iFastPulseDelay);
         }
       }
       break;
