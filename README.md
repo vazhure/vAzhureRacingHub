@@ -22,3 +22,5 @@ WIP:
 * F1 2018
 * F1 2019
 * F1 2020
+
+My Discord: https://discord.gg/ynHCkrsmMA
