@@ -106,8 +106,8 @@ namespace Codemasters
                         float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[2] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[2];
 
-                        aMMotionData.Pitch = data.forward_dir[2];
-                        aMMotionData.Roll = data.left_dir[2];
+                        aMMotionData.Pitch = data.pitch[2];
+                        aMMotionData.Roll = data.roll[2];
 
                         aMMotionData.Heave = _acc = accZ;
                         aMMotionData.Sway = data.gforce_lateral;
@@ -115,20 +115,16 @@ namespace Codemasters
                     }
                     else
                     {
-                        Vector3 f = Vector3.Normalize(new Vector3(data.forward_dir[0], data.forward_dir[1], data.forward_dir[2]));
-                        Vector3 l = Vector3.Normalize(new Vector3(data.left_dir[0], data.left_dir[1], data.left_dir[2]));
-
                         float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[1] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[1];
 
-                        aMMotionData.Pitch = (float)Math2.Clamp(Math.Asin(f.Y), -Math2.halfPI, Math2.halfPI);
-                        aMMotionData.Roll = (float)Math2.Clamp(Math.Asin(-l.Y), -Math2.halfPI, Math2.halfPI);
+                        aMMotionData.Pitch = data.pitch[1];
+                        aMMotionData.Roll = -data.roll[1];
 
                         aMMotionData.Heave = _acc = accZ;
                         aMMotionData.Sway = data.gforce_lateral;
                         aMMotionData.Surge = data.gforce_longitudinal;
                     }
-
 
                     carData.Tires = new AMTireData[]
                     {
