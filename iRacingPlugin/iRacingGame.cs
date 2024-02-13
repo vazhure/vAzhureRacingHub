@@ -1,9 +1,9 @@
-﻿using iRacingSdkWrapper;
-using iRacingSdkWrapper.Bitfields;
+﻿using HerboldRacing;
 using System;
 using System.Drawing;
-using System.Globalization;
+using System.Windows.Forms;
 using vAzhureRacingAPI;
+using static HerboldRacing.IRacingSdkEnum;
 
 namespace iRacingPlugin
 {
@@ -46,7 +46,7 @@ namespace iRacingPlugin
 
         TelemetryDataSet dataSet = null;
 
-        private SdkWrapper wrapper;
+        private IRSDKSharper wrapper;
 
         public void Initialize(IVAzhureRacingApp _)
         {
@@ -54,235 +54,227 @@ namespace iRacingPlugin
 
             try
             {
-                wrapper = new SdkWrapper
+                wrapper = new IRSDKSharper
                 {
-                    EventRaiseType = SdkWrapper.EventRaiseTypes.CurrentThread,
-                    TelemetryUpdateFrequency = 60
+                    UpdateInterval = 1
                 };
 
-                wrapper.TelemetryUpdated += Wrapper_TelemetryUpdated;
-                wrapper.Connected += Wrapper_Connected;
-                wrapper.Disconnected += Wrapper_Disconnected;
-                wrapper.SessionInfoUpdated += Wrapper_SessionInfoUpdated;
+                wrapper.OnException += OnException;
+                wrapper.OnConnected += OnConnected;
+                wrapper.OnDisconnected += OnDisconnected;
+                wrapper.OnSessionInfo += OnSessionInfo;
+                wrapper.OnTelemetryData += OnTelemetryData;
+                wrapper.OnStopped += OnStopped;
 
                 wrapper.Start();
             }
             catch { }
         }
 
-        private void Wrapper_SessionInfoUpdated(object sender, SdkWrapper.SessionInfoUpdatedEventArgs e)
+        private void OnException(Exception exception)
         {
-            ParseCarData(e.SessionInfo, sessionData);
+            //MessageBox.Show(exception.Message);
         }
 
-        private void Wrapper_Disconnected(object sender, EventArgs e)
+        private void OnConnected()
+        {
+            dataSet = new TelemetryDataSet(this);
+            carIdx = 0;
+            OnGameStateChanged?.Invoke(this, new EventArgs());
+        }
+
+        private void OnDisconnected()
         {
             OnGameStateChanged?.Invoke(this, new EventArgs());
         }
 
-        private void Wrapper_Connected(object sender, EventArgs e)
+        private int carIdx = 0;
+
+        private void OnSessionInfo()
         {
-            OnGameStateChanged?.Invoke(this, new EventArgs());
+            dataSet.SessionInfo.TrackName = wrapper.Data.SessionInfo.WeekendInfo.TrackName;
+            dataSet.SessionInfo.TrackConfig = wrapper.Data.SessionInfo.WeekendInfo.TrackConfigName;
+
+            if (double.TryParse(wrapper.Data.SessionInfo.WeekendInfo.TrackPitSpeedLimit, out double speedLimit))
+                dataSet.SessionInfo.PitSpeedLimit = speedLimit; // kph
+            if (double.TryParse(wrapper.Data.SessionInfo.WeekendInfo.TrackLength, out double length))
+                dataSet.SessionInfo.TrackLength = length * 1000f;
+
+            carIdx = wrapper.Data.SessionInfo.DriverInfo.DriverCarIdx;
+            dataSet.CarData.DriverName = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].DivisionName;
+            dataSet.CarData.CarNumber = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarNumber;
+            dataSet.CarData.CarClass = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarClassShortName;
+            dataSet.CarData.MaxRPM = wrapper.Data.SessionInfo.DriverInfo.DriverCarRedLine;
+            dataSet.SessionInfo.DriversCount = wrapper.Data.SessionInfo.DriverInfo.PaceCarIdx;
         }
 
-        private void Wrapper_TelemetryUpdated(object sender, SdkWrapper.TelemetryUpdatedEventArgs e)
+        private void OnTelemetryData()
         {
-            TelemetryInfo ti = e.TelemetryInfo;
-
             AMCarData carData = dataSet.CarData;
             AMSessionInfo sessionInfo = dataSet.SessionInfo;
             AMWeatherData weatherData = dataSet.WeatherData;
             AMMotionData motionData = carData.MotionData;
 
-            sessionData.currentSessionNum = ti.SessionNum.Value;
+            motionData.Pitch = wrapper.Data.GetFloat("Pitch") / (float)Math.PI;
+            motionData.Roll = wrapper.Data.GetFloat("Roll") / (float)Math.PI;
+            motionData.Yaw = wrapper.Data.GetFloat("Yaw") / (float)Math.PI;
+            motionData.Surge = wrapper.Data.GetFloat("LongAccel") / (9.81f * (float)Math.PI);
+            motionData.Heave = wrapper.Data.GetFloat("VertAccel") / (9.81f * (float)Math.PI);
+            motionData.Sway = wrapper.Data.GetFloat("LatAccel") / (9.81f * (float)Math.PI);
 
-            motionData.Pitch = ti.Pitch.Value / (float)Math.PI;
-            motionData.Roll = ti.Roll.Value / (float)Math.PI;
-            motionData.Yaw = ti.Yaw.Value / (float)Math.PI;
-            motionData.Surge = ti.LongAccel.Value / (9.81f * (float)Math.PI);
-            motionData.Heave = ti.VertAccel.Value / (9.81f * (float)Math.PI);
-            motionData.Sway = ti.LatAccel.Value / (9.81f * (float)Math.PI);
-            //motionData.LocalAcceleration = new float[] { ti.LatAccel.Value, ti.VertAccel.Value, ti.LongAccel.Value };
+            EngineWarnings ew = (EngineWarnings)wrapper.Data.GetBitField("EngineWarnings");
 
-            int idx = ti.PlayerCarIdx.Value;
+            carData.Electronics = ew.HasFlag(EngineWarnings.PitSpeedLimiter) ? CarElectronics.Limiter : CarElectronics.None;
 
-            carData.DriverName = sessionData.driverName;
-            carData.CarClass = sessionData.carClassName;
-            carData.CarName = sessionData.carName;
-            carData.CarNumber = sessionData.carNumber;
+            carData.Steering = -wrapper.Data.GetFloat("SteeringWheelAngle");
+            carData.Throttle = wrapper.Data.GetFloat("Throttle");
+            carData.Clutch = wrapper.Data.GetFloat("Clutch");
+            carData.Brake = wrapper.Data.GetFloat("Brake");
+            carData.Speed = wrapper.Data.GetFloat("Speed") * 3.6f;
+            carData.RPM = wrapper.Data.GetFloat("RPM");
+            carData.Gear = (short)(wrapper.Data.GetInt("Gear") + 1);
+            carData.FuelLevel = wrapper.Data.GetFloat("FuelLevel");
+            sessionInfo.CurrentLapNumber = carData.Lap = wrapper.Data.GetInt("Lap");
+            carData.Distance = wrapper.Data.GetFloat("LapDist");
+            carData.OilTemp = wrapper.Data.GetFloat("OilTemp");
+            carData.OilPressure = wrapper.Data.GetFloat("OilPress");
+            carData.WaterTemp = wrapper.Data.GetFloat("WaterTemp");
+            carData.WaterPressure = wrapper.Data.GetFloat("WaterLevel");
+            weatherData.AmbientTemp = wrapper.Data.GetFloat("AirTemp");
+            weatherData.TrackTemp = wrapper.Data.GetFloat("TrackTemp");
 
-            carData.Electronics = ti.EngineWarnings.Value.Contains(EngineWarnings.PitSpeedLimiter) ? CarElectronics.Limiter : CarElectronics.None;
-
-            carData.Electronics |= ti.DrsStatus.Value > 0 ? CarElectronics.DRS : CarElectronics.None;
-            carData.Steering = -ti.SteeringWheelAngle.Value;
-            carData.Throttle = ti.Throttle.Value;
-            carData.Clutch = 1.0f - ti.Clutch.Value;
-            carData.Brake = ti.Brake.Value;
-            carData.Speed = ti.Speed.Value * 3.6f;
-            carData.RPM = (uint)ti.RPM.Value;
-            carData.MaxRPM = sessionData.rpmMax;
-            carData.Gear = (short)(ti.Gear.Value + 1);
-            carData.FuelLevel = ti.FuelLevel.Value;
-            sessionInfo.CurrentLapNumber = carData.Lap = ti.Lap.Value;
-            sessionInfo.CurrentPosition = carData.Position = ti.CarIdxPosition.Value[idx];
-            carData.Distance = ti.LapDist.Value;
-            carData.OilTemp = ti.OilTemp.Value;
-            carData.OilPressure = ti.OilPress.Value;
-            carData.WaterTemp = ti.WaterTemp.Value;
-            carData.WaterPressure = 0;
-
-            weatherData.AmbientTemp = ti.AirTemp.Value;
-            weatherData.TrackTemp = ti.TrackTemp.Value;
-
-            SessionStates sessionState = ti.SessionState.Value;
+            sessionInfo.CurrentPosition = carData.Position = wrapper.Data.GetInt("CarIdxPosition", carIdx);
 
             carData.Tires = new AMTireData[]
             {
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = new TelemetryValue<float>(wrapper.Sdk, "LFcoldPressure").Value,
-                    Wear = 1.0f - (float)(new TelemetryValue<float>(wrapper.Sdk, "LFwearM").Value),
+                    Pressure = wrapper.Data.GetFloat("LFcoldPressure") / 6.89475728f, // kPa to PSI
+                    Wear = 1.0f - wrapper.Data.GetFloat("LFwearM"),
                     Temperature = new double []
                     {
-                        new TelemetryValue<float>(wrapper.Sdk, "LFtempCL").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "LFtempCM").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "LFtempCR").Value,
+                        wrapper.Data.GetFloat("LFtempCL"),
+                        wrapper.Data.GetFloat("LFtempCM"),
+                        wrapper.Data.GetFloat("LFtempCR"),
                     },
                     Compound = ""
                 },
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = new TelemetryValue<float>(wrapper.Sdk, "RFcoldPressure").Value,
-                    Wear = 1.0f - (float)(new TelemetryValue<float>(wrapper.Sdk, "RFwearM").Value),
+                    Pressure = wrapper.Data.GetFloat("RFcoldPressure")/ 6.89475728f, // kPa to PSI
+                    Wear = 1.0f - wrapper.Data.GetFloat("RFwearM"),
                     Temperature = new double []
                     {
-                        new TelemetryValue<float>(wrapper.Sdk, "RFtempCL").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "RFtempCM").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "RFtempCR").Value,
+                        wrapper.Data.GetFloat("RFtempCL"),
+                        wrapper.Data.GetFloat("RFtempCM"),
+                        wrapper.Data.GetFloat("RFtempCR"),
                     },
                     Compound = ""
                 },
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = new TelemetryValue<float>(wrapper.Sdk, "LRcoldPressure").Value,
-                    Wear = 1.0f - (float)(new TelemetryValue<float>(wrapper.Sdk, "LRwearM").Value),
+                    Pressure = wrapper.Data.GetFloat("LRcoldPressure") / 6.89475728f,// kPa to PSI
+                    Wear = 1.0f - wrapper.Data.GetFloat("LRwearM"),
                     Temperature = new double []
                     {
-                        new TelemetryValue<float>(wrapper.Sdk, "LRtempCL").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "LRtempCM").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "LRtempCR").Value,
+                        wrapper.Data.GetFloat("LRtempCL"),
+                        wrapper.Data.GetFloat("LRtempCM"),
+                        wrapper.Data.GetFloat("LRtempCR"),
                     },
                     Compound = ""
                 },
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = new TelemetryValue<float>(wrapper.Sdk, "RRcoldPressure").Value,
-                    Wear = 1.0f - (float)(new TelemetryValue<float>(wrapper.Sdk, "RRwearM").Value),
+                    Pressure = wrapper.Data.GetFloat("RRcoldPressure") / 6.89475728f,// kPa to PSI
+                    Wear = 1.0f - wrapper.Data.GetFloat("RRwearM"),
                     Temperature = new double []
                     {
-                        new TelemetryValue<float>(wrapper.Sdk, "RRtempCL").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "RRtempCM").Value,
-                        new TelemetryValue<float>(wrapper.Sdk, "RRtempCR").Value,
+                        wrapper.Data.GetFloat("RRtempCL"),
+                        wrapper.Data.GetFloat("RRtempCM"),
+                        wrapper.Data.GetFloat("RRtempCR"),
                     },
                     Compound = ""
                 },
             };
 
-            TelemetryValue<int> carIdx = new TelemetryValue<int>(wrapper.Sdk, "PlayerCarIdx");
-            TelemetryValue<float> shiftRPM = new TelemetryValue<float>(wrapper.Sdk, "ShiftGrindRPM");
-
-            TelemetryValue<float> curLapTime = new TelemetryValue<float>(wrapper.Sdk, "LapCurrentLapTime");
-            sessionInfo.CurrentLapTime = (int)(curLapTime.Value * 1000);
-
-            TelemetryValue<float> bestLapTime = new TelemetryValue<float>(wrapper.Sdk, "LapBestLapTime");
-            sessionInfo.BestLapTime = (int)(bestLapTime.Value * 1000);
-
-            TelemetryValue<float> lastLapTime = new TelemetryValue<float>(wrapper.Sdk, "LapLastLapTime");
-            sessionInfo.LastLapTime = (int)(lastLapTime.Value * 1000);
-
-            TelemetryValue<float> diffTime = new TelemetryValue<float>(wrapper.Sdk, "LapDeltaToSessionBestLap");
-            sessionInfo.CurrentDelta = (int)(diffTime.Value * 1000);
-
-            TelemetryValue<int> lapsRemain = new TelemetryValue<int>(wrapper.Sdk, "SessionLapsRemainEx");
-            sessionInfo.RemainingLaps = lapsRemain.Value == short.MaxValue ? 0 : lapsRemain.Value;
-
-            sessionInfo.PitSpeedLimit = sessionData.trackSpeedLimit;
+            sessionInfo.CurrentLapTime = wrapper.Data.GetInt("LapCurrentLapTime") * 1000;
+            sessionInfo.BestLapTime = wrapper.Data.GetInt("LapBestLapTime") * 1000;
+            sessionInfo.LastLapTime = wrapper.Data.GetInt("LapLastLapTime") * 1000;
+            sessionInfo.CurrentDelta = wrapper.Data.GetInt("LapDeltaToSessionBestLap") * 1000;
+            sessionInfo.RemainingLaps = wrapper.Data.GetInt("SessionLapsRemainEx") * 1000;
 
             // Car Depending parameters
 
             try
             {
-                TelemetryValue<float> dcBrakeBias = new TelemetryValue<float>(wrapper.Sdk, "dcBrakeBias");
-                carData.BrakeBias = dcBrakeBias.Value;
+                carData.BrakeBias = wrapper.Data.GetFloat("dcBrakeBias");
             }
             catch { carData.BrakeBias = 50; }
 
             try
             {
-                TelemetryValue<float> dcABS = new TelemetryValue<float>(wrapper.Sdk, "dcABS");
-                carData.AbsLevel = (short)dcABS.Value;
+                carData.AbsLevel = (short)wrapper.Data.GetFloat("dcABS");
             }
             catch { carData.AbsLevel = 0; }
 
             try
             {
-                TelemetryValue<float> dcTractionControl = new TelemetryValue<float>(wrapper.Sdk, "dcTractionControl");
-                carData.TcLevel = (short)dcTractionControl.Value;
+                carData.TcLevel = (short)wrapper.Data.GetFloat("dcTractionControl");
             }
             catch { carData.TcLevel = 0; }
 
             try
             {
-                TelemetryValue<bool> dcTractionControlToggle = new TelemetryValue<bool>(wrapper.Sdk, "dcTractionControlToggle");
-                carData.Electronics |= dcTractionControlToggle.Value ? CarElectronics.TCS : CarElectronics.None;
+                carData.Electronics |= wrapper.Data.GetBool("dcTractionControlToggle") ? CarElectronics.TCS : CarElectronics.None;
             }
             catch { }
 
-            carData.Flags = (ti.SessionFlags.Value.Contains(SessionFlags.Black) ? TelemetryFlags.FlagBlack : TelemetryFlags.FlagNone) |
-                (ti.SessionFlags.Value.Contains(SessionFlags.Blue) ? TelemetryFlags.FlagBlue : TelemetryFlags.FlagNone) |
-                (ti.SessionFlags.Value.Contains(SessionFlags.StartGo) ? TelemetryFlags.FlagGreen : TelemetryFlags.FlagNone) |
-                (ti.SessionFlags.Value.Contains(SessionFlags.Checkered) ? TelemetryFlags.FlagChequered : TelemetryFlags.FlagNone) |
-                (ti.SessionFlags.Value.Contains(SessionFlags.White) ? TelemetryFlags.FlagWhite : TelemetryFlags.FlagNone) |
-                (ti.SessionFlags.Value.Contains(SessionFlags.YellowWaving) ? TelemetryFlags.FlagYellow : TelemetryFlags.FlagNone) |
-                (ti.SessionFlags.Value.Contains(SessionFlags.Yellow) ? TelemetryFlags.FlagYellow : TelemetryFlags.FlagNone);
+            Flags sessionFlags = (Flags)wrapper.Data.GetBitField("SessionFlags");
 
-            sessionInfo.RemainingTime = (int)(ti.SessionTimeRemain.Value * 1000);
-            sessionInfo.TrackLength = sessionData.trackLength;
-            sessionInfo.TrackName = sessionData.trackName;
-            sessionInfo.TrackConfig = sessionData.trackConfigName;
-            sessionInfo.CurrentPosition = ti.CarIdxPosition.Value[idx];
-            sessionInfo.CurrentLapNumber = ti.Lap.Value;
-            sessionInfo.CurrentLapTime = (int)(curLapTime.Value * 1000);
-            sessionInfo.LastLapTime = (int)(lastLapTime.Value * 1000);
-            sessionInfo.BestLapTime = (int)(bestLapTime.Value * 1000);
-            sessionInfo.CurrentDelta = (int)(diffTime.Value * 1000);
+            carData.Flags = (sessionFlags.HasFlag(Flags.Black) ? TelemetryFlags.FlagBlack : TelemetryFlags.FlagNone) |
+                (sessionFlags.HasFlag(Flags.Blue) ? TelemetryFlags.FlagBlue : TelemetryFlags.FlagNone) |
+                (sessionFlags.HasFlag(Flags.StartGo) ? TelemetryFlags.FlagGreen : TelemetryFlags.FlagNone) |
+                (sessionFlags.HasFlag(Flags.Checkered) ? TelemetryFlags.FlagChequered : TelemetryFlags.FlagNone) |
+                (sessionFlags.HasFlag(Flags.White) ? TelemetryFlags.FlagWhite : TelemetryFlags.FlagNone) |
+                (sessionFlags.HasFlag(Flags.YellowWaving) ? TelemetryFlags.FlagYellow : TelemetryFlags.FlagNone) |
+                (sessionFlags.HasFlag(Flags.Yellow) ? TelemetryFlags.FlagYellow : TelemetryFlags.FlagNone);
+
+            sessionInfo.RemainingTime = (int)(wrapper.Data.GetDouble("SessionTimeRemain") * 1000.0);
+            sessionInfo.CurrentLapNumber = wrapper.Data.GetInt("RaceLaps");
+            sessionInfo.CurrentLapTime = (int)(wrapper.Data.GetFloat("LapCurrentLapTime") * 1000.0);
+            sessionInfo.LastLapTime = (int)(wrapper.Data.GetFloat("LapLastLapTime") * 1000.0);
+            sessionInfo.BestLapTime = (int)(wrapper.Data.GetFloat("LapBestNLapTime") * 1000.0);
+            sessionInfo.CurrentDelta = (int)(wrapper.Data.GetFloat("LapDeltaToBestLap") * 1000.0);
             sessionInfo.Sector1BestTime = -1;
             sessionInfo.Sector2BestTime = -1;
             sessionInfo.CurrentSector1Time = -1;
             sessionInfo.CurrentSector2Time = -1;
             sessionInfo.LastSector1Time = -1;
             sessionInfo.LastSector2Time = -1;
-            sessionInfo.Flag = carData.Flags == TelemetryFlags.FlagBlack ? "Black" :
-                               carData.Flags == TelemetryFlags.FlagBlue ? "Blue" :
-                               carData.Flags == TelemetryFlags.FlagChequered ? "Chequered" :
-                               carData.Flags == TelemetryFlags.FlagYellow ? "Yellow" :
-                               carData.Flags == TelemetryFlags.FlagWhite ? "White" :
-                               carData.Flags == TelemetryFlags.FlagGreen ? "Green" :
-                               carData.Flags == TelemetryFlags.FlagSlowDown ? "SlowDown" :
-                               carData.Flags == TelemetryFlags.FlagStopAndGo ? "StopAndGo" :
-                               carData.Flags == TelemetryFlags.FlagPenalty ? "Penalty" : "";
-            sessionInfo.TotalLapsCount = lapsRemain.Value;
-            sessionInfo.DriversCount = sessionData.numDrivers;
-            sessionInfo.SessionState = sessionState == SessionStates.ParadeLaps ? "Formation Lap" :
-                                sessionState == SessionStates.Warmup ? "Warmup" :
-                                sessionState == SessionStates.Racing ? "Race" :
-                                sessionState == SessionStates.CoolDown ? "Cooldown Lap" :
-                                sessionState == SessionStates.Checkered ? "Finish" : "";
-            sessionInfo.FinishStatus = sessionState == SessionStates.Checkered ? "FINISHED" : "";
+            sessionInfo.Flag = carData.Flags.HasFlag(TelemetryFlags.FlagBlack) ? "Black" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagBlue) ? "Blue" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagChequered) ? "Chequered" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagYellow) ? "Yellow" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagWhite) ? "White" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagGreen) ? "Green" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagSlowDown) ? "SlowDown" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagStopAndGo) ? "StopAndGo" :
+                               carData.Flags.HasFlag(TelemetryFlags.FlagPenalty) ? "Penalty" : "";
+            sessionInfo.TotalLapsCount = wrapper.Data.GetInt("SessionLapsRemain");
+
+            SessionState sessionState = (SessionState)wrapper.Data.GetBitField("SessionState");
+
+            sessionInfo.SessionState = sessionState.HasFlag(SessionState.ParadeLaps) ? "Formation Lap" :
+                                sessionState.HasFlag(SessionState.Warmup) ? "Warmup" :
+                                sessionState.HasFlag(SessionState.Racing) ? "Race" :
+                                sessionState.HasFlag(SessionState.CoolDown) ? "Cooldown Lap" :
+                                sessionState.HasFlag(SessionState.Checkered) ? "Finish" : "";
+
+            sessionInfo.FinishStatus = sessionState.HasFlag(SessionState.Checkered) ? "FINISHED" : "";
             sessionInfo.CurrentSector3Time = -1;
             sessionInfo.LastSector3Time = -1;
             sessionInfo.Sector = -1;
@@ -291,14 +283,15 @@ namespace iRacingPlugin
             OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
         }
 
+        private void OnStopped()
+        {
+            OnGameStateChanged?.Invoke(this, new EventArgs());
+        }
+
         public void Quit(IVAzhureRacingApp _)
         {
             try
             {
-                wrapper.TelemetryUpdated -= Wrapper_TelemetryUpdated;
-                wrapper.Connected -= Wrapper_Connected;
-                wrapper.Disconnected -= Wrapper_Disconnected;
-                wrapper.SessionInfoUpdated -= Wrapper_SessionInfoUpdated;
                 wrapper.Stop();
             }
             catch { }
@@ -327,79 +320,6 @@ namespace iRacingPlugin
             {
                 app.SetStatusText($"Ошибка запуска игры {Name}!");
             }
-        }
-
-        public class SessionData
-        {
-            public int currentSessionNum = -1;
-            public int numDrivers = 0;
-            public double trackLength = 0;
-            public float trackSpeedLimit = 50;
-            public uint rpmMax = 0;
-            public string driverName = "";
-            public string trackName = "";
-            public string trackConfigName = "";
-            public string carNumber = "";
-            public string carName = "";
-            public string carClassName = "";
-            public string sessionType = "";
-        }
-
-        readonly SessionData sessionData = new SessionData();
-
-        private void ParseCarData(SessionInfo sessionInfo, SessionData data)
-        {
-            try
-            {
-                sessionInfo["WeekendInfo"]["TrackDisplayName"].TryGetValue(out data.trackName);
-                sessionInfo["WeekendInfo"]["TrackConfigName"].TryGetValue(out data.trackConfigName);
-                sessionInfo["WeekendInfo"]["TrackPitSpeedLimit"].TryGetValue(out string speedLimit);
-
-                if (sessionInfo["WeekendInfo"]["TrackLength"].TryGetValue(out string tracklen))
-                {
-                    try
-                    {
-                        data.trackLength = float.Parse(tracklen, CultureInfo.InvariantCulture) * 1000f;
-                    }
-                    catch
-                    {
-                        data.trackLength = 0;
-                    }
-                }
-
-                if (sessionInfo["WeekendInfo"]["SessionID"].TryGetValue(out string sessionID))
-                {
-                    if (int.TryParse(sessionID, out data.currentSessionNum))
-                    {
-                        YamlQuery session = sessionInfo["WeekendInfo"]["Sessions"]["SessionNum", data.currentSessionNum];
-                        session["SessionType"].TryGetValue(out data.sessionType);
-                    }
-                }
-
-                if (sessionInfo["DriverInfo"]["DriverCarIdx"].TryGetValue(out string carIdx))
-                {
-                    if (int.TryParse(carIdx, out int idx))
-                    {
-                        YamlQuery driver = sessionInfo["DriverInfo"]["Drivers"]["CarIdx", idx];
-
-                        if (driver["UserName"].TryGetValue(out string name))
-                            data.driverName = name;
-                        if (driver["CarNumber"].TryGetValue(out string number))
-                            data.carNumber = number;
-                        if (driver["CarClassShortName"].TryGetValue(out string carclass))
-                            data.carClassName = carclass;
-                        if (driver["CarScreenName"].TryGetValue(out string carname))
-                            data.carName = carname;
-                    }
-                }
-
-                YamlQuery query = sessionInfo["DriverInfo"];
-                data.rpmMax = (uint)float.Parse(query["DriverCarRedLine"].GetValue("0"), CultureInfo.InvariantCulture);
-                data.numDrivers =  int.Parse(query["PaceCarIdx"].GetValue("1"), CultureInfo.InvariantCulture);
-
-                float.TryParse(speedLimit, out data.trackSpeedLimit);
-            }
-            catch { }
         }
     }
 }

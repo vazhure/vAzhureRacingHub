@@ -1,8 +1,9 @@
-﻿using vAzhureRacingAPI;
+﻿using System;
+using vAzhureRacingAPI;
 
 namespace iRacingPlugin
 {
-    public class AiRacingPlugin : ICustomPlugin
+    public class AiRacingPlugin : ICustomPlugin, IDisposable 
     {
         readonly IRacingGame game = new IRacingGame();
 
@@ -15,6 +16,11 @@ namespace iRacingPlugin
         public bool CanClose(IVAzhureRacingApp app)
         {
             return true;
+        }
+
+        public void Dispose()
+        {
+            Quit(null);
         }
 
         public bool Initialize(IVAzhureRacingApp app)
