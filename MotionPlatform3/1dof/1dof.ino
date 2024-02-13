@@ -449,13 +449,16 @@ void loop() {
           for (int32_t t = 0; t < SAFE_DIST_IN_STEPS; t++) {
             Step(!HOME_DIRECTION, HOMEING_PULSE_DELAY);
           }
-          mode = MODE::READY;
-          bHomed = true;
+
           currentPos = MAX_POS;
           targetPos = (MIN_POS + MAX_POS) / 2;
           // Moving to the center postion at homing speed
           while (targetPos != currentPos)
             Step(targetPos > currentPos ? HIGH : LOW, HOMEING_PULSE_DELAY);
+
+          mode = MODE::READY;
+          bHomed = true;
+
           break;
         }
 
