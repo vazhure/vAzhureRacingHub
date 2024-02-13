@@ -3,18 +3,16 @@ using System.Threading;
 using vAzhureRacingAPI;
 using PC2SharedMemory;
 using System;
+using System.Linq;
 
 namespace PCars2
 {
     public class PC2AMS2Listener : VAzhureSharedMemoryClient
     {
-        readonly GamePlugin pluginAMS2;
-        readonly GamePlugin pluginPC2;
-
-        public PC2AMS2Listener(GamePlugin ams2, GamePlugin pc2)
+        readonly GamePlugin[] games = new GamePlugin[] { };
+        public PC2AMS2Listener(GamePlugin[] gamePlugins)
         {
-            pluginAMS2 = ams2;
-            pluginPC2 = pc2;
+            games = gamePlugins;
         }
 
         public string PlayerName { get; set; } = "V.AZHURE";
@@ -62,9 +60,10 @@ namespace PCars2
         public bool EnableMotionOnReplay { get; set; } = false;
 
         private bool bPaused = false;
+
         public override void UserFunc()
         {
-            GamePlugin runningGame = pluginAMS2.IsRunning ? pluginAMS2 : pluginPC2.IsRunning ? pluginPC2 : null;
+            GamePlugin runningGame = games.Where(g => g.IsRunning).FirstOrDefault();
 
             if (Enabled && runningGame != null)
             {
@@ -267,17 +266,16 @@ namespace PCars2
                                 if (pageFileContent.mGameState == GameState.INPLAYING || ((pageFileContent.mGameState == GameState.INREPLAY ||
                                 pageFileContent.mGameState == GameState.FRONT_END_REPLAY) && EnableMotionOnReplay))
                                 {
-                                    motionData.LocalAcceleration = pageFileContent.mLocalAcceleration;
                                     motionData.LocalVelocity = pageFileContent.mLocalVelocity;
                                     motionData.LocalRot = pageFileContent.mOrientation;
 
-                                    motionData.Pitch = pageFileContent.mOrientation[0];
-                                    motionData.Yaw = pageFileContent.mOrientation[1];
-                                    motionData.Roll = pageFileContent.mOrientation[2];
+                                    motionData.Pitch = pageFileContent.mOrientation[0] / (float)Math.PI;
+                                    motionData.Yaw = pageFileContent.mOrientation[1] / (float)Math.PI;
+                                    motionData.Roll = pageFileContent.mOrientation[2] / (float)Math.PI;
 
-                                    motionData.Surge = pageFileContent.Surge;
-                                    motionData.Heave = pageFileContent.Heave;
-                                    motionData.Sway = pageFileContent.Sway;
+                                    motionData.Surge = -pageFileContent.Surge / (float)Math.PI;
+                                    motionData.Heave = pageFileContent.Heave / (float)Math.PI;
+                                    motionData.Sway = pageFileContent.Sway / (float)Math.PI;
                                 }
                                 else
                                 {
