@@ -64,9 +64,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="Firmware\SimDash2.HMI">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </AdditionalFiles>
     <None Include="Resources\acc.ico" />
     <None Include="vehicle.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

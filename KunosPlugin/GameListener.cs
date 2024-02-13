@@ -69,7 +69,7 @@ namespace KunosPlugin
 
                             string carModel = pageFileStatic.CarModel;
 
-                            CarData.DriverName = $"{pageFileStatic.PlayerName} {pageFileStatic.PlayerSurname}";
+                            CarData.DriverName = runningGame.gameID == GameID.AC ? $"{pageFileStatic.PlayerName}" : $"{pageFileStatic.PlayerName} {pageFileStatic.PlayerSurname}";
                             CarData.CarName = Plugin.sVechicleInfo.GetVehicleName(carModel);
                             CarData.FuelCapacity = pageFileStatic.MaxFuel;
                             CarData.MaxRPM = (uint)Plugin.sVechicleInfo.GetMaxRPM(carModel, pageFileStatic.MaxRpm);
@@ -287,7 +287,7 @@ namespace KunosPlugin
 
                             CarData.IgnitionStarter = (short)(physics.ignitionOn + physics.starterEngineOn);
 
-                            MotionData.LocalAcceleration = physics.accG;
+                            MotionData.LocalAcceleration = new float[] { physics.accG[0] / 9.81f, physics.accG[1] / 9.81f, physics.accG[2] / 9.81f };
                             MotionData.LocalVelocity = physics.localVelocity;
 
                             MotionData.Pitch = physics.pitch;
