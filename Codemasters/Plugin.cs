@@ -21,7 +21,7 @@ namespace Codemasters
             new GamePlugin(GamePlugin.CodemastersGame.DIRT4), 
             new GamePlugin(GamePlugin.CodemastersGame.DIRTRALLY), 
             new GamePlugin(GamePlugin.CodemastersGame.DIRTRALLY20),
-            new GamePlugin(GamePlugin.CodemastersGame.WRCG)
+            new GamePlugin(GamePlugin.CodemastersGame.WRCG),
         };
 
         public bool Initialize(IVAzhureRacingApp app)
