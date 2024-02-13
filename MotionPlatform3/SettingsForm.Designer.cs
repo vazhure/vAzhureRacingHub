@@ -75,7 +75,7 @@ namespace MotionPlatform3
             this.chkInvertSurge = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.chkInvertSway = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.sliderOveralEffects = new vAzhureRacingAPI.VAzhureSliderControl();
-            this.label16 = new System.Windows.Forms.Label();
+            this.labelOveral = new System.Windows.Forms.Label();
             this.lblOveralEffects = new System.Windows.Forms.Label();
             this.btnApply = new System.Windows.Forms.Button();
             this.chkCollect = new vAzhureRacingAPI.VAzhureSwitchButton();
@@ -689,15 +689,15 @@ namespace MotionPlatform3
             this.sliderOveralEffects.Vertical = false;
             this.sliderOveralEffects.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
             // 
-            // label16
+            // labelOveral
             // 
-            this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(471, 159);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(38, 13);
-            this.label16.TabIndex = 14;
-            this.label16.Text = "Overal";
+            this.labelOveral.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelOveral.AutoSize = true;
+            this.labelOveral.Location = new System.Drawing.Point(471, 159);
+            this.labelOveral.Name = "labelOveral";
+            this.labelOveral.Size = new System.Drawing.Size(38, 13);
+            this.labelOveral.TabIndex = 14;
+            this.labelOveral.Text = "Overal";
             // 
             // lblOveralEffects
             // 
@@ -910,7 +910,7 @@ namespace MotionPlatform3
             this.Controls.Add(this.label12);
             this.Controls.Add(this.labelHeave);
             this.Controls.Add(this.labelRoll);
-            this.Controls.Add(this.label16);
+            this.Controls.Add(this.labelOveral);
             this.Controls.Add(this.labelPitch);
             this.Controls.Add(this.sliderSway);
             this.Controls.Add(this.sliderSurge);
@@ -1001,7 +1001,7 @@ namespace MotionPlatform3
         private vAzhureRacingAPI.VAzhureSwitchButton chkInvertSurge;
         private vAzhureRacingAPI.VAzhureSwitchButton chkInvertSway;
         private vAzhureRacingAPI.VAzhureSliderControl sliderOveralEffects;
-        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label labelOveral;
         private System.Windows.Forms.Label lblOveralEffects;
         private System.Windows.Forms.Button btnApply;
         private vAzhureRacingAPI.VAzhureSwitchButton chkCollect;

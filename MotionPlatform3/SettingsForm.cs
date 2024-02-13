@@ -13,6 +13,7 @@ namespace MotionPlatform3
         readonly Plugin _plugin;
         readonly Timer timer = new Timer();
 
+        readonly BackgroundWorker testWorker;
         public SettingsForm(Plugin plugin)
         {
             _plugin = plugin;
@@ -23,7 +24,88 @@ namespace MotionPlatform3
                 Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(10, _plugin.FrontAxisState));
                 Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(11, _plugin.RearLeftAxisState));
                 Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(12, _plugin.RearRightAxisState));
+                if (testWorker.IsBusy)
+                    testWorker.CancelAsync();
             };
+            plugin.OnConnected += delegate (object sender, EventArgs e)
+             {
+                 timer.Start();
+             };
+
+            _plugin.App.OnDeviceArrival += Application_OnDeviceArrival;
+            _plugin.App.OnDeviceRemoveComplete += Application_OnDeviceRemoveComplete;
+
+            testWorker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            testWorker.DoWork += TestWorker_DoWork;
+            testWorker.RunWorkerCompleted += TestWorker_RunWorkerCompleted;
+        }
+
+        private void Application_OnDeviceRemoveComplete(object sender, DeviceChangeEventsArgs e)
+        {
+            InitComPorts();
+        }
+
+        private void Application_OnDeviceArrival(object sender, DeviceChangeEventsArgs e)
+        {
+            InitComPorts();
+         
+            if (MessageBox.Show(this, "Use a connected device?", $"New Device ({e.Port})", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                if (comboComPort.FindString(e.Port) is int t && t > 0)
+                {
+                    comboComPort.SelectedIndex = t;
+
+                    if (comboComPort.SelectedItem is string port && int.TryParse(port.ToUpper().Replace("COM", ""), out int p))
+                    {
+                        _plugin.settings.ComPort = p;
+                        _plugin.ReConnect();
+                    }
+                }
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            try
+            {
+                testWorker.CancelAsync();
+            }
+            catch { }
+        }
+
+        private void TestWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            btnTestSpeed.Text = "TEST";
+        }
+
+        private void TestWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (sender is BackgroundWorker worker)
+            {
+                BeginInvoke((Action)delegate
+                {
+                    btnTestSpeed.Text = "STOP";
+                });
+
+                DateTime dtStart = DateTime.Now;
+
+                while (!worker.CancellationPending)
+                {
+                    TimeSpan ts = DateTime.Now - dtStart;
+
+                    double heave = 0.5*Math.Sin(Math.PI * (ts.TotalMilliseconds / 2000));
+
+                    try
+                    {
+                        if (_plugin.ReadyToSend)
+                            _plugin.DoHeave((float)heave);
+                    }
+                    catch { worker.CancelAsync(); }
+
+                    System.Threading.Thread.Sleep(10);
+                }
+            }
         }
 
         protected override void OnLoad(EventArgs e)
@@ -50,8 +132,11 @@ namespace MotionPlatform3
             sliderLinearity.Value = (int)Math.Ceiling(Math2.Mapf(_plugin.settings.Linearity, 1, 2, 100, 0));
 
             sliderSpeed.Value = _plugin.settings.SpeedOverride;
+            lblSpeed.Text = $"{_plugin.settings.SpeedOverride} mm/sec";
 
             chkEnabled.Checked = _plugin.settings.Enabled;
+
+            lblGame.Text = _plugin.Telemetry?.GamePlugin?.Name;
 
             InitComPorts();
 
@@ -258,30 +343,11 @@ namespace MotionPlatform3
 
         private void BtnTestSpeed_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this, "TODO...", "vAzhureRacingHub");
-            return;
-            if (_plugin.IsDeviceReady)
-            {
-                if (MessageBox.Show(this, "Start Test?", "Speed Test", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    BeginInvoke((Action)delegate
-                    {
-                        int speed = _plugin.settings.SpeedOverride;
-                        _plugin.SetSpeed(sliderSpeed.Value);
-
-                        // TODO:
-                        // TEST HEAVE: FULL DONW, FULL UP, FULL DOWN, CENTER
-                        // TEST PITCH: FULL FORWARD, FULL BACK, FULL FORWARD, CENTER
-                        // TEST RELL: FULL LEFT, FULL RIGHT, FULL LEFT, CENTER
-
-                        if (_plugin.IsDeviceReady)
-                            // restore speed
-                            _plugin.SetSpeed(speed);
-                    });
-                }
-            }
+            if (testWorker.IsBusy)
+                testWorker.CancelAsync();
+            else
+                testWorker.RunWorkerAsync();
         }
-
 
         Label mouseControl = null;
         Point ptDown = new Point();
