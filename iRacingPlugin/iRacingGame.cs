@@ -96,12 +96,12 @@ namespace iRacingPlugin
 
             sessionData.currentSessionNum = ti.SessionNum.Value;
 
-            motionData.Pitch = ti.Pitch.Value;
-            motionData.Roll = ti.Roll.Value;
-            motionData.Yaw = ti.Yaw.Value;
-            motionData.Surge = ti.LongAccel.Value / 9.81f;
-            motionData.Heave = ti.VertAccel.Value / 9.81f;
-            motionData.Sway = ti.LatAccel.Value / 9.81f;
+            motionData.Pitch = ti.Pitch.Value / (float)Math.PI;
+            motionData.Roll = ti.Roll.Value / (float)Math.PI;
+            motionData.Yaw = ti.Yaw.Value / (float)Math.PI;
+            motionData.Surge = ti.LongAccel.Value / (9.81f * (float)Math.PI);
+            motionData.Heave = ti.VertAccel.Value / (9.81f * (float)Math.PI);
+            motionData.Sway = ti.LatAccel.Value / (9.81f * (float)Math.PI);
             //motionData.LocalAcceleration = new float[] { ti.LatAccel.Value, ti.VertAccel.Value, ti.LongAccel.Value };
 
             int idx = ti.PlayerCarIdx.Value;
