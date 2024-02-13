@@ -336,13 +336,12 @@ namespace RaceRoomPlugin
                                 dataSet.SessionInfo.Flag = "White";
                             }
 
-                            dataSet.CarData.MotionData.LocalAcceleration = pageFileContent.LocalAcceleration.ToArray();
-                            dataSet.CarData.MotionData.Pitch = pageFileContent.CarOrientation.Pitch;
-                            dataSet.CarData.MotionData.Roll = pageFileContent.CarOrientation.Roll;
-                            dataSet.CarData.MotionData.Yaw = pageFileContent.CarOrientation.Yaw;
-                            dataSet.CarData.MotionData.Sway = pageFileContent.LocalAcceleration.X;
-                            dataSet.CarData.MotionData.Heave = pageFileContent.LocalAcceleration.Y;
-                            dataSet.CarData.MotionData.Surge = pageFileContent.LocalAcceleration.Z;
+                            dataSet.CarData.MotionData.Pitch = pageFileContent.CarOrientation.Pitch / (float)Math.PI;
+                            dataSet.CarData.MotionData.Roll = pageFileContent.CarOrientation.Roll / (float)Math.PI;
+                            dataSet.CarData.MotionData.Yaw = pageFileContent.CarOrientation.Yaw / (float)Math.PI;
+                            dataSet.CarData.MotionData.Sway = pageFileContent.LocalAcceleration.X / (9.81f * (float)Math.PI);
+                            dataSet.CarData.MotionData.Heave = pageFileContent.LocalAcceleration.Y / (9.81f * (float)Math.PI);
+                            dataSet.CarData.MotionData.Surge = -pageFileContent.LocalAcceleration.Z / (9.81f * (float)Math.PI);
 
                             dataSet.CarData.MotionData.LocalRotAcceleration = new float[] { (float)pageFileContent.Player.AngularAcceleration.X,
                                 (float)pageFileContent.Player.AngularAcceleration.Y, (float)pageFileContent.Player.AngularAcceleration.Z };
