@@ -1,5 +1,4 @@
 ﻿using Codemasters.Structs;
-using NoiseFilters;
 using System;
 using System.Runtime.InteropServices;
 using vAzhureRacingAPI;
@@ -25,12 +24,6 @@ namespace Codemasters
         private float _vY = 0;
         private float _acc = 0;
         private DateTime _tm = DateTime.Now;
-
-        readonly KalmanFilter swayFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        readonly KalmanFilter surgeFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        readonly KalmanFilter heaveFilter = new KalmanFilter(1, 1, 0.05f, 1, 0.05f, 0.0f);
-        readonly NoiseFilter pitchFilter = new NoiseFilter(3);
-        readonly NoiseFilter rollFilter = new NoiseFilter(3);
 
         public override void OnDataReceived(ref byte[] bytes)
         {
@@ -110,24 +103,24 @@ namespace Codemasters
                         float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[2] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[2];
 
-                        aMMotionData.Pitch = pitchFilter.Filter(data.pitch[2]);
-                        aMMotionData.Roll = rollFilter.Filter(data.roll[2]);
+                        aMMotionData.Pitch = -data.pitch[2];
+                        aMMotionData.Roll = data.roll[2];
 
-                        aMMotionData.Heave = _acc = heaveFilter.Filter(accZ / 9.81f);
-                        aMMotionData.Sway = swayFilter.Filter(data.gforce_lateral / 9.81f);
-                        aMMotionData.Surge = surgeFilter.Filter(data.gforce_longitudinal / 9.81f);
+                        aMMotionData.Heave = _acc = accZ / (9.81f * (float)Math.PI);
+                        aMMotionData.Sway = -data.gforce_lateral / (9.81f * (float)Math.PI);
+                        aMMotionData.Surge = -data.gforce_longitudinal / (9.81f * (float)Math.PI);
                     }
                     else
                     {
                         float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[1] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[1];
 
-                        aMMotionData.Pitch = pitchFilter.Filter(data.pitch[1]);
-                        aMMotionData.Roll = -rollFilter.Filter(data.roll[1]);
+                        aMMotionData.Pitch = data.pitch[1];
+                        aMMotionData.Roll = -data.roll[1];
 
-                        aMMotionData.Heave = _acc = heaveFilter.Filter(accZ / 9.81f);
-                        aMMotionData.Sway = swayFilter.Filter(data.gforce_lateral / 9.81f);
-                        aMMotionData.Surge = surgeFilter.Filter(data.gforce_longitudinal / 9.81f);
+                        aMMotionData.Heave = _acc = accZ / (9.81f * (float)Math.PI);
+                        aMMotionData.Sway = data.gforce_lateral / (float)Math.PI;
+                        aMMotionData.Surge = data.gforce_longitudinal / (float)Math.PI;
                     }
 
                     carData.Tires = new AMTireData[]

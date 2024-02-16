@@ -1,7 +1,6 @@
 ﻿using HerboldRacing;
 using System;
 using System.Drawing;
-using System.Windows.Forms;
 using vAzhureRacingAPI;
 using static HerboldRacing.IRacingSdkEnum;
 
@@ -142,8 +141,8 @@ namespace iRacingPlugin
             carData.WaterPressure = wrapper.Data.GetFloat("WaterLevel");
             weatherData.AmbientTemp = wrapper.Data.GetFloat("AirTemp");
             weatherData.TrackTemp = wrapper.Data.GetFloat("TrackTemp");
-
-            sessionInfo.CurrentPosition = carData.Position = wrapper.Data.GetInt("CarIdxPosition", carIdx);
+            carData.InPits = ((TrkLoc)wrapper.Data.GetBitField("CarIdxTrackSurface", carIdx)).HasFlag(TrkLoc.InPitStall);
+            sessionInfo.CurrentPosition = carData.Position = wrapper.Data.GetInt("CarIdxClassPosition", carIdx);
 
             carData.Tires = new AMTireData[]
             {
@@ -229,9 +228,23 @@ namespace iRacingPlugin
 
             try
             {
+                carData.TcLevel2 = (short)wrapper.Data.GetFloat("dcTractionControl2");
+            }
+            catch { carData.TcLevel2 = 0; }
+
+            try
+            {
+                carData.EngineMap = (short)wrapper.Data.GetFloat("dcFuelMixture");
+            }
+            catch { carData.EngineMap = 0; }
+
+            try
+            {
                 carData.Electronics |= wrapper.Data.GetBool("dcTractionControlToggle") ? CarElectronics.TCS : CarElectronics.None;
             }
             catch { }
+
+            carData.IgnitionStarter = (short)(ew.HasFlag(EngineWarnings.EngineStalled) ? 0 : ew.HasFlag(EngineWarnings.FuelPressureWarning)? 1 : 2);
 
             Flags sessionFlags = (Flags)wrapper.Data.GetBitField("SessionFlags");
 
@@ -244,7 +257,7 @@ namespace iRacingPlugin
                 (sessionFlags.HasFlag(Flags.Yellow) ? TelemetryFlags.FlagYellow : TelemetryFlags.FlagNone);
 
             sessionInfo.RemainingTime = (int)(wrapper.Data.GetDouble("SessionTimeRemain") * 1000.0);
-            sessionInfo.CurrentLapNumber = wrapper.Data.GetInt("RaceLaps");
+            sessionInfo.CurrentLapNumber = wrapper.Data.GetInt("CarIdxLap", carIdx);
             sessionInfo.CurrentLapTime = (int)(wrapper.Data.GetFloat("LapCurrentLapTime") * 1000.0);
             sessionInfo.LastLapTime = (int)(wrapper.Data.GetFloat("LapLastLapTime") * 1000.0);
             sessionInfo.BestLapTime = (int)(wrapper.Data.GetFloat("LapBestNLapTime") * 1000.0);

@@ -270,9 +270,9 @@ namespace KunosPlugin
 
                         var physics = SPageFilePhysics.FromBytes(dataPhysics);
 
-                        if (physics.packetId != m_packetID || MotionData.LocalAcceleration[0] != physics.accG[0]
-                            || MotionData.LocalAcceleration[1] != physics.accG[1]
-                            || MotionData.LocalAcceleration[2] != physics.accG[2])
+                        if (physics.packetId != m_packetID || MotionData.LocalAcceleration[0] != physics.accG[0] / (float)Math.PI
+                            || MotionData.LocalAcceleration[1] != physics.accG[1] / (float)Math.PI
+                            || MotionData.LocalAcceleration[2] != physics.accG[2] / (float)Math.PI)
                         {
                             m_packetID = physics.packetId;
 
@@ -287,12 +287,12 @@ namespace KunosPlugin
 
                             CarData.IgnitionStarter = (short)(physics.ignitionOn + physics.starterEngineOn);
 
-                            MotionData.LocalAcceleration = new float[] { physics.accG[0] / 9.81f, physics.accG[1] / 9.81f, physics.accG[2] / 9.81f };
+                            MotionData.LocalAcceleration = new float[] { physics.accG[0] / (float)Math.PI, physics.accG[1] / (float)Math.PI, physics.accG[2] / (float)Math.PI };
                             MotionData.LocalVelocity = physics.localVelocity;
 
-                            MotionData.Pitch = physics.pitch;
-                            MotionData.Roll = physics.roll;
-                            MotionData.Yaw = physics.heading;
+                            MotionData.Pitch = physics.pitch / (float) Math.PI;
+                            MotionData.Roll = physics.roll / (float)Math.PI;
+                            MotionData.Yaw = physics.heading / (float)Math.PI;
 
                             MotionData.ABSVibration = physics.absVibrations;
 

@@ -73,6 +73,16 @@ namespace Codemasters.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon dirt5 {
+            get {
+                object obj = ResourceManager.GetObject("dirt5", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon dirtrally2 {
             get {
                 object obj = ResourceManager.GetObject("dirtrally2", resourceCulture);

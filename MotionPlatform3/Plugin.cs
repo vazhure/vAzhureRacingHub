@@ -1,5 +1,6 @@
 ﻿// Ignore Spelling: app
 
+using NoiseFilters;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -402,7 +403,7 @@ namespace MotionPlatform3
                                 }
                                 else
                                 {
-                                    plugin.ProcessTelemetry(true);
+                                    plugin.ProcessTelemetry();
                                     _tm = DateTime.Now;
                                 }
                             }
@@ -420,31 +421,17 @@ namespace MotionPlatform3
             }
         };
 
-        internal void ResetActiveGameData()
-        {
-            string name = tds?.GamePlugin?.Name;
-            if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
-                gd.Reset();
-        }
-
-        private readonly Filter FrontFilter = new Filter();
-        private readonly Filter RLFilter = new Filter();
-        private readonly Filter RRFilter = new Filter();
-
-        int _lastPosFront = 0;
-        int _lastPosRL = 0;
-        int _lastPosRR = 0;
-
         private void ProcessIdle()
         {
-            if (!settings.Enabled || !IsConnected)
-                return;
+            float pitch = pitchFilter.Filter(0);
+            float roll = rollFilter.Filter(0);
+            float heave = heaveFilter.Filter(0);
+            float sway = swayFilter.Filter(0);
+            float surge = surgeFilter.Filter(0);
 
-            int middle = (FrontAxisState.min + FrontAxisState.max) / 2;
-
-            int posFront = (int)FrontFilter.Smooth(middle, 0.5);
-            int posRL = (int)RLFilter.Smooth(middle, 0.5);
-            int posRR = (int)RRFilter.Smooth(middle, 0.5);
+            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
+            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
+            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
 
             if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR)
             {
@@ -465,13 +452,31 @@ namespace MotionPlatform3
             }
         }
 
+        internal void ResetActiveGameData()
+        {
+            string name = tds?.GamePlugin?.Name;
+            if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
+                gd.Reset();
+        }
+
+        readonly KalmanFilter swayFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
+        readonly KalmanFilter surgeFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
+        readonly KalmanFilter heaveFilter = new KalmanFilter(1, 1, 0.05f, 1, 0.05f, 0.0f);
+        readonly NoiseFilter pitchFilter = new NoiseFilter(3);
+        readonly NoiseFilter rollFilter = new NoiseFilter(3);
+        //readonly NoiseFilter yawFilter = new NoiseFilter(3);
+
+        int _lastPosFront = 0;
+        int _lastPosRL = 0;
+        int _lastPosRR = 0;
+
         internal void DoHeave(float delta)
         {
             float pitch = 0;
             float roll = 0;
             float sway = 0;
             float surge = 0;
-            float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
+            float heave = heaveFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
 
             int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
             int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
@@ -483,7 +488,7 @@ namespace MotionPlatform3
         internal void DoRoll(float delta)
         {
             float pitch = 0;
-            float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f); ;
+            float roll = rollFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
             float sway = 0;
             float surge = 0;
             float heave = 0;
@@ -497,7 +502,7 @@ namespace MotionPlatform3
 
         internal void DoPitch(float delta)
         {
-            float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
+            float pitch = pitchFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
             float roll = 0;
             float sway = 0;
             float surge = 0;
@@ -510,39 +515,12 @@ namespace MotionPlatform3
             Move(posFront, posRL, posRR);
         }
 
-        private void ProcessTelemetry(bool bIdle =false)
+        private void ProcessTelemetry()
         {
-            if (!settings.Enabled || !IsConnected)
+            if (!settings.Enabled || !IsConnected || settings.mode == MODE.CollectingGameData)
                 return;
             try
             {
-                if (bIdle && FrontFilter.Initialized && RLFilter.Initialized && RRFilter.Initialized)
-                {
-                    double coeff = settings.SmoothCoefficient / 100.0;
-                    int posFront = (int)FrontFilter.Smooth(FrontFilter.Value, coeff);
-                    int posRL = (int)RLFilter.Smooth(RLFilter.Value, coeff);
-                    int posRR = (int)RRFilter.Smooth(RRFilter.Value, coeff);
-
-                    if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR)
-                    {
-                        byte[] data = GenerateCommand(COMMAND.CMD_MOVE, posFront, posRL, posRR);
-
-                        lock (serialPort)
-                        {
-                            try
-                            {
-                                serialPort.Write(data, 0, PCCMD_SIZE);
-                            }
-                            catch { }
-                        }
-
-                        _lastPosFront = posFront;
-                        _lastPosRL = posRL;
-                        _lastPosRR = posRR;
-                    }
-                    return;
-                }
-
                 string name = tds?.GamePlugin?.Name;
                 GameData gd = settings.gamesData.FirstOrDefault(o => o.GameName == name) ?? new GameData(Name);
                 {
@@ -571,6 +549,14 @@ namespace MotionPlatform3
                     sway = (float)((float)Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
                     surge = (float)((float)Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
 
+                    float coeff = settings.SmoothCoefficient / 100.0f;
+
+                    pitch = Math2.Mapf(coeff, 0.0f, 1.0f, pitch, pitchFilter.Filter(pitch));
+                    roll = Math2.Mapf(coeff, 0.0f,  1.0f, roll, rollFilter.Filter(roll));
+                    heave = Math2.Mapf(coeff, 0.0f, 1.0f, heave, heaveFilter.Filter(heave));
+                    sway = Math2.Mapf(coeff, 0.0f,  1.0f, sway, swayFilter.Filter(sway));
+                    surge = Math2.Mapf(coeff, 0.0f, 1.0f, surge, surgeFilter.Filter(surge));
+
                     int posFront;
                     int posRL;
                     int posRR;
@@ -592,11 +578,6 @@ namespace MotionPlatform3
                         posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
                         posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
                     }
-
-                    double coeff = settings.SmoothCoefficient / 100.0;
-                    posFront = (int)FrontFilter.Smooth(posFront, coeff);
-                    posRL = (int)RLFilter.Smooth(posRL, coeff);
-                    posRR = (int)RRFilter.Smooth(posRR, coeff);
 
                     if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR)
                     {
@@ -655,7 +636,7 @@ namespace MotionPlatform3
 
         private readonly byte[] data = new byte[20];
 
-        const int cFirstAddr = 10;
+        const int cFirstAddr = 09;
         const int cLastAddr = 12;
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -983,39 +964,4 @@ namespace MotionPlatform3
         STATE_ON_LIMIT_SWITCH = 1,
         STATE_HOMED = 1 << 1,
     };
-
-    public class Filter
-    {
-        private bool _isInitialized;
-        private double _previousAverage;
-
-        public double Average { get; private set; }
-        public double Value { get; private set; }
-        public bool Initialized => _isInitialized;
-
-        public void Reset() { _isInitialized = false; }
-
-        public Filter()
-        {
-            Reset();
-        }
-
-        public double Smooth(double val, double coeff)
-        {
-            Value = val;
-            double mul = Math2.Clamp(1.0 - coeff, 0.0, 1.0);
-
-            if (!_isInitialized)
-            {
-                Average = val;
-                _previousAverage = Average;
-                _isInitialized = true;
-                return _previousAverage;
-            }
-
-            Average = ((val - _previousAverage) * mul) + _previousAverage;
-
-            return _previousAverage = Average;
-        }
-    }
 }

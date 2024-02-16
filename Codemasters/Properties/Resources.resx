@@ -121,6 +121,9 @@
   <data name="dirt4" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\dirt4.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="dirt5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\dirt5.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="dirtrally2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\dirtrally2.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

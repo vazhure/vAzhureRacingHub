@@ -1,7 +1,6 @@
 ﻿using System;
 
 using FlatBuffers;
-using NoiseFilters;
 using vAzhureRacingAPI;
 
 namespace KartKraft
@@ -54,12 +53,6 @@ namespace KartKraft
         public string UserIconPath { get => sUserIconPath; set => sUserIconPath = value; }
         public string UserExecutablePath { get => sUserExecutablePath; set => sUserExecutablePath = value; }
 
-        readonly KalmanFilter swayFilter= new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        readonly KalmanFilter surgeFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        readonly KalmanFilter heaveFilter= new KalmanFilter(1, 1, 0.05f, 1, 0.05f, 0.0f);
-        readonly NoiseFilter pitchFilter = new NoiseFilter(3);
-        readonly NoiseFilter rollFilter = new NoiseFilter(3);
-        readonly NoiseFilter yawFilter = new NoiseFilter(3);
         
         public KKGame()
         {
@@ -179,13 +172,13 @@ namespace KartKraft
 
                 if (frame.Motion.HasValue)
                 {
-                    mCarData.CarData.MotionData.Pitch = pitchFilter.Filter(frame.Motion.Value.Pitch / (10.0f * (float)Math.PI));
-                    mCarData.CarData.MotionData.Roll = rollFilter.Filter(frame.Motion.Value.Roll / (10.0f * (float)Math.PI));
-                    mCarData.CarData.MotionData.Yaw = yawFilter.Filter(frame.Motion.Value.Yaw / 180.0f);
+                    mCarData.CarData.MotionData.Pitch = frame.Motion.Value.Pitch / (10.0f * (float)Math.PI);
+                    mCarData.CarData.MotionData.Roll =  frame.Motion.Value.Roll / (10.0f * (float)Math.PI);
+                    mCarData.CarData.MotionData.Yaw =   frame.Motion.Value.Yaw / 180.0f;
 
-                    mCarData.CarData.MotionData.Surge = surgeFilter.Filter(frame.Motion.Value.AccelerationX / (9.81f * (float)Math.PI));
-                    mCarData.CarData.MotionData.Sway = -swayFilter.Filter(frame.Motion.Value.AccelerationY / (9.81f * (float)Math.PI));
-                    mCarData.CarData.MotionData.Heave = heaveFilter.Filter(frame.Motion.Value.AccelerationZ / (9.81f * (float)Math.PI));
+                    mCarData.CarData.MotionData.Surge = frame.Motion.Value.AccelerationX / (9.81f * (float)Math.PI);
+                    mCarData.CarData.MotionData.Sway = -frame.Motion.Value.AccelerationY / (9.81f * (float)Math.PI);
+                    mCarData.CarData.MotionData.Heave = frame.Motion.Value.AccelerationZ / (9.81f * (float)Math.PI);
 
                     mCarData.CarData.MotionData.Position = new double[] { frame.Motion.Value.WorldPositionX, frame.Motion.Value.WorldPositionY, frame.Motion.Value.WorldPositionZ };
                     mCarData.CarData.MotionData.LocalVelocity = new float[] { frame.Motion.Value.VelocityX, frame.Motion.Value.VelocityY, frame.Motion.Value.VelocityZ };
@@ -203,10 +196,6 @@ namespace KartKraft
             {
                 Stop();
                 monitor.Stop();
-
-                pitchFilter.Reset();
-                rollFilter.Reset();
-                yawFilter.Reset();
             }
             catch { };
         }

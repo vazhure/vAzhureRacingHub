@@ -352,17 +352,10 @@ namespace MotionPlatform3
         Label mouseControl = null;
         Point ptDown = new Point();
 
-        private readonly Filter HeaveFilter = new Filter();
-        private readonly Filter RollFilter = new Filter();
-        private readonly Filter PitchFilter = new Filter();
-
         private void OnLabelMouseDown(object sender, MouseEventArgs e)
         {
             mouseControl = sender as Label;
             ptDown = e.Location;
-            HeaveFilter.Reset();
-            RollFilter.Reset();
-            PitchFilter.Reset();
         }
 
         private void OnLabelMouseMove(object sender, MouseEventArgs e)
@@ -378,15 +371,12 @@ namespace MotionPlatform3
                     switch (mouseControl.Name)
                     {
                         case "labelHeave":
-                            delta = (float)HeaveFilter.Smooth(delta, 0.75);
                             _plugin.DoHeave(delta);
                             break;
                         case "labelPitch":
-                            delta = (float)PitchFilter.Smooth(delta, 0.75);
                             _plugin.DoPitch(delta);
                             break;
                         case "labelRoll":
-                            delta = (float)RollFilter.Smooth(delta, 0.75);
                             _plugin.DoRoll(delta);
                             break;
                     }
