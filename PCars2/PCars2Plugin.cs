@@ -16,16 +16,16 @@ namespace PCars2
             return true;
         }
 
-        readonly GamePlugin ams2 = new GamePlugin(GamePlugin.GameID.AMS2);
-        readonly GamePlugin pc2 = new GamePlugin(GamePlugin.GameID.PC2);
         PC2AMS2Listener listener;
 
         public bool Initialize(IVAzhureRacingApp app)
         {
-            app.RegisterGame(ams2);
-            app.RegisterGame(pc2);
+            GamePlugin[] games =new GamePlugin[] { new GamePlugin(GamePlugin.GameID.AMS2), new GamePlugin(GamePlugin.GameID.PC2), new GamePlugin(GamePlugin.GameID.PC3) };
 
-            listener = new PC2AMS2Listener(ams2, pc2);
+            foreach(GamePlugin g in games)
+                app.RegisterGame(g);
+
+            listener = new PC2AMS2Listener(games);
             listener.StartThread();
             listener.OnThreadError += delegate (object sender, EventArgs e)
             {

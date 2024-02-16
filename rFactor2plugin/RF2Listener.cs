@@ -109,12 +109,12 @@ namespace rFactor2plugin
                             sessionInfo.Valid = false;
                             weatherData.Valid = false;
 
-                            motionData.Pitch = (float)vt.mLocalRot.x;
-                            motionData.Roll = (float)vt.mLocalRot.y;
-                            motionData.Yaw = (float)vt.mLocalRot.z;
-                            motionData.Sway = vt.Sway;
-                            motionData.Surge = -vt.Surge;
-                            motionData.Heave = vt.Heave;
+                            motionData.Pitch = (float)vt.mLocalRot.x / (float)Math.PI;
+                            motionData.Roll = (float)vt.mLocalRot.y / (float)Math.PI;
+                            motionData.Yaw = (float)vt.mLocalRot.z / (float)Math.PI;
+                            motionData.Sway = vt.Sway / (float)Math.PI;
+                            motionData.Surge = -vt.Surge / (float)Math.PI;
+                            motionData.Heave = vt.Heave / (float)Math.PI;
                             motionData.Position = vt.mPos;
                             motionData.LocalVelocity = vt.mLocalVel;
                             motionData.LocalRotAcceleration = vt.mLocalRotAccel;

@@ -6,20 +6,56 @@ namespace PCars2
 {
     public class GamePlugin : IGamePlugin
     {
-        public enum GameID { AMS2, PC2};
+        public enum GameID { AMS2, PC2, PC3 };
 
         readonly GameID m_gameID = GameID.AMS2;
-        public GamePlugin(GameID gameID) 
+        public GamePlugin(GameID gameID)
         {
             TelemetryData = new TelemetryDataSet(this);
             m_gameID = gameID;
         }
 
-        public string Name => m_gameID == GameID.AMS2? "Automobilista 2" : "ProjectCARS 2";
+        public string Name
+        {
+            get
+            {
+                switch (m_gameID)
+                {
+                    default:
+                    case GameID.AMS2: return "Automobilista 2";
+                    case GameID.PC2: return "ProjectCARS 2";
+                    case GameID.PC3: return "ProjectCARS 3";
+                }
+            }
+        }
 
-        public uint SteamGameID => m_gameID == GameID.AMS2 ? 1066890U : 378860U;
+        public uint SteamGameID
+        {
+            get
+            {
+                switch (m_gameID)
+                {
+                    default:
+                    case GameID.AMS2: return 1066890U;
+                    case GameID.PC2: return 378860U;
+                    case GameID.PC3: return 958400U;
+                }
+            }
+        }
 
-        public string[] ExecutableProcessName => m_gameID == GameID.AMS2 ? new string[] { "AMS2AVX","AMS2" } : new string[] { "pCARS2AVX", "pcars2" };
+        public string[] ExecutableProcessName
+        {
+            get
+            {
+                switch (m_gameID)
+                {
+                    default:
+                    case GameID.AMS2: return new string[] { "AMS2AVX", "AMS2" };
+                    case GameID.PC2: return new string[] { "pCARS2AVX", "pcars2" } ;
+                    case GameID.PC3: return new string[] { "pCARS3AVX", "pcars3" };
+                }
+            }
+        }
 
         string sUserIconPath = "";
         string sUserExecutablePath = "";
@@ -56,7 +92,13 @@ namespace PCars2
 
         public Icon GetIcon()
         {
-            return m_gameID == GameID.AMS2 ? Properties.Resources.AMS2 : Properties.Resources.pCARS2;
+            switch (m_gameID)
+            {
+                default:
+                case GameID.AMS2: return Properties.Resources.AMS2;
+                case GameID.PC2: return Properties.Resources.pCARS2;
+                case GameID.PC3: return Properties.Resources.pCARS3;
+            }
         }
 
         public void ShowSettings(IVAzhureRacingApp app)

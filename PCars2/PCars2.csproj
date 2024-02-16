@@ -68,6 +68,9 @@
   <ItemGroup>
     <None Include="Resources\pCARS2.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pCARS3.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo D| xcopy "$(TargetPath)" "C:\ProgramData\vAzhureRacingHub\Plugins\PCars2" /e /y /d</PostBuildEvent>
