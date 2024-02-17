@@ -8,29 +8,29 @@
 #include <Wire.h>  // https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
 #include <stdio.h>
 
-//#define I2CMASTER
+// Uncomment this line to flash MASTER device
+// Comment this line to flash SLAVE devices
+#define I2CMASTER
 
-// Number of linear actuators
-#define LINEAR_ACTUATORS 3
+// Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
+// Number of linear actuators
+#define LINEAR_ACTUATORS MAX_LINEAR_ACTUATORS
 
-#define SLAVE_ADDR_FL 09  // Front Left
-#define SLAVE_ADDR_FR 10  // Front / Front Right
+#define SLAVE_ADDR_FL 10  // Front / Front Left
 #define SLAVE_ADDR_RL 11  // Rear Left
 #define SLAVE_ADDR_RR 12  // Rear Right
+#define SLAVE_ADDR_FR 13  // Front RIGHT
 
-#if (LINEAR_ACTUATORS == 3)
-#define SLAVE_FIRST SLAVE_ADDR_FR
-#else
 #define SLAVE_FIRST SLAVE_ADDR_FL
-#endif
-#define SLAVE_LAST SLAVE_ADDR_RR
+#define SLAVE_LAST SLAVE_FIRST + LINEAR_ACTUATORS - 1
 
 #ifndef I2CMASTER
-//#define SLAVE_ADDR SLAVE_ADDR_FL
-//#define SLAVE_ADDR SLAVE_ADDR_FR
+// Uncomment a single line with desired Address to flash SLAVE device
+#define SLAVE_ADDR SLAVE_ADDR_FR
 //#define SLAVE_ADDR SLAVE_ADDR_RL
-#define SLAVE_ADDR SLAVE_ADDR_RR
+//#define SLAVE_ADDR SLAVE_ADDR_RR
+//#define SLAVE_ADDR SLAVE_ADDR_FL
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -96,10 +96,7 @@ const int RAW_DATA_LEN = sizeof(PCCMD);
 #define SIGNAL_PIN A5
 
 // Device states
-STATE stFR, stRL, stRR;
-#if (LINEAR_ACTUATORS == 4)
-STATE stFL;
-#endif
+STATE st[MAX_LINEAR_ACTUATORS];
 
 volatile bool bAlarm = false;
 
@@ -189,7 +186,7 @@ bool TransmitCMD(uint8_t addr, uint8_t cmd, uint32_t data) {
 
 void loop() {
   if (bAlarm) {
-    for (int addr = SLAVE_FIRST; addr <= SLAVE_ADDR_RR; addr++)
+    for (int addr = SLAVE_FIRST; addr <= SLAVE_LAST; addr++)
       TransmitCMD(addr, COMMAND::SET_ALARM, 1);
     bAlarm = false;
   }
@@ -205,23 +202,11 @@ void loop() {
       case COMMAND::CMD_DISABLE:
       case COMMAND::CMD_CLEAR_ALARM:
         {
-#if (LINEAR_ACTUATORS == 4)
-          if (pccmd.data[0] == 1)
-            TransmitCMD(SLAVE_ADDR_FL, pccmd.cmd, 0);
-          if (pccmd.data[1] == 1)
-            TransmitCMD(SLAVE_ADDR_FR, pccmd.cmd, 0);
-          if (pccmd.data[2] == 1)
-            TransmitCMD(SLAVE_ADDR_RL, pccmd.cmd, 0);
-          if (pccmd.data[3] == 1)
-            TransmitCMD(SLAVE_ADDR_RR, pccmd.cmd, 0);
-#else
-          if (pccmd.data[0] == 1)
-            TransmitCMD(SLAVE_ADDR_FR, pccmd.cmd, 0);
-          if (pccmd.data[1] == 1)
-            TransmitCMD(SLAVE_ADDR_RL, pccmd.cmd, 0);
-          if (pccmd.data[2] == 1)
-            TransmitCMD(SLAVE_ADDR_RR, pccmd.cmd, 0);
-#endif
+
+          for (int t = 0; t < LINEAR_ACTUATORS; t++) {
+            if (pccmd.data[t] == 1)
+              TransmitCMD(SLAVE_FIRST + t, pccmd.cmd, 0);
+          }
         }
         break;
       case COMMAND::CMD_PARK:
@@ -230,44 +215,21 @@ void loop() {
       case COMMAND::CMD_SET_SLOW_SPEED:
       case COMMAND::CMD_SET_ACCEL:
         {
-#if (LINEAR_ACTUATORS == 4)
-          TransmitCMD(SLAVE_ADDR_FL, pccmd.cmd, pccmd.data[0]);
-          TransmitCMD(SLAVE_ADDR_FR, pccmd.cmd, pccmd.data[1]);
-          TransmitCMD(SLAVE_ADDR_RL, pccmd.cmd, pccmd.data[2]);
-          TransmitCMD(SLAVE_ADDR_RR, pccmd.cmd, pccmd.data[3]);
-#else
-          TransmitCMD(SLAVE_ADDR_FR, pccmd.cmd, pccmd.data[0]);
-          TransmitCMD(SLAVE_ADDR_RL, pccmd.cmd, pccmd.data[1]);
-          TransmitCMD(SLAVE_ADDR_RR, pccmd.cmd, pccmd.data[2]);
-#endif
+          for (int t = 0; t < LINEAR_ACTUATORS; t++)
+            TransmitCMD(SLAVE_FIRST + t, pccmd.cmd, pccmd.data[t]);
         }
         break;
       case COMMAND::CMD_GET_STATE:
         {
-#if (LINEAR_ACTUATORS == 4)
-          if (!RequestSlaveState(SLAVE_ADDR_FL, (uint8_t*)&stFL, STATE_LEN))
-            stFL.mode = MODE::UNKNOWN;
-#endif
-          if (!RequestSlaveState(SLAVE_ADDR_FR, (uint8_t*)&stFR, STATE_LEN))
-            stFR.mode = MODE::UNKNOWN;
-          if (!RequestSlaveState(SLAVE_ADDR_RL, (uint8_t*)&stRL, STATE_LEN))
-            stRL.mode = MODE::UNKNOWN;
-          if (!RequestSlaveState(SLAVE_ADDR_RR, (uint8_t*)&stRR, STATE_LEN))
-            stRR.mode = MODE::UNKNOWN;
-
-#if (LINEAR_ACTUATORS == 4)
-          Serial.write(SLAVE_ADDR_FL);
-          Serial.write(STATE_LEN);
-#endif
-          Serial.write(SLAVE_ADDR_FR);
-          Serial.write(STATE_LEN);
-          Serial.write((uint8_t*)&stFR, STATE_LEN);
-          Serial.write(SLAVE_ADDR_RL);
-          Serial.write(STATE_LEN);
-          Serial.write((uint8_t*)&stRL, STATE_LEN);
-          Serial.write(SLAVE_ADDR_RR);
-          Serial.write(STATE_LEN);
-          Serial.write((uint8_t*)&stRR, STATE_LEN);
+          for (int t = 0; t < LINEAR_ACTUATORS; t++) {
+            if (!RequestSlaveState(SLAVE_FIRST + t, (uint8_t*)&st[t], STATE_LEN))
+              st[t].mode = MODE::UNKNOWN;
+          }
+          for (int t = 0; t < LINEAR_ACTUATORS; t++) {
+            Serial.write(SLAVE_FIRST + t);
+            Serial.write(STATE_LEN);
+            Serial.write((uint8_t*)&st[t], STATE_LEN);
+          }
         }
         break;
     }
@@ -288,7 +250,7 @@ const uint8_t limiterPinNC = PA7;
 
 uint32_t accel = 900;
 const int32_t STEPS_PER_REVOLUTIONS = 1000;                                // Steps per revolution
-#define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4                       // Distance in steps
+#define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4  // Distance in steps
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;              // Safe traveling distance in steps
 const float MM_PER_REV = 5.0f;                                             // distance in mm per revolution
 const float MAX_REVOLUTIONS = 18;                                          // maximum revolutions
