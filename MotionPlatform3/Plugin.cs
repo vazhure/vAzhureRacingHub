@@ -91,6 +91,7 @@ namespace MotionPlatform3
             vAzhureRacingApp = app;
 
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
+
             app.RegisterDevice(this);
             app.OnDeviceArrival += delegate (object sender, DeviceChangeEventsArgs e)
             {
@@ -114,6 +115,12 @@ namespace MotionPlatform3
                 DtrEnable = settings.DtrEnable
             };
 
+            swayFilter = new KalmanFilter(settings.FilterSettings.Sway[0], settings.FilterSettings.Sway[1], settings.FilterSettings.Sway[2], settings.FilterSettings.Sway[3], settings.FilterSettings.Sway[4], settings.FilterSettings.Sway[5]);
+            surgeFilter = new KalmanFilter(settings.FilterSettings.Surge[0], settings.FilterSettings.Surge[1], settings.FilterSettings.Surge[2], settings.FilterSettings.Surge[3], settings.FilterSettings.Surge[4], settings.FilterSettings.Surge[5]);
+            heaveFilter = new KalmanFilter(settings.FilterSettings.Heave[0], settings.FilterSettings.Heave[1], settings.FilterSettings.Heave[2], settings.FilterSettings.Heave[3], settings.FilterSettings.Heave[4], settings.FilterSettings.Heave[5]);
+            pitchFilter = new NoiseFilter(settings.FilterSettings.Pitch);
+            rollFilter = new NoiseFilter(settings.FilterSettings.Roll);
+
             serialPort.DataReceived += SerialPort_DataReceived;
             mainLoop = new Task(MainTread, this, tokenSource.Token);
 
@@ -132,14 +139,14 @@ namespace MotionPlatform3
             {
                 try
                 {
-                    byte[] data = GenerateCommand(COMMAND.CMD_PARK, 1, 1, 1);
+                    byte[] data = GenerateCommand(COMMAND.CMD_PARK, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
             }
         }
 
-        internal void Move(int ff, int rl, int rr)
+        internal void Move(int fl, int rl, int rr, int fr = 0)
         {
             if (!IsConnected || !IsDeviceReady)
                 return;
@@ -148,10 +155,11 @@ namespace MotionPlatform3
             {
                 try
                 {
-                    ff = Math2.Clamp(ff, FrontAxisState.min, FrontAxisState.max);
+                    fl = Math2.Clamp(fl, FrontAxisState.min, FrontAxisState.max);
                     rl = Math2.Clamp(rl, RearLeftAxisState.min, RearLeftAxisState.max);
                     rr = Math2.Clamp(rr, RearRightAxisState.min, RearRightAxisState.max);
-                    byte[] data = GenerateCommand(COMMAND.CMD_MOVE, ff, rl, rr);
+                    fr = Math2.Clamp(fr, FrontRightAxisState.min, FrontRightAxisState.max);
+                    byte[] data = GenerateCommand(COMMAND.CMD_MOVE, fl, rl, rr, fr);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
@@ -166,7 +174,7 @@ namespace MotionPlatform3
             {
                 try
                 {
-                    byte[] data = GenerateCommand(COMMAND.CMD_HOME, 1, 1, 1);
+                    byte[] data = GenerateCommand(COMMAND.CMD_HOME, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
@@ -181,7 +189,7 @@ namespace MotionPlatform3
             {
                 try
                 {
-                    byte[] data = GenerateCommand(COMMAND.CMD_CLEAR_ALARM, 1, 1, 1);
+                    byte[] data = GenerateCommand(COMMAND.CMD_CLEAR_ALARM, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
@@ -203,7 +211,7 @@ namespace MotionPlatform3
                 try
                 {
                     speed = Math2.Clamp(speed, settings.MinSpeed, settings.MaxSpeed);
-                    byte[] data = GenerateCommand(bLow ? COMMAND.CMD_SET_LOW_SPEED : COMMAND.CMD_SET_SPEED, speed, speed, speed);
+                    byte[] data = GenerateCommand(bLow ? COMMAND.CMD_SET_LOW_SPEED : COMMAND.CMD_SET_SPEED, speed, speed, speed, speed);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
@@ -219,7 +227,7 @@ namespace MotionPlatform3
             {
                 try
                 {
-                    byte[] data = GenerateCommand(COMMAND.CMD_SET_ACCEL, acc, acc, acc);
+                    byte[] data = GenerateCommand(COMMAND.CMD_SET_ACCEL, acc, acc, acc, acc);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
@@ -242,25 +250,35 @@ namespace MotionPlatform3
                 catch { }
             }
 
-            FrontAxisState = new AXIS_STATE();
-            RearLeftAxisState = new AXIS_STATE();
-            RearRightAxisState = new AXIS_STATE();
-            status = DeviceStatus.Disconnected;
-            OnDisconnected?.Invoke(this, new EventArgs());
+            if (Status == DeviceStatus.Connected)
+            {
+                FrontAxisState = new AXIS_STATE();
+                RearLeftAxisState = new AXIS_STATE();
+                RearRightAxisState = new AXIS_STATE();
+                FrontRightAxisState = new AXIS_STATE();
+                Status = DeviceStatus.Disconnected;
+                OnDisconnected?.Invoke(this, new EventArgs());
+            }
         }
+
+        readonly Dictionary<int, bool> devMap = new Dictionary<int, bool>();
+        int ConnectedLinearAxes { get => devMap.Count; }
 
         private void Connect()
         {
+            Status = DeviceStatus.Unknown;
+
             if (settings.ComPort == 0)
                 return;
 
-            serialPort.PortName = $"COM{settings.ComPort}";
-            serialPort.BaudRate = settings.BaudRate;
+            devMap.Clear();
 
             lock (serialPort)
             {
                 try
                 {
+                    serialPort.PortName = $"COM{settings.ComPort}";
+                    serialPort.BaudRate = settings.BaudRate;
                     serialPort.Open();
                     serialPort.DiscardInBuffer();
                     serialPort.DiscardOutBuffer();
@@ -274,12 +292,15 @@ namespace MotionPlatform3
             }
 
             Status = serialPort.IsOpen ? DeviceStatus.Connected : DeviceStatus.ConnectionError;
-            OnConnected?.Invoke(this, new EventArgs());
+            if (IsConnected)
+            {
+                SetSpeed(settings.SpeedOverride);
+                SetSpeed(settings.LowSpeedOverride, true);
+                SetAcceleration(settings.Acceleration);
+                RequestState();
 
-            SetSpeed(settings.SpeedOverride);
-            SetSpeed(settings.LowSpeedOverride, true);
-            SetAcceleration(settings.Acceleration);
-            RequestState();
+                OnConnected?.Invoke(this, new EventArgs());
+            }
         }
 
         byte[] GenerateCommand(COMMAND cmd, int par1, int par2, int par3, int par4 = 0)
@@ -316,7 +337,7 @@ namespace MotionPlatform3
             {
                 try
                 {
-                    byte[] data = GenerateCommand(COMMAND.CMD_GET_STATE, 1, 1, 1);
+                    byte[] data = GenerateCommand(COMMAND.CMD_GET_STATE, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
                 catch { }
@@ -423,19 +444,24 @@ namespace MotionPlatform3
 
         private void ProcessIdle()
         {
+            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
+                return;
+
             float pitch = pitchFilter.Filter(0);
             float roll = rollFilter.Filter(0);
             float heave = heaveFilter.Filter(0);
             float sway = swayFilter.Filter(0);
             float surge = surgeFilter.Filter(0);
 
-            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
+            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) :
+                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
             int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
-            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
+            int posRR =  (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
+            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
 
-            if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR)
+            if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
             {
-                byte[] data = GenerateCommand(COMMAND.CMD_MOVE, posFront, posRL, posRR);
+                byte[] data = GenerateCommand(COMMAND.CMD_MOVE, posFront, posRL, posRR, posFR);
 
                 lock (serialPort)
                 {
@@ -449,6 +475,7 @@ namespace MotionPlatform3
                 _lastPosFront = posFront;
                 _lastPosRL = posRL;
                 _lastPosRR = posRR;
+                _lastPosFR = posFR;
             }
         }
 
@@ -459,65 +486,78 @@ namespace MotionPlatform3
                 gd.Reset();
         }
 
-        readonly KalmanFilter swayFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        readonly KalmanFilter surgeFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        readonly KalmanFilter heaveFilter = new KalmanFilter(1, 1, 0.05f, 1, 0.05f, 0.0f);
-        readonly NoiseFilter pitchFilter = new NoiseFilter(3);
-        readonly NoiseFilter rollFilter = new NoiseFilter(3);
+        KalmanFilter swayFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
+        KalmanFilter surgeFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
+        KalmanFilter heaveFilter = new KalmanFilter(1, 1, 0.05f, 1, 0.05f, 0.0f);
+        NoiseFilter pitchFilter = new NoiseFilter(3);
+        NoiseFilter rollFilter = new NoiseFilter(3);
         //readonly NoiseFilter yawFilter = new NoiseFilter(3);
 
         int _lastPosFront = 0;
         int _lastPosRL = 0;
         int _lastPosRR = 0;
+        int _lastPosFR = 0;
 
         internal void DoHeave(float delta)
         {
+            if (!settings.Enabled)
+                return;
             float pitch = 0;
             float roll = 0;
             float sway = 0;
             float surge = 0;
             float heave = heaveFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
 
-            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
+            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max) :
+                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
             int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
             int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
+            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) : (FrontAxisState.min + FrontAxisState.max) / 2;
 
-            Move(posFront, posRL, posRR);
+            Move(posFront, posRL, posRR, posFR);
         }
 
         internal void DoRoll(float delta)
         {
+            if (!settings.Enabled)
+                return;
             float pitch = 0;
             float roll = rollFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
             float sway = 0;
             float surge = 0;
             float heave = 0;
 
-            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
+            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max) :
+                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
             int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
             int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
+            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
 
-            Move(posFront, posRL, posRR);
+            Move(posFront, posRL, posRR, posFR);
         }
 
         internal void DoPitch(float delta)
         {
+            if (!settings.Enabled)
+                return;
             float pitch = pitchFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
             float roll = 0;
             float sway = 0;
             float surge = 0;
             float heave = 0;
 
-            int posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
+            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max) :
+                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
             int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
             int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
+            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
 
-            Move(posFront, posRL, posRR);
+            Move(posFront, posRL, posRR, posFR);
         }
 
         private void ProcessTelemetry()
         {
-            if (!settings.Enabled || !IsConnected || settings.mode == MODE.CollectingGameData)
+            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
                 return;
             try
             {
@@ -552,20 +592,23 @@ namespace MotionPlatform3
                     float coeff = settings.SmoothCoefficient / 100.0f;
 
                     pitch = Math2.Mapf(coeff, 0.0f, 1.0f, pitch, pitchFilter.Filter(pitch));
-                    roll = Math2.Mapf(coeff, 0.0f,  1.0f, roll, rollFilter.Filter(roll));
+                    roll = Math2.Mapf(coeff, 0.0f, 1.0f, roll, rollFilter.Filter(roll));
                     heave = Math2.Mapf(coeff, 0.0f, 1.0f, heave, heaveFilter.Filter(heave));
-                    sway = Math2.Mapf(coeff, 0.0f,  1.0f, sway, swayFilter.Filter(sway));
+                    sway = Math2.Mapf(coeff, 0.0f, 1.0f, sway, swayFilter.Filter(sway));
                     surge = Math2.Mapf(coeff, 0.0f, 1.0f, surge, surgeFilter.Filter(surge));
 
                     int posFront;
                     int posRL;
                     int posRR;
+                    int posFR;
 
                     if (settings.ClipByRange)
                     {
-                        posFront = (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
+                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge + roll + sway, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) : 
+                            (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
                         posRL = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge + roll + sway, -overal, overal), -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
                         posRR = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge - roll - sway, -overal, overal), -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
+                        posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge - roll - sway, -overal, overal), -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
                     }
                     else
                     {
@@ -574,14 +617,16 @@ namespace MotionPlatform3
                         heave *= overal;
                         sway *= overal;
                         surge *= overal;
-                        posFront = (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
+                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) : 
+                            (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
                         posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
                         posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
+                        posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
                     }
 
-                    if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR)
+                    if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
                     {
-                        byte[] data = GenerateCommand(COMMAND.CMD_MOVE, posFront, posRL, posRR);
+                        byte[] data = GenerateCommand(COMMAND.CMD_MOVE, posFront, posRL, posRR, posFR);
 
                         lock (serialPort)
                         {
@@ -595,14 +640,17 @@ namespace MotionPlatform3
                         _lastPosFront = posFront;
                         _lastPosRL = posRL;
                         _lastPosRR = posRR;
+                        _lastPosFR = posFR;
                     }
                 }
             }
             catch { }
         }
 
+        public const int cMaxAxesCount = 4;
+
         // ACTUAL STATES
-        private readonly AXIS_STATE[] states = new AXIS_STATE[3];
+        private readonly AXIS_STATE[] states = new AXIS_STATE[cMaxAxesCount];
 
         public AXIS_STATE FrontAxisState
         {
@@ -622,6 +670,12 @@ namespace MotionPlatform3
             private set => states[2] = value;
         }
 
+        public AXIS_STATE FrontRightAxisState
+        {
+            get => states[3];
+            private set => states[3] = value;
+        }
+
         public class AxisStateChanged : EventArgs
         {
             public AxisStateChanged(int addr, AXIS_STATE state) => (Addr, State) = (addr, state);
@@ -636,8 +690,8 @@ namespace MotionPlatform3
 
         private readonly byte[] data = new byte[20];
 
-        const int cFirstAddr = 09;
-        const int cLastAddr = 12;
+        const int cFirstAddr = 10;
+        const int cLastAddr = 13;
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -655,10 +709,14 @@ namespace MotionPlatform3
                                 AXIS_STATE state = (AXIS_STATE)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(AXIS_STATE));
                                 h.Free();
 
-                                states[addr - 10] = state;
+                                states[addr - cFirstAddr] = state;
+                                if (state.mode != DEVICE_MODE.UNKNOWN)
+                                    devMap[addr] = true;
                                 OnAxisStateChanged?.Invoke(this, new AxisStateChanged(addr, state));
                             }
-                            catch { }
+                            catch {
+                                //Console.WriteLine(ex.Message);
+                            }
                     }
                 }
             }
@@ -668,9 +726,7 @@ namespace MotionPlatform3
         {
             get
             {
-                return (states[0].mode == DEVICE_MODE.CONNECTED || states[0].mode == DEVICE_MODE.READY) &&
-                    (states[1].mode == DEVICE_MODE.CONNECTED || states[1].mode == DEVICE_MODE.READY) &&
-                    (states[2].mode == DEVICE_MODE.CONNECTED || states[2].mode == DEVICE_MODE.READY);
+                return ConnectedLinearAxes > 1;
             }
         }
 
@@ -699,7 +755,7 @@ namespace MotionPlatform3
             }
         }
 
-        public bool ReadyToSend 
+        public bool ReadyToSend
         {
             get
             {
@@ -797,10 +853,21 @@ namespace MotionPlatform3
         }
     }
 
-    public enum MODE { Run, CollectingGameData };
+    public class FilterSettings
+    {
+        public float[] Sway { get; set; } = { 1, 1, 0.02f, 1, 0.02f, 0.0f };
+        public float[] Surge { get; set; } = { 1, 1, 0.02f, 1, 0.02f, 0.0f };
+        public float[] Heave { get; set; } = { 1, 1, 0.02f, 1, 0.02f, 0.0f };
+        public int Pitch { get; set; } = 3;
+        public int Roll { get; set; } = 3;
+    }
+
+    public enum MODE { Run, CollectingGameData, Test };
 
     public class MotionPlatformSettings : ICloneable
     {
+        public string[] LinearAxesNames { get; set; } = { "Front", "Rear Left", "Rear Right", "Front Right" };
+        public float[] Offsets { get; set; } = { 0, 0, 0, 0 };
         /// <summary>
         /// Номер ком-порта
         /// </summary>
@@ -836,6 +903,8 @@ namespace MotionPlatform3
         public bool ClipByRange { get; set; } = false;
         public float Linearity { get; set; } = 1.0f;
         public int SmoothCoefficient { get; set; } = 50;
+
+        public FilterSettings FilterSettings { get; set; } = new FilterSettings();
         public float StepsPerMM { get; set; } = 200;
         /// <summary>
         /// Inversion flags

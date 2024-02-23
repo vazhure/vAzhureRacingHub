@@ -33,6 +33,7 @@ namespace rFactor2plugin
         public const int MAX_STATUS_MSG_LEN = 128;
         public const int MAX_RULES_INSTRUCTION_MSG_LEN = 96;
         public const string RFACTOR2_PROCESS_NAME = "rFactor2";
+        public const string LMU_PROCESS_NAME = "Le Mans Ultimate";
 
         public const byte RowX = 0;
         public const byte RowY = 1;

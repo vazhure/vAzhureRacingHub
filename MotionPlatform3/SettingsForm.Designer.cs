@@ -33,20 +33,25 @@ namespace MotionPlatform3
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.pbRL = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.lblRearRightState = new System.Windows.Forms.Label();
             this.lblFrontState = new System.Windows.Forms.Label();
             this.pbFR = new System.Windows.Forms.PictureBox();
-            this.pbRR = new System.Windows.Forms.PictureBox();
-            this.lblRearLeftState = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.lblPosRL = new System.Windows.Forms.Label();
+            this.lblName1 = new System.Windows.Forms.Label();
             this.lblPosFront = new System.Windows.Forms.Label();
-            this.lblPosRR = new System.Windows.Forms.Label();
-            this.lblTargetRL = new System.Windows.Forms.Label();
             this.lblTargetFront = new System.Windows.Forms.Label();
+            this.lblRearLeftState = new System.Windows.Forms.Label();
+            this.lblName2 = new System.Windows.Forms.Label();
+            this.lblPosRL = new System.Windows.Forms.Label();
+            this.lblTargetRL = new System.Windows.Forms.Label();
+            this.lblRearRightState = new System.Windows.Forms.Label();
+            this.pbRR = new System.Windows.Forms.PictureBox();
+            this.lblName3 = new System.Windows.Forms.Label();
+            this.lblPosRR = new System.Windows.Forms.Label();
             this.lblTargetRR = new System.Windows.Forms.Label();
+            this.lblFrontRightState = new System.Windows.Forms.Label();
+            this.pbFRR = new System.Windows.Forms.PictureBox();
+            this.lblName4 = new System.Windows.Forms.Label();
+            this.lblPosFRR = new System.Windows.Forms.Label();
+            this.lblTargetFRR = new System.Windows.Forms.Label();
             this.btnHome = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.btnPark = new System.Windows.Forms.Button();
@@ -96,15 +101,16 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbRR)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbFRR)).BeginInit();
             this.SuspendLayout();
             // 
             // pbRL
             // 
             this.pbRL.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbRL.Image = global::MotionPlatform3.Properties.Resources._3dof;
-            this.pbRL.Location = new System.Drawing.Point(3, 43);
+            this.pbRL.Location = new System.Drawing.Point(116, 43);
             this.pbRL.Name = "pbRL";
-            this.pbRL.Size = new System.Drawing.Size(144, 301);
+            this.pbRL.Size = new System.Drawing.Size(107, 301);
             this.pbRL.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRL.TabIndex = 0;
             this.pbRL.TabStop = false;
@@ -114,25 +120,31 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 3;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33028F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33486F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33486F));
+            this.tableLayoutPanel1.ColumnCount = 4;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.Controls.Add(this.lblFrontState, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.pbFR, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.lblName1, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.lblPosFront, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.lblTargetFront, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.lblRearLeftState, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.pbRL, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.lblName2, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.lblPosRL, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.lblTargetRL, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.lblRearRightState, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.lblFrontState, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.pbRL, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.pbFR, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.pbRR, 2, 1);
-            this.tableLayoutPanel1.Controls.Add(this.lblRearLeftState, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.label1, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label2, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label3, 2, 2);
-            this.tableLayoutPanel1.Controls.Add(this.lblPosRL, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.lblPosFront, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.lblName3, 2, 2);
             this.tableLayoutPanel1.Controls.Add(this.lblPosRR, 2, 3);
-            this.tableLayoutPanel1.Controls.Add(this.lblTargetRL, 0, 4);
-            this.tableLayoutPanel1.Controls.Add(this.lblTargetFront, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.lblTargetRR, 2, 4);
+            this.tableLayoutPanel1.Controls.Add(this.lblFrontRightState, 3, 0);
+            this.tableLayoutPanel1.Controls.Add(this.pbFRR, 3, 1);
+            this.tableLayoutPanel1.Controls.Add(this.lblName4, 3, 2);
+            this.tableLayoutPanel1.Controls.Add(this.lblPosFRR, 3, 3);
+            this.tableLayoutPanel1.Controls.Add(this.lblTargetFRR, 3, 4);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 71);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 5;
@@ -144,22 +156,12 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.Size = new System.Drawing.Size(453, 417);
             this.tableLayoutPanel1.TabIndex = 8;
             // 
-            // lblRearRightState
-            // 
-            this.lblRearRightState.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblRearRightState.Location = new System.Drawing.Point(304, 0);
-            this.lblRearRightState.Name = "lblRearRightState";
-            this.lblRearRightState.Size = new System.Drawing.Size(146, 40);
-            this.lblRearRightState.TabIndex = 8;
-            this.lblRearRightState.Text = "Unknown state";
-            this.lblRearRightState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // lblFrontState
             // 
             this.lblFrontState.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblFrontState.Location = new System.Drawing.Point(153, 0);
+            this.lblFrontState.Location = new System.Drawing.Point(3, 0);
             this.lblFrontState.Name = "lblFrontState";
-            this.lblFrontState.Size = new System.Drawing.Size(145, 40);
+            this.lblFrontState.Size = new System.Drawing.Size(107, 40);
             this.lblFrontState.TabIndex = 4;
             this.lblFrontState.Text = "Unknown state";
             this.lblFrontState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -168,123 +170,184 @@ namespace MotionPlatform3
             // 
             this.pbFR.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbFR.Image = global::MotionPlatform3.Properties.Resources._3dof;
-            this.pbFR.Location = new System.Drawing.Point(153, 43);
+            this.pbFR.Location = new System.Drawing.Point(3, 43);
             this.pbFR.Name = "pbFR";
-            this.pbFR.Size = new System.Drawing.Size(145, 301);
+            this.pbFR.Size = new System.Drawing.Size(107, 301);
             this.pbFR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbFR.TabIndex = 0;
             this.pbFR.TabStop = false;
+            // 
+            // lblName1
+            // 
+            this.lblName1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblName1.Location = new System.Drawing.Point(3, 347);
+            this.lblName1.Name = "lblName1";
+            this.lblName1.Size = new System.Drawing.Size(107, 30);
+            this.lblName1.TabIndex = 5;
+            this.lblName1.Text = "Front";
+            this.lblName1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblPosFront
+            // 
+            this.lblPosFront.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblPosFront.Location = new System.Drawing.Point(3, 377);
+            this.lblPosFront.Name = "lblPosFront";
+            this.lblPosFront.Size = new System.Drawing.Size(107, 20);
+            this.lblPosFront.TabIndex = 6;
+            this.lblPosFront.Text = "-";
+            this.lblPosFront.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblTargetFront
+            // 
+            this.lblTargetFront.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblTargetFront.Location = new System.Drawing.Point(3, 397);
+            this.lblTargetFront.Name = "lblTargetFront";
+            this.lblTargetFront.Size = new System.Drawing.Size(107, 20);
+            this.lblTargetFront.TabIndex = 7;
+            this.lblTargetFront.Text = "-";
+            this.lblTargetFront.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblRearLeftState
+            // 
+            this.lblRearLeftState.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblRearLeftState.Location = new System.Drawing.Point(116, 0);
+            this.lblRearLeftState.Name = "lblRearLeftState";
+            this.lblRearLeftState.Size = new System.Drawing.Size(107, 40);
+            this.lblRearLeftState.TabIndex = 0;
+            this.lblRearLeftState.Text = "Unknown state";
+            this.lblRearLeftState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblName2
+            // 
+            this.lblName2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblName2.Location = new System.Drawing.Point(116, 347);
+            this.lblName2.Name = "lblName2";
+            this.lblName2.Size = new System.Drawing.Size(107, 30);
+            this.lblName2.TabIndex = 1;
+            this.lblName2.Text = "Rear Left";
+            this.lblName2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblPosRL
+            // 
+            this.lblPosRL.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblPosRL.Location = new System.Drawing.Point(116, 377);
+            this.lblPosRL.Name = "lblPosRL";
+            this.lblPosRL.Size = new System.Drawing.Size(107, 20);
+            this.lblPosRL.TabIndex = 2;
+            this.lblPosRL.Text = "-";
+            this.lblPosRL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblTargetRL
+            // 
+            this.lblTargetRL.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblTargetRL.Location = new System.Drawing.Point(116, 397);
+            this.lblTargetRL.Name = "lblTargetRL";
+            this.lblTargetRL.Size = new System.Drawing.Size(107, 20);
+            this.lblTargetRL.TabIndex = 3;
+            this.lblTargetRL.Text = "-";
+            this.lblTargetRL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblRearRightState
+            // 
+            this.lblRearRightState.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblRearRightState.Location = new System.Drawing.Point(229, 0);
+            this.lblRearRightState.Name = "lblRearRightState";
+            this.lblRearRightState.Size = new System.Drawing.Size(107, 40);
+            this.lblRearRightState.TabIndex = 8;
+            this.lblRearRightState.Text = "Unknown state";
+            this.lblRearRightState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pbRR
             // 
             this.pbRR.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
-            this.pbRR.Location = new System.Drawing.Point(304, 43);
+            this.pbRR.Location = new System.Drawing.Point(229, 43);
             this.pbRR.Name = "pbRR";
-            this.pbRR.Size = new System.Drawing.Size(146, 301);
+            this.pbRR.Size = new System.Drawing.Size(107, 301);
             this.pbRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRR.TabIndex = 0;
             this.pbRR.TabStop = false;
             // 
-            // lblRearLeftState
+            // lblName3
             // 
-            this.lblRearLeftState.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblRearLeftState.Location = new System.Drawing.Point(3, 0);
-            this.lblRearLeftState.Name = "lblRearLeftState";
-            this.lblRearLeftState.Size = new System.Drawing.Size(144, 40);
-            this.lblRearLeftState.TabIndex = 0;
-            this.lblRearLeftState.Text = "Unknown state";
-            this.lblRearLeftState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label1
-            // 
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Location = new System.Drawing.Point(3, 347);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(144, 30);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Rear Left";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label2
-            // 
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Location = new System.Drawing.Point(153, 347);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(145, 30);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Front";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label3
-            // 
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Location = new System.Drawing.Point(304, 347);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(146, 30);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "Rear Right";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblPosRL
-            // 
-            this.lblPosRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRL.Location = new System.Drawing.Point(3, 377);
-            this.lblPosRL.Name = "lblPosRL";
-            this.lblPosRL.Size = new System.Drawing.Size(144, 20);
-            this.lblPosRL.TabIndex = 2;
-            this.lblPosRL.Text = "-";
-            this.lblPosRL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblPosFront
-            // 
-            this.lblPosFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosFront.Location = new System.Drawing.Point(153, 377);
-            this.lblPosFront.Name = "lblPosFront";
-            this.lblPosFront.Size = new System.Drawing.Size(145, 20);
-            this.lblPosFront.TabIndex = 6;
-            this.lblPosFront.Text = "-";
-            this.lblPosFront.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblName3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblName3.Location = new System.Drawing.Point(229, 347);
+            this.lblName3.Name = "lblName3";
+            this.lblName3.Size = new System.Drawing.Size(107, 30);
+            this.lblName3.TabIndex = 9;
+            this.lblName3.Text = "Rear Right";
+            this.lblName3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblPosRR
             // 
             this.lblPosRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRR.Location = new System.Drawing.Point(304, 377);
+            this.lblPosRR.Location = new System.Drawing.Point(229, 377);
             this.lblPosRR.Name = "lblPosRR";
-            this.lblPosRR.Size = new System.Drawing.Size(146, 20);
+            this.lblPosRR.Size = new System.Drawing.Size(107, 20);
             this.lblPosRR.TabIndex = 10;
             this.lblPosRR.Text = "-";
             this.lblPosRR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lblTargetRL
-            // 
-            this.lblTargetRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRL.Location = new System.Drawing.Point(3, 397);
-            this.lblTargetRL.Name = "lblTargetRL";
-            this.lblTargetRL.Size = new System.Drawing.Size(144, 20);
-            this.lblTargetRL.TabIndex = 3;
-            this.lblTargetRL.Text = "-";
-            this.lblTargetRL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblTargetFront
-            // 
-            this.lblTargetFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetFront.Location = new System.Drawing.Point(153, 397);
-            this.lblTargetFront.Name = "lblTargetFront";
-            this.lblTargetFront.Size = new System.Drawing.Size(145, 20);
-            this.lblTargetFront.TabIndex = 7;
-            this.lblTargetFront.Text = "-";
-            this.lblTargetFront.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // lblTargetRR
             // 
             this.lblTargetRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRR.Location = new System.Drawing.Point(304, 397);
+            this.lblTargetRR.Location = new System.Drawing.Point(229, 397);
             this.lblTargetRR.Name = "lblTargetRR";
-            this.lblTargetRR.Size = new System.Drawing.Size(146, 20);
+            this.lblTargetRR.Size = new System.Drawing.Size(107, 20);
             this.lblTargetRR.TabIndex = 11;
             this.lblTargetRR.Text = "-";
             this.lblTargetRR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblFrontRightState
+            // 
+            this.lblFrontRightState.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblFrontRightState.Location = new System.Drawing.Point(342, 0);
+            this.lblFrontRightState.Name = "lblFrontRightState";
+            this.lblFrontRightState.Size = new System.Drawing.Size(108, 40);
+            this.lblFrontRightState.TabIndex = 8;
+            this.lblFrontRightState.Text = "Unknown state";
+            this.lblFrontRightState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // pbFRR
+            // 
+            this.pbFRR.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pbFRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
+            this.pbFRR.Location = new System.Drawing.Point(342, 43);
+            this.pbFRR.Name = "pbFRR";
+            this.pbFRR.Size = new System.Drawing.Size(108, 301);
+            this.pbFRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbFRR.TabIndex = 0;
+            this.pbFRR.TabStop = false;
+            // 
+            // lblName4
+            // 
+            this.lblName4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblName4.Location = new System.Drawing.Point(342, 347);
+            this.lblName4.Name = "lblName4";
+            this.lblName4.Size = new System.Drawing.Size(108, 30);
+            this.lblName4.TabIndex = 9;
+            this.lblName4.Text = "Front Right";
+            this.lblName4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblPosFRR
+            // 
+            this.lblPosFRR.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblPosFRR.Location = new System.Drawing.Point(342, 377);
+            this.lblPosFRR.Name = "lblPosFRR";
+            this.lblPosFRR.Size = new System.Drawing.Size(108, 20);
+            this.lblPosFRR.TabIndex = 10;
+            this.lblPosFRR.Text = "-";
+            this.lblPosFRR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblTargetFRR
+            // 
+            this.lblTargetFRR.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblTargetFRR.Location = new System.Drawing.Point(342, 397);
+            this.lblTargetFRR.Name = "lblTargetFRR";
+            this.lblTargetFRR.Size = new System.Drawing.Size(108, 20);
+            this.lblTargetFRR.TabIndex = 11;
+            this.lblTargetFRR.Text = "-";
+            this.lblTargetFRR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnHome
             // 
@@ -956,6 +1019,7 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbRR)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbFRR)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -972,9 +1036,9 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label lblRearLeftState;
         private System.Windows.Forms.Button btnHome;
         private System.Windows.Forms.Button btnClose;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblName2;
+        private System.Windows.Forms.Label lblName1;
+        private System.Windows.Forms.Label lblName3;
         private System.Windows.Forms.Button btnPark;
         private vAzhureRacingAPI.VAzhureSliderControl sliderSpeed;
         private vAzhureRacingAPI.VAzhureSwitchButton chkEnabled;
@@ -1024,5 +1088,10 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label lblLinearity;
         private System.Windows.Forms.ToolTip toolTips;
         private System.Windows.Forms.Button btnTestSpeed;
+        private System.Windows.Forms.Label lblFrontRightState;
+        private System.Windows.Forms.PictureBox pbFRR;
+        private System.Windows.Forms.Label lblName4;
+        private System.Windows.Forms.Label lblPosFRR;
+        private System.Windows.Forms.Label lblTargetFRR;
     }
 }

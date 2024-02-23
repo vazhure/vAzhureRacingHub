@@ -1,6 +1,7 @@
 ﻿using rFactor2plugin.rFactor2Data;
 using System;
 using System.IO.MemoryMappedFiles;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,7 +16,7 @@ namespace rFactor2plugin
         readonly byte[] scData = new byte[rF2Scoring.Length()];
         readonly byte[] dataExt = new byte[rF2Extended.Length()];
 
-        readonly RFactor2GamePlugin gamePlugin = null;
+        readonly GamePlugin[] gamePlugins = null;
         TelemetryDataSet dataSet = null;
 
         const int cThreadInterval = 10; // ms
@@ -28,10 +29,10 @@ namespace rFactor2plugin
         public bool SpeakBestLap { get; set; } = false;
 
         private readonly DeltaBest lap_delta = null;
-        public RF2Listener(RFactor2GamePlugin game, IVAzhureRacingApp app)
+        public RF2Listener(GamePlugin[] games, IVAzhureRacingApp app)
         {
-            gamePlugin = game;
-            dataSet = new TelemetryDataSet(game);
+            gamePlugins = games;
+            dataSet = new TelemetryDataSet(games.FirstOrDefault() as IGamePlugin);
             lap_delta = new DeltaBest();
 
             lap_delta.OnBestLap += delegate (object sender, EventArgs e)
@@ -44,8 +45,16 @@ namespace rFactor2plugin
         private bool bGameRunning = false;
         public override void UserFunc()
         {
-            if (gamePlugin.IsRunning && Enabled)
+            GamePlugin gamePlugin = gamePlugins.Where(o => o.Running).FirstOrDefault();
+
+            if (gamePlugin != null && Enabled)
             {
+                if (gamePlugin is IGamePlugin game)
+                {
+                    if (dataSet.GamePlugin != game)
+                        dataSet = new TelemetryDataSet(game);
+                }
+
                 if (!bGameRunning)
                 {
                     bGameRunning = true;
@@ -375,7 +384,7 @@ namespace rFactor2plugin
                             if (!bEmptyTelemetry)
                             {
                                 bEmptyTelemetry = true;
-                                dataSet = new TelemetryDataSet(gamePlugin);
+                                dataSet = new TelemetryDataSet(gamePlugin as IGamePlugin);
                                 gamePlugin.NotifyTelemetry(dataSet);
                                 Thread.Sleep(cThreadInterval * 10); // Not too fast.. Processor high load
                             }

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
 
@@ -11,33 +12,44 @@ namespace MotionPlatform3
     public partial class SettingsForm : MovableForm
     {
         readonly Plugin _plugin;
-        readonly Timer timer = new Timer();
 
         readonly BackgroundWorker testWorker;
+        readonly BackgroundWorker stateWorker;
         public SettingsForm(Plugin plugin)
         {
             _plugin = plugin;
+            oldMode = plugin.settings.mode;
             InitializeComponent();
-            plugin.OnAxisStateChanged += Plugin_OnAxisStateChanged;
-            plugin.OnDisconnected += delegate (object sender, EventArgs e)
-            {
-                Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(10, _plugin.FrontAxisState));
-                Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(11, _plugin.RearLeftAxisState));
-                Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(12, _plugin.RearRightAxisState));
-                if (testWorker.IsBusy)
-                    testWorker.CancelAsync();
-            };
-            plugin.OnConnected += delegate (object sender, EventArgs e)
-             {
-                 timer.Start();
-             };
-
-            _plugin.App.OnDeviceArrival += Application_OnDeviceArrival;
-            _plugin.App.OnDeviceRemoveComplete += Application_OnDeviceRemoveComplete;
 
             testWorker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             testWorker.DoWork += TestWorker_DoWork;
             testWorker.RunWorkerCompleted += TestWorker_RunWorkerCompleted;
+
+            stateWorker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            stateWorker.DoWork += delegate
+            {
+                while (!stateWorker.CancellationPending)
+                {
+                    try
+                    {
+                        if (_plugin.Status == DeviceStatus.Connected)
+                            _plugin.RequestState();
+                    }
+                    catch { }
+                    Thread.Sleep(100);
+                }
+            };
+        }
+
+        private void Plugin_OnDisconnected(object sender, EventArgs e)
+        {
+            Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(10, _plugin.FrontAxisState));
+            Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(11, _plugin.RearLeftAxisState));
+            Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(12, _plugin.RearRightAxisState));
+            Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(13, _plugin.RearRightAxisState));
+            if (testWorker.IsBusy)
+                testWorker.CancelAsync();
+            Close();
         }
 
         private void Application_OnDeviceRemoveComplete(object sender, DeviceChangeEventsArgs e)
@@ -48,8 +60,8 @@ namespace MotionPlatform3
         private void Application_OnDeviceArrival(object sender, DeviceChangeEventsArgs e)
         {
             InitComPorts();
-         
-            if (MessageBox.Show(this, "Use a connected device?", $"New Device ({e.Port})", MessageBoxButtons.YesNo) == DialogResult.Yes)
+
+            if (!_plugin.IsConnected && MessageBox.Show(this, "Use a connected device?", $"New Device ({e.Port})", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 if (comboComPort.FindString(e.Port) is int t && t > 0)
                 {
@@ -67,16 +79,25 @@ namespace MotionPlatform3
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            try
-            {
-                testWorker.CancelAsync();
-            }
-            catch { }
+
+            _plugin.OnAxisStateChanged -= Plugin_OnAxisStateChanged;
+            _plugin.OnDisconnected -= Plugin_OnDisconnected;
+            _plugin.App.OnDeviceArrival -= Application_OnDeviceArrival;
+            _plugin.App.OnDeviceRemoveComplete -= Application_OnDeviceRemoveComplete;
+
+            testWorker?.CancelAsync();
+            stateWorker?.CancelAsync();
         }
+
+        MODE oldMode = MODE.Run;
 
         private void TestWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            btnTestSpeed.Text = "TEST";
+            BeginInvoke((Action)delegate
+            {
+                btnTestSpeed.Text = "TEST";
+                _plugin.settings.mode = oldMode;
+            });
         }
 
         private void TestWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -94,7 +115,7 @@ namespace MotionPlatform3
                 {
                     TimeSpan ts = DateTime.Now - dtStart;
 
-                    double heave = 0.5*Math.Sin(Math.PI * (ts.TotalMilliseconds / 2000));
+                    double heave = 0.5 * Math.Sin(Math.PI * (ts.TotalMilliseconds / 2000));
 
                     try
                     {
@@ -149,9 +170,13 @@ namespace MotionPlatform3
                 sliderRoll.Value = _plugin.settings.RollCoefficient;
             }
             catch { }
-            timer.Interval = 100;
-            timer.Tick += Timer_Tick;
-            timer.Start();
+
+            _plugin.OnAxisStateChanged += Plugin_OnAxisStateChanged;
+            _plugin.OnDisconnected += Plugin_OnDisconnected;
+            _plugin.App.OnDeviceArrival += Application_OnDeviceArrival;
+            _plugin.App.OnDeviceRemoveComplete += Application_OnDeviceRemoveComplete;
+
+            stateWorker.RunWorkerAsync();
         }
 
         private void InitComPorts()
@@ -179,13 +204,7 @@ namespace MotionPlatform3
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            timer.Stop();
             base.OnClosing(e);
-        }
-
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            _plugin.RequestState();
         }
 
         private void Plugin_OnAxisStateChanged(object sender, Plugin.AxisStateChanged e)
@@ -244,6 +263,16 @@ namespace MotionPlatform3
                             lblPosRR.Text = pos;
                             lblTargetRR.Text = target;
                             toolTips.SetToolTip(pbRR, state);
+                        }
+                        break;
+                    case 13:
+                        {
+                            lblFrontRightState.Text = text;
+                            lblFrontRightState.BackColor = color;
+                            lblFrontRightState.ForeColor = textClr;
+                            lblPosFRR.Text = pos;
+                            lblTargetFRR.Text = target;
+                            toolTips.SetToolTip(pbFRR, state);
                         }
                         break;
                 }
@@ -346,7 +375,11 @@ namespace MotionPlatform3
             if (testWorker.IsBusy)
                 testWorker.CancelAsync();
             else
+            {
+                oldMode = _plugin.settings.mode;
+                _plugin.settings.mode = MODE.Test;
                 testWorker.RunWorkerAsync();
+            }
         }
 
         Label mouseControl = null;
@@ -354,8 +387,13 @@ namespace MotionPlatform3
 
         private void OnLabelMouseDown(object sender, MouseEventArgs e)
         {
-            mouseControl = sender as Label;
-            ptDown = e.Location;
+            if (_plugin.settings.mode != MODE.Test)
+            {
+                mouseControl = sender as Label;
+                ptDown = e.Location;
+                oldMode = _plugin.settings.mode;
+                _plugin.settings.mode = MODE.Test;
+            }
         }
 
         private void OnLabelMouseMove(object sender, MouseEventArgs e)
@@ -388,6 +426,7 @@ namespace MotionPlatform3
 
         private void OnLabelMouseUp(object sender, MouseEventArgs e)
         {
+            _plugin.settings.mode = oldMode;
             switch (mouseControl?.Name)
             {
                 case "labelHeave":
