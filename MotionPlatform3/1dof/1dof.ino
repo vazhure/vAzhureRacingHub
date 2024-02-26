@@ -1,6 +1,6 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2024-02-10
+// version from 2024-02-24
 
 //#define DEBUG
 // Board: STM32F103C8T6 4 pcs (master + 3 slave)
@@ -10,7 +10,7 @@
 
 // Uncomment this line to flash MASTER device
 // Comment this line to flash SLAVE devices
-#define I2CMASTER
+//#define I2CMASTER
 
 // Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
@@ -23,14 +23,14 @@
 #define SLAVE_ADDR_FR 13  // Front RIGHT
 
 #define SLAVE_FIRST SLAVE_ADDR_FL
-#define SLAVE_LAST SLAVE_FIRST + LINEAR_ACTUATORS - 1
+#define SLAVE_LAST (SLAVE_FIRST + LINEAR_ACTUATORS - 1)
 
 #ifndef I2CMASTER
 // Uncomment a single line with desired Address to flash SLAVE device
-#define SLAVE_ADDR SLAVE_ADDR_FR
+//#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-//#define SLAVE_ADDR SLAVE_ADDR_FL
+#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -202,7 +202,6 @@ void loop() {
       case COMMAND::CMD_DISABLE:
       case COMMAND::CMD_CLEAR_ALARM:
         {
-
           for (int t = 0; t < LINEAR_ACTUATORS; t++) {
             if (pccmd.data[t] == 1)
               TransmitCMD(SLAVE_FIRST + t, pccmd.cmd, 0);
@@ -320,10 +319,12 @@ void receiveEvent(int size) {
   if (size >= 5 && Wire.readBytes(&cmd, 1) == 1 && Wire.readBytes((uint8_t*)&data, sizeof(uint32_t)) == sizeof(uint32_t)) {
     switch (cmd) {
       case COMMAND::CMD_HOME:
-        mode = MODE::HOMEING;
-        currentPos = 0;
-        targetPos = MAX_POS;
-        bHomed = false;
+        if (mode != MODE::HOMEING;) {
+          mode = MODE::HOMEING;
+          currentPos = 0;
+          targetPos = MAX_POS;
+          bHomed = false;
+        }
         break;
       case COMMAND::CMD_PARK:
         if (bHomed) {
@@ -331,7 +332,8 @@ void receiveEvent(int size) {
         }
         break;
       case COMMAND::CMD_MOVE:
-        targetPos = data;
+        if (mode == MODE::READY)
+          targetPos = data;
         break;
       case COMMAND::CMD_CLEAR_ALARM:
       case COMMAND::CMD_ENABLE:
