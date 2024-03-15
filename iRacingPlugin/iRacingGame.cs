@@ -100,6 +100,8 @@ namespace iRacingPlugin
                 dataSet.SessionInfo.TrackLength = length * 1000f;
 
             carIdx = wrapper.Data.SessionInfo.DriverInfo.DriverCarIdx;
+            dataSet.CarData.CarName = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarScreenName;
+            dataSet.CarData.CarClass = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarClassShortName;
             dataSet.CarData.DriverName = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].DivisionName;
             dataSet.CarData.CarNumber = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarNumber;
             dataSet.CarData.CarClass = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarClassShortName;
