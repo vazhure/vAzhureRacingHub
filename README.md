@@ -13,6 +13,7 @@ Supported Game Titles:
 * Dirt Rally 2
 * iRacing
 * KartKraft
+* Kart Racing Pro
 * Le Mans Ultimate
 * RaceRoom Racing Experience
 * rFactor 2
