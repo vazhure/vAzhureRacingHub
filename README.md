@@ -21,8 +21,13 @@ Supported Game Titles:
 * BeamNG.Drive
 
 WIP:
+* Automobilista 1
+* Grid 2019
 * F1 2018
 * F1 2019
 * F1 2020
+* Richard Burn Rally
+* rFactor 1
+* Tracmania
 
 My Discord: https://discord.gg/ynHCkrsmMA
