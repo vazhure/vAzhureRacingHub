@@ -28,6 +28,6 @@ WIP:
 * F1 2020
 * Richard Burn Rally
 * rFactor 1
-* Tracmania
+* Trackmania
 
 My Discord: https://discord.gg/ynHCkrsmMA
