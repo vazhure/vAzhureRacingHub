@@ -115,7 +115,9 @@ namespace MotionPlatform3
                 {
                     TimeSpan ts = DateTime.Now - dtStart;
 
-                    double heave = 0.5 * Math.Sin(Math.PI * (ts.TotalMilliseconds / 2000));
+                    double amp = sliderOveralEffects.Value / 100.0;
+
+                    double heave = amp * Math.Sin(Math.PI * (ts.TotalMilliseconds / 2000));
 
                     try
                     {
