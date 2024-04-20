@@ -11,6 +11,7 @@ Supported Game Titles:
 * Dirt 4
 * Dirt Rally
 * Dirt Rally 2
+* EA Sports WRC
 * iRacing
 * KartKraft
 * Kart Racing Pro
