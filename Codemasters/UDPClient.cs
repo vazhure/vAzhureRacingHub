@@ -1,6 +1,8 @@
 ﻿using Codemasters.Structs;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using vAzhureRacingAPI;
 
 namespace Codemasters
@@ -18,15 +20,74 @@ namespace Codemasters
         {
             gameid = id;
             dataset = new TelemetryDataSet(game);
-            structSize = Marshal.SizeOf(typeof(DIRT_4_DATA_MODE3));
+            structSize = id == GamePlugin.CodemastersGame.EAWRC ? Marshal.SizeOf(typeof(WRC_DATA)) : Marshal.SizeOf(typeof(DIRT_4_DATA_MODE3));
         }
 
         private float _vY = 0;
         private float _acc = 0;
         private DateTime _tm = DateTime.Now;
+        //readonly StringBuilder sb = new StringBuilder();
+
+        //public void Finish()
+        //{
+        //    if (gameid == GamePlugin.CodemastersGame.EAWRC)
+        //    {
+        //        if (sb.Length > 0)
+        //        {
+        //            string file_name = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", "WRC", "telemetry.csv");
+        //            File.WriteAllText(file_name, sb.ToString());
+        //        }
+        //    }
+        //}
 
         public override void OnDataReceived(ref byte[] bytes)
         {
+            if (gameid == GamePlugin.CodemastersGame.EAWRC)
+            {
+                if (bytes?.Length >= structSize)
+                {
+                    WRC_DATA data = Marshalizable<WRC_DATA>.FromBytes(bytes);
+
+                    AMCarData carData = dataset.CarData;
+                    AMSessionInfo sessionInfo = dataset.SessionInfo;
+                    AMMotionData aMMotionData = dataset.CarData.MotionData;
+
+                    carData.Gear = (short)(data.vehicle_gear_index == data.vehicle_gear_index_reverse ? 0 : (data.vehicle_gear_index + 1));
+                    carData.MaxRPM = data.vehicle_engine_rpm_max;
+                    carData.RPM = (uint)(data.vehicle_engine_rpm_current);
+                    carData.Speed = data.vehicle_speed * 3.6f; // meters per second -> km per hour
+                    carData.Distance = data.stage_current_distance;
+
+                    sessionInfo.CurrentLapTime = (int)(data.stage_current_time * 1000.0f);
+                    sessionInfo.CurrentDelta = (int)(data.game_delta_time * 1000.0f);
+                    sessionInfo.TrackLength = data.stage_length;
+
+                    aMMotionData.Heave = data.vehicle_acceleration_y / (9.81f * (float)Math.PI);
+
+                    double x = data.vehicle_acceleration_x * data.vehicle_roll_z - data.vehicle_acceleration_z * data.vehicle_roll_x;
+                    double y = data.vehicle_acceleration_x * data.vehicle_roll_x + data.vehicle_acceleration_z * data.vehicle_roll_z;
+
+                    aMMotionData.Sway = (float)(y / (9.81 * Math.PI));
+                    aMMotionData.Surge = -(float)(x / (9.81 * Math.PI));
+
+                    aMMotionData.Pitch = data.vehicle_pitch_y;
+                    aMMotionData.Roll = data.vehicle_roll_y;
+
+                    carData.Throttle = data.vehicle_throttle;
+                    carData.Brake = data.vehicle_brake;
+                    carData.Clutch = data.vehicle_clutch;
+
+                    //sb.AppendLine($"{data.vehicle_acceleration_x:0.000};{data.vehicle_acceleration_y:0.000};{data.vehicle_acceleration_z:0.000};" +
+                    //    $"{data.vehicle_pitch_x:0.000};{data.vehicle_pitch_y:0.000};{data.vehicle_pitch_z:0.000};" +
+                    //    $"{data.vehicle_roll_x:0.000};{data.vehicle_roll_y:0.000};{data.vehicle_roll_z:0.000};" +
+                    //    $"{data.vehicle_yaw_x:0.000};{data.vehicle_yaw_y:0.000};{data.vehicle_yaw_z:0.000}");
+
+                    OnDataArrived?.Invoke(this, new TelemetryUpdatedEventArgs(dataset));
+                }
+
+                return;
+            }
+
             if (bytes?.Length >= structSize)
             {
                 try
@@ -34,7 +95,7 @@ namespace Codemasters
                     TimeSpan ts = DateTime.Now - _tm;
                     _tm = DateTime.Now;
 
-                    DIRT_4_DATA_MODE3 data = DIRT_4_DATA_MODE3.FromBytes(bytes);
+                    DIRT_4_DATA_MODE3 data = Marshalizable<DIRT_4_DATA_MODE3>.FromBytes(bytes);
 
                     AMCarData carData = dataset.CarData;
                     AMSessionInfo sessionInfo = dataset.SessionInfo;

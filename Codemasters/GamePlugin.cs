@@ -25,6 +25,7 @@ namespace Codemasters
                     case CodemastersGame.DIRTRALLY: return "DiRT Rally";
                     case CodemastersGame.DIRTRALLY20: return "DiRT Rally 2.0";
                     case CodemastersGame.WRCG: return "WRC Generations";
+                    case CodemastersGame.EAWRC: return "EA SPORTS WRC";
                 }
                 return "error";
             }
@@ -41,6 +42,7 @@ namespace Codemasters
                     case CodemastersGame.DIRTRALLY: return 310560U;
                     case CodemastersGame.DIRTRALLY20: return 690790U;
                     case CodemastersGame.WRCG: return 1953520U;
+                    case CodemastersGame.EAWRC: return 1849250U;
                 }
                 return 0U;
             }
@@ -57,6 +59,7 @@ namespace Codemasters
                     case CodemastersGame.DIRTRALLY: return new string[] { "drt" };
                     case CodemastersGame.DIRTRALLY20: return new string[] { "dirtrally2" };
                     case CodemastersGame.WRCG: return new string[] { "WRCG" };
+                    case CodemastersGame.EAWRC: return new string[] { "wrc" };
                 }
                 return new string[] { };
             }
@@ -73,7 +76,7 @@ namespace Codemasters
         public event EventHandler OnGameStateChanged;
         public event EventHandler OnGameIconChanged;
 
-        public enum CodemastersGame { DIRT4, DIRT5, DIRTRALLY, DIRTRALLY20, WRCG };
+        public enum CodemastersGame { DIRT4, DIRT5, DIRTRALLY, DIRTRALLY20, WRCG, EAWRC };
         public GamePlugin(CodemastersGame game)
         {
             _game = game;
@@ -121,6 +124,7 @@ namespace Codemasters
                 case CodemastersGame.DIRTRALLY: return Properties.Resources.drt_rally;
                 case CodemastersGame.DIRTRALLY20: return Properties.Resources.dirtrally2;
                 case CodemastersGame.WRCG: return Properties.Resources.WRCG;
+                case CodemastersGame.EAWRC: return Properties.Resources.eawrc;
             }
         }
 
@@ -246,6 +250,7 @@ namespace Codemasters
             try
             {
                 monitor?.Stop();
+                //_client?.Finish();
                 _client?.Stop();
             }
             catch { }

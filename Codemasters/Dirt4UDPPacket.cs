@@ -115,20 +115,6 @@ namespace Codemasters.Structs
         public float total_laps;
         public float track_length;
         public float last_lap_time;
-
-        public static DIRT_4_DATA_MODE2 FromBytes(byte[] data)
-        {
-            DIRT_4_DATA_MODE2 d4 = new DIRT_4_DATA_MODE2();
-            try
-            {
-                GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                d4 = (DIRT_4_DATA_MODE2)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(DIRT_4_DATA_MODE2));
-                h.Free();
-            }
-            catch { }
-
-            return d4;
-        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -140,7 +126,7 @@ namespace Codemasters.Structs
         /// Current lap time in seconds
         /// </summary>
         [MarshalAs(UnmanagedType.R4)]
-        public float lap_time; 
+        public float lap_time;
         [MarshalAs(UnmanagedType.R4)]
         public float lap_distance;
         [MarshalAs(UnmanagedType.R4)]
@@ -149,7 +135,7 @@ namespace Codemasters.Structs
         /// World space position (X, Y, Z)
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
-        public float [] position;
+        public float[] position;
         /// <summary>
         /// Car speed in Meters per-second
         /// </summary>
@@ -159,17 +145,17 @@ namespace Codemasters.Structs
         /// Velocity in world space (X, Y, Z)
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
-        public float [] velocity;
+        public float[] velocity;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
-        public float [] roll;
+        public float[] roll; //left_dir
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
-        public float [] pitch;
+        public float[] pitch; //forward_dir
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 4)]
-        public float [] suspension_position;
+        public float[] suspension_position;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 4)]
-        public float [] suspension_velocity;
+        public float[] suspension_velocity;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 4)]
-        public float [] wheel_patch_speed;
+        public float[] wheel_patch_speed;
         /// <summary>
         /// Throttle pedal position
         /// </summary>
@@ -239,12 +225,12 @@ namespace Codemasters.Structs
         /// brakes temperature (centigrade)
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 4)]
-        public float [] brake_temp;
+        public float[] brake_temp;
         /// <summary>
         /// wheels pressure PSI
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 4)]
-        public float [] tyre_pressure;
+        public float[] tyre_pressure;
         [MarshalAs(UnmanagedType.R4)]
         public float laps_completed;
         [MarshalAs(UnmanagedType.R4)]
@@ -268,19 +254,118 @@ namespace Codemasters.Structs
         /// </summary>
         [MarshalAs(UnmanagedType.R4)]
         public float max_gears;
+    }
 
-        public static DIRT_4_DATA_MODE3 FromBytes(byte[] data)
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    struct WRC_DATA
+    {
+        public long packet_uid;
+        public float game_total_time;
+        public float game_delta_time;
+        public long game_frame_count;
+        public float shiftlights_fraction;
+        public float shiftlights_rpm_start;
+        public float shiftlights_rpm_end;
+        public byte shiftlights_rpm_valid;
+        public byte vehicle_gear_index;
+        public byte vehicle_gear_index_neutral;
+        public byte vehicle_gear_index_reverse;
+        public byte vehicle_gear_maximum;
+        public float vehicle_speed;
+        public float vehicle_transmission_speed;
+        public float vehicle_position_x;
+        public float vehicle_position_y;
+        public float vehicle_position_z;
+        public float vehicle_velocity_x;
+        public float vehicle_velocity_y;
+        public float vehicle_velocity_z;
+        public float vehicle_acceleration_x;
+        public float vehicle_acceleration_y;
+        public float vehicle_acceleration_z;
+        public float vehicle_roll_x;
+        public float vehicle_roll_y;
+        public float vehicle_roll_z;
+        public float vehicle_pitch_x;
+        public float vehicle_pitch_y;
+        public float vehicle_pitch_z;
+        public float vehicle_yaw_x;
+        public float vehicle_yaw_y;
+        public float vehicle_yaw_z;
+        public float vehicle_hub_position_bl;
+        public float vehicle_hub_position_br;
+        public float vehicle_hub_position_fl;
+        public float vehicle_hub_position_fr;
+        public float vehicle_hub_velocity_bl;
+        public float vehicle_hub_velocity_br;
+        public float vehicle_hub_velocity_fl;
+        public float vehicle_hub_velocity_fr;
+        public float vehicle_cp_forward_speed_bl;
+        public float vehicle_cp_forward_speed_br;
+        public float vehicle_cp_forward_speed_fl;
+        public float vehicle_cp_forward_speed_fr;
+        public float vehicle_brake_temperature_bl;
+        public float vehicle_brake_temperature_br;
+        public float vehicle_brake_temperature_fl;
+        public float vehicle_brake_temperature_fr;
+        public float vehicle_engine_rpm_max;
+        public float vehicle_engine_rpm_idle;
+        public float vehicle_engine_rpm_current;
+        public float vehicle_throttle;
+        public float vehicle_brake;
+        public float vehicle_clutch;
+        public float vehicle_steering;
+        public float vehicle_handbrake;
+        public float stage_current_time;
+        public double stage_current_distance;
+        public double stage_length;
+    }
+
+    public struct Marshalizable<T> where T : new()
+    {
+        /// <summary>
+        /// Convert bytes to object T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        internal static T FromBytes(byte[] bytes)
         {
-            DIRT_4_DATA_MODE3 d4 = new DIRT_4_DATA_MODE3();
             try
             {
-                GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                d4 = (DIRT_4_DATA_MODE3)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(DIRT_4_DATA_MODE3));
-                h.Free();
+                GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                T stuff = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+                handle.Free();
+                return stuff;
             }
-            catch { }
+            catch
+            {
+                return default;
+            }
+        }
 
-            return d4;
+        /// <summary>
+        /// Convert object T to bytes
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="bytes"></param>
+        internal static void ToBytes(T obj, ref byte[] bytes)
+        {
+            GCHandle h = default;
+            try
+            {
+                h = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                Marshal.StructureToPtr<T>(obj, h.AddrOfPinnedObject(), false);
+            }
+            catch
+            {
+            }
+            finally
+            {
+                if (h.IsAllocated)
+                {
+                    h.Free();
+                }
+            }
         }
     }
 }
