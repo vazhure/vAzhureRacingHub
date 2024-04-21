@@ -1,7 +1,7 @@
 # vAzhureRacingHub
 Application for Sim Racing Games. Supporting plugins and external devices via Serial Port
 ![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/7ce0700b-066d-4681-a54e-31646424d08c)
-![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/7b188e8d-4314-4c0f-b754-9073ec5943b3)
+![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/854e9e48-29b4-4987-8002-dd5b09e4b3de)
 
 Supported Game Titles:
 * Assetto Corsa
