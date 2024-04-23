@@ -21,7 +21,7 @@ namespace BeamNG
             return true;
         }
 
-        BeamNGGame game = new BeamNGGame();
+        readonly BeamNGGame game = new BeamNGGame();
 
         public bool Initialize(IVAzhureRacingApp app)
         {
@@ -110,15 +110,14 @@ namespace BeamNG
                 {
                     StructBeamNG structBeamNG = StructBeamNG.FromBytes(bytes);
 
-                    dataSet.CarData.MotionData.Heave = structBeamNG.Heave;
-                    dataSet.CarData.MotionData.Sway = -structBeamNG.Sway;
-                    dataSet.CarData.MotionData.Surge = structBeamNG.Surge;
+                    dataSet.CarData.MotionData.Heave = structBeamNG.Heave / 100f;
+                    dataSet.CarData.MotionData.Sway = -structBeamNG.Sway / 100f;
+                    dataSet.CarData.MotionData.Surge = structBeamNG.Surge / 100f;
                     dataSet.CarData.MotionData.Pitch = structBeamNG.pitchPos;
                     dataSet.CarData.MotionData.Roll = structBeamNG.rollPos;
-                    dataSet.CarData.MotionData.Yaw = structBeamNG.yawPos;
+                    dataSet.CarData.MotionData.Yaw = structBeamNG.yawPos / (float)Math.PI;
                     dataSet.CarData.MotionData.Position = new double[] { structBeamNG.position[0], structBeamNG.position[1], structBeamNG.position[2] };
                     dataSet.CarData.MotionData.LocalVelocity = structBeamNG.velocity;
-
                 }
             }
             catch { }
