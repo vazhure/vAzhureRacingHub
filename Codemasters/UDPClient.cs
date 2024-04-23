@@ -50,6 +50,7 @@ namespace Codemasters
 
                     AMCarData carData = dataset.CarData;
                     AMSessionInfo sessionInfo = dataset.SessionInfo;
+                    AMWeatherData aMWeatherData = dataset.WeatherData;
                     AMMotionData aMMotionData = dataset.CarData.MotionData;
 
                     carData.Gear = (short)(data.vehicle_gear_index == data.vehicle_gear_index_reverse ? 0 : (data.vehicle_gear_index + 1));
@@ -57,18 +58,23 @@ namespace Codemasters
                     carData.RPM = (uint)(data.vehicle_engine_rpm_current);
                     carData.Speed = data.vehicle_speed * 3.6f; // meters per second -> km per hour
                     carData.Distance = data.stage_current_distance;
+                    carData.FuelLevel = 45;
+                    carData.FuelCapacity = 60;
 
                     sessionInfo.CurrentLapTime = (int)(data.stage_current_time * 1000.0f);
                     sessionInfo.CurrentDelta = (int)(data.game_delta_time * 1000.0f);
                     sessionInfo.TrackLength = data.stage_length;
+                    sessionInfo.SessionState = "Race";
+                    sessionInfo.Flag = "Green";
+                    sessionInfo.TotalLapsCount = 1;
 
-                    aMMotionData.Heave = data.vehicle_acceleration_y / (9.81f * (float)Math.PI);
+                    aMMotionData.Heave = data.vehicle_acceleration_y / 20f;
 
                     double x = data.vehicle_acceleration_x * data.vehicle_roll_z - data.vehicle_acceleration_z * data.vehicle_roll_x;
                     double y = data.vehicle_acceleration_x * data.vehicle_roll_x + data.vehicle_acceleration_z * data.vehicle_roll_z;
 
-                    aMMotionData.Sway = (float)(y / (9.81 * Math.PI));
-                    aMMotionData.Surge = -(float)(x / (9.81 * Math.PI));
+                    aMMotionData.Sway = (float)(y / 20.0);
+                    aMMotionData.Surge = -(float)(x / 20.0);
 
                     aMMotionData.Pitch = data.vehicle_pitch_y;
                     aMMotionData.Roll = data.vehicle_roll_y;
@@ -77,12 +83,37 @@ namespace Codemasters
                     carData.Brake = data.vehicle_brake;
                     carData.Clutch = data.vehicle_clutch;
 
+                    aMWeatherData.AmbientTemp = 21;
+                    aMWeatherData.TrackTemp = 21;
+
                     //sb.AppendLine($"{data.vehicle_acceleration_x:0.000};{data.vehicle_acceleration_y:0.000};{data.vehicle_acceleration_z:0.000};" +
                     //    $"{data.vehicle_pitch_x:0.000};{data.vehicle_pitch_y:0.000};{data.vehicle_pitch_z:0.000};" +
                     //    $"{data.vehicle_roll_x:0.000};{data.vehicle_roll_y:0.000};{data.vehicle_roll_z:0.000};" +
                     //    $"{data.vehicle_yaw_x:0.000};{data.vehicle_yaw_y:0.000};{data.vehicle_yaw_z:0.000}");
 
                     OnDataArrived?.Invoke(this, new TelemetryUpdatedEventArgs(dataset));
+                }
+                else
+                {
+                    AMCarData carData = dataset.CarData;
+                    AMSessionInfo sessionInfo = dataset.SessionInfo;
+                    AMMotionData aMMotionData = dataset.CarData.MotionData;
+
+                    aMMotionData.Heave = 0;
+                    aMMotionData.Sway = 0;
+                    aMMotionData.Surge = 0;
+                    aMMotionData.Pitch = 0;
+                    aMMotionData.Roll = 0;
+                    aMMotionData.Yaw = 0;
+
+                    carData.Throttle = 0;
+                    carData.Brake = 0;
+                    carData.Clutch = 0;
+                    carData.Gear = 1;
+                    carData.Steering = 0;
+                    carData.Speed = 0;
+                    carData.RPM = 0;
+                    sessionInfo.SessionState = "";
                 }
 
                 return;
@@ -115,6 +146,7 @@ namespace Codemasters
                     carData.Distance = data.lap_distance;
 
                     sessionInfo.Sector = (int)data.race_sector;
+                    sessionInfo.Flag = "Green";
                     //sessionInfo.CurrentSector1Time = (int)(data.sector_time_1 * 1000.0f);
                     //sessionInfo.CurrentSector2Time = (int)(data.sector_time_2 * 1000.0f);
 
