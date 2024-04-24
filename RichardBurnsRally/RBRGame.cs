@@ -16,7 +16,7 @@ namespace RichardBurnsRally
 
         readonly Icon gameIcon = Properties.Resources.RichardBurnsRally;
         string sCustomGameIcon = "";
-        string sExecutablePath = @"c:\RichardBurnsRally\RichardBurnsRally_SSE.exe";
+        string sExecutablePath = @"c:\Richard Burns Rally\RichardBurnsRally_SSE.exe";
 
         public string UserIconPath { get => sCustomGameIcon; set => sCustomGameIcon = value; }
         public string UserExecutablePath { get => sExecutablePath; set => sExecutablePath = value; }
