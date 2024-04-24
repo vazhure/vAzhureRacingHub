@@ -1,0 +1,3 @@
+Loaded Telemetry Config.
+Parsing file 'custom1.json'
+Loaded upd packet structure 'custom1'

@@ -65,24 +65,72 @@ namespace BeamNG
 
         readonly ProcessMonitor monitor;
         readonly int UdpPort = 4444;
+        readonly int UdpOutGaugePort = 4445;
 
         TelemetryDataSet dataSet = null;
+
+        readonly VAzhureUDPClient OutGaugeClient = new VAzhureUDPClient();
 
         public BeamNGGame()
         {
             monitor = new ProcessMonitor(ExecutableProcessName, 500);
+
+            OutGaugeClient.OnDataReceivedEvent += OutGaugeClient_OnDataReceivedEvent;
+
             monitor.OnProcessRunningStateChanged += delegate (object o, bool bRunning)
             {
                 if (bRunning)
                 {
                     dataSet = new TelemetryDataSet(this);
                     Run(UdpPort);
+                    OutGaugeClient.Run(UdpOutGaugePort);
                 }
                 else
+                {
                     Stop();
+                    OutGaugeClient.Stop();
+                }
                 OnGameStateChanged?.Invoke(this, new EventArgs());
             };
             monitor.Start();
+        }
+
+        private void OutGaugeClient_OnDataReceivedEvent(object sender, byte[] bytes)
+        {
+            //TODO:
+            if (bytes.Length < Marshal.SizeOf(typeof(OutGauge)))
+                return;
+
+            try
+            {
+                OutGauge outGauge = Marshalizable<OutGauge>.FromBytes(bytes);
+
+                AMCarData carData = dataSet.CarData;
+                AMSessionInfo sessionInfo = dataSet.SessionInfo;
+
+                sessionInfo.SessionState = "Race";
+                sessionInfo.Flag = "Green";
+                sessionInfo.TotalLapsCount = 1;
+                sessionInfo.CurrentLapTime = (int)outGauge.time;
+
+                carData.Gear = outGauge.gear;
+                carData.Clutch = outGauge.clutch;
+                carData.Throttle = outGauge.throttle;
+                carData.Brake = outGauge.brake;
+                carData.Speed = outGauge.speed * 3.6f;
+                carData.RPM = outGauge.rpm;
+                carData.FuelLevel = outGauge.fuel;
+                carData.FuelCapacity = 1;
+                carData.OilTemp = outGauge.oilTemp;
+                carData.OilPressure = outGauge.oilPressure;
+                carData.Electronics = ((OutGauge.OutGaugePack)outGauge.dashLights).HasFlag(OutGauge.OutGaugePack.DL_PITSPEED) ? CarElectronics.Limiter : CarElectronics.None;
+                carData.Electronics |= ((OutGauge.OutGaugePack)outGauge.dashLights).HasFlag(OutGauge.OutGaugePack.DL_FULLBEAM) ? CarElectronics.Headlight : CarElectronics.None;
+                carData.Electronics |= ((OutGauge.OutGaugePack)outGauge.dashLights).HasFlag(OutGauge.OutGaugePack.DL_ABS) ? CarElectronics.ABS : CarElectronics.None;
+                carData.Electronics |= ((OutGauge.OutGaugePack)outGauge.dashLights).HasFlag(OutGauge.OutGaugePack.DL_TC) ? CarElectronics.TCS : CarElectronics.None;
+                carData.DirectionsLight = ((OutGauge.OutGaugePack)outGauge.dashLights).HasFlag(OutGauge.OutGaugePack.DL_SIGNAL_L) ? DirectionsLight.Left : DirectionsLight.None;
+                carData.DirectionsLight |= ((OutGauge.OutGaugePack)outGauge.dashLights).HasFlag(OutGauge.OutGaugePack.DL_SIGNAL_R) ? DirectionsLight.Right : DirectionsLight.None;
+            }
+            catch { }
         }
 
         public Icon GetIcon()
@@ -108,7 +156,7 @@ namespace BeamNG
             {
                 if (bytes[0] == 'B' && bytes[1] == 'N' && bytes[2] == 'G' && bytes[3] == '1')
                 {
-                    StructBeamNG structBeamNG = StructBeamNG.FromBytes(bytes);
+                    StructBeamNG structBeamNG = Marshalizable<StructBeamNG>.FromBytes(bytes);
 
                     dataSet.CarData.MotionData.Heave = structBeamNG.Heave / 100f;
                     dataSet.CarData.MotionData.Sway = -structBeamNG.Sway / 100f;

@@ -7,7 +7,7 @@ namespace vAzhureRacingAPI
     public class VAzhureUDPClient
     {
         public event EventHandler OnConnectionError;
-        public event EventHandler<byte[]> OnDataRecievedEvent;
+        public event EventHandler<byte[]> OnDataReceivedEvent;
 
         private struct UdpState
         {
@@ -47,7 +47,7 @@ namespace vAzhureRacingAPI
 
         public virtual void OnDataReceived(ref byte[] bytes)
         {
-            OnDataRecievedEvent?.Invoke(this, bytes);
+            OnDataReceivedEvent?.Invoke(this, bytes);
         }
 
         private void OnUdpData(IAsyncResult result)

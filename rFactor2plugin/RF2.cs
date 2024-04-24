@@ -794,24 +794,6 @@ namespace rFactor2plugin
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = rFactor2Constants.MAX_MAPPED_VEHICLES)]
             public rF2VehicleTelemetry[] mVehicles;
 
-            /// <summary>
-            /// Make struct from byte array
-            /// </summary>
-            /// <param name="data">data bytes</param>
-            /// <returns>PC2SharedMemoryStruct</returns>
-            public static rF2Telemetry FromBytes(byte[] data)
-            {
-                rF2Telemetry pc2 = new rF2Telemetry();
-                try
-                {
-                    GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                    pc2 = (rF2Telemetry)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(rF2Telemetry));
-                    h.Free();
-                }
-                catch { }
-
-                return pc2;
-            }
 
             /// <summary>
             /// Returns length of structure in bytes
@@ -837,25 +819,6 @@ namespace rFactor2plugin
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = rFactor2Constants.MAX_MAPPED_VEHICLES)]
             public rF2VehicleScoring[] mVehicles;
-
-            /// <summary>
-            /// Make struct from byte array
-            /// </summary>
-            /// <param name="data">data bytes</param>
-            /// <returns>PC2SharedMemoryStruct</returns>
-            public static rF2Scoring FromBytes(byte[] data)
-            {
-                rF2Scoring pc2 = new rF2Scoring();
-                try
-                {
-                    GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                    pc2 = (rF2Scoring)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(rF2Scoring));
-                    h.Free();
-                }
-                catch { }
-
-                return pc2;
-            }
 
             /// <summary>
             /// Returns length of structure in bytes
@@ -1002,19 +965,6 @@ namespace rFactor2plugin
                 return Marshal.SizeOf(typeof(rF2Scoring));
             }
 
-            public static rF2Extended FromBytes(byte[] data)
-            {
-                rF2Extended ext = new rF2Extended();
-                try
-                {
-                    GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                    ext = (rF2Extended)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(rF2Extended));
-                    h.Free();
-                }
-                catch { }
-
-                return ext;
-            }
         }
     }
 }

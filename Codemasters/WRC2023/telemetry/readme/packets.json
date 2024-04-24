@@ -1,0 +1,29 @@
+{
+	"versions":
+	{
+		"schema": 1,
+		"data": 1
+	},
+	"packets": [
+		{
+			"id": "session_start",
+			"fourCC": "SESS"
+		},
+		{
+			"id": "session_update",
+			"fourCC": "SESU"
+		},
+		{
+			"id": "session_end",
+			"fourCC": "SESE"
+		},
+		{
+			"id": "session_pause",
+			"fourCC": "SESP"
+		},
+		{
+			"id": "session_resume",
+			"fourCC": "SESR"
+		}
+	]
+}

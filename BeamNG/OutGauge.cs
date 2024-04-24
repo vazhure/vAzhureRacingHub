@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 /// <summary>
 /// OutGauge UDP protocol
@@ -18,8 +19,8 @@ namespace BeamNG
         /// <summary>
         /// Car name // N/A, hardcoded to "beam"
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public char[] car;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
+        public string car;
         /// <summary>
         /// Info (see OG_x below)
         /// </summary>
@@ -83,13 +84,13 @@ namespace BeamNG
         /// <summary>
         /// Usually Fuel // N/A, hardcoded to ""
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public char[] display1;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+        public string display1;
         /// <summary>
         /// Usually Settings // N/A, hardcoded to ""
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public char[] display2;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+        public string display2;
         /// <summary>
         /// optional - only if OutGauge ID is specified
         /// </summary>
@@ -118,7 +119,8 @@ namespace BeamNG
         /// </summary>
         public const int OG_BAR = 32768;
 
-        public enum OutGaugePack : short
+        [Flags]
+        public enum OutGaugePack : ushort
         {
             DL_SHIFT = 1 << 0,            // - shift light
             DL_FULLBEAM = 1 << 1,         // - full beam

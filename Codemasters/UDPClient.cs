@@ -44,7 +44,7 @@ namespace Codemasters
         {
             if (gameid == GamePlugin.CodemastersGame.EAWRC)
             {
-                if (bytes?.Length >= structSize)
+                if (bytes?.Length == structSize)
                 {
                     WRC_DATA data = Marshalizable<WRC_DATA>.FromBytes(bytes);
 
@@ -95,25 +95,9 @@ namespace Codemasters
                 }
                 else
                 {
-                    AMCarData carData = dataset.CarData;
-                    AMSessionInfo sessionInfo = dataset.SessionInfo;
-                    AMMotionData aMMotionData = dataset.CarData.MotionData;
+                    dataset.LoadDefaults();
 
-                    aMMotionData.Heave = 0;
-                    aMMotionData.Sway = 0;
-                    aMMotionData.Surge = 0;
-                    aMMotionData.Pitch = 0;
-                    aMMotionData.Roll = 0;
-                    aMMotionData.Yaw = 0;
-
-                    carData.Throttle = 0;
-                    carData.Brake = 0;
-                    carData.Clutch = 0;
-                    carData.Gear = 1;
-                    carData.Steering = 0;
-                    carData.Speed = 0;
-                    carData.RPM = 0;
-                    sessionInfo.SessionState = "";
+                    OnDataArrived?.Invoke(this, new TelemetryUpdatedEventArgs(dataset));
                 }
 
                 return;

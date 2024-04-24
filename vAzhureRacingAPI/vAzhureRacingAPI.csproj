@@ -60,6 +60,7 @@
     <Compile Include="LedControl.Designer.cs">
       <DependentUpon>LedControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Marshalizable.cs" />
     <Compile Include="Math2.cs" />
     <Compile Include="MovableForm.cs">
       <SubType>Form</SubType>

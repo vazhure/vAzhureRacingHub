@@ -1,0 +1,405 @@
+{
+	"versions":
+	{
+		"schema": 1,
+		"data": 2
+	},
+	"channels": [
+		{
+			"id": "packet_4cc",
+			"type": "fourcc",
+			"units": "",
+			"description": "An automatic channel that exports the packet's 4CC code. This allows the use of packet headers to receive UDP on a single socket with reliable network connections."
+		},
+		{
+			"id": "packet_uid",
+			"type": "uint64",
+			"units": "count",
+			"description": "A rolling unique identifier for the current packet. Can be used to order and drop received packets."
+		},
+		{
+			"id": "shiftlights_fraction",
+			"type": "float32",
+			"units": "",
+			"description": "For shift lights, from 0 ('vehicle_engine_rpm_current'='shiftlights_rpm_start') to 1 ('vehicle_engine_rpm_current'='shiftlights_rpm_end')."
+		},
+		{
+			"id": "shiftlights_rpm_start",
+			"type": "float32",
+			"units": "revolution per minute",
+			"description": "Shift lights start at 'vehicle_engine_rpm_current' value."
+		},
+		{
+			"id": "shiftlights_rpm_end",
+			"type": "float32",
+			"units": "revolution per minute",
+			"description": "Shift lights end (i.e. optimal shift) at 'vehicle_engine_rpm_current' value."
+		},
+		{
+			"id": "shiftlights_rpm_valid",
+			"type": "boolean",
+			"units": "",
+			"description": "Are shift lights RPM data valid: 'vehicle_engine_rpm_current', 'shiftlights_rpm_start', 'shiftlights_rpm_end'"
+		},
+		{
+			"id": "vehicle_gear_index",
+			"type": "uint8",
+			"units": "",
+			"description": "Gear index or value of 'vehicle_gear_index_neutral' or 'vehicle_gear_index_reverse'"
+		},
+		{
+			"id": "vehicle_gear_index_neutral",
+			"type": "uint8",
+			"units": "",
+			"description": "'vehicle_gear_index' if gearbox in Neutral."
+		},
+		{
+			"id": "vehicle_gear_index_reverse",
+			"type": "uint8",
+			"units": "",
+			"description": "'vehicle_gear_index' if gearbox in Reverse."
+		},
+		{
+			"id": "vehicle_gear_maximum",
+			"type": "uint8",
+			"units": "",
+			"description": "Number of forward gears."
+		},
+		{
+			"id": "vehicle_speed",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Car body speed."
+		},
+		{
+			"id": "vehicle_transmission_speed",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Car speed at wheel/road due to transmission (for speedo use). NB. May differ from 'vehicle_speed'."
+		},
+		{
+			"id": "vehicle_position_x",
+			"type": "float32",
+			"units": "metre",
+			"description": "Car position X component, positive left."
+		},
+		{
+			"id": "vehicle_position_y",
+			"type": "float32",
+			"units": "metre",
+			"description": "Car position Y component, positive up."
+		},
+		{
+			"id": "vehicle_position_z",
+			"type": "float32",
+			"units": "metre",
+			"description": "Car position Z component, positive forward."
+		},
+		{
+			"id": "vehicle_velocity_x",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Car velocity X component, positive left."
+		},
+		{
+			"id": "vehicle_velocity_y",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Car velocity Y component, positive up."
+		},
+		{
+			"id": "vehicle_velocity_z",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Car velocity Z component, positive forward."
+		},
+		{
+			"id": "vehicle_acceleration_x",
+			"type": "float32",
+			"units": "metre per second squared",
+			"description": "Car acceleration X component, positive left."
+		},
+		{
+			"id": "vehicle_acceleration_y",
+			"type": "float32",
+			"units": "metre per second squared",
+			"description": "Car acceleration Y component, positive up."
+		},
+		{
+			"id": "vehicle_acceleration_z",
+			"type": "float32",
+			"units": "metre per second squared",
+			"description": "Car acceleration Z component, positive forward."
+		},
+		{
+			"id": "vehicle_left_direction_x",
+			"type": "float32",
+			"units": "",
+			"description": "Car left unit vector X component, positive left."
+		},
+		{
+			"id": "vehicle_left_direction_y",
+			"type": "float32",
+			"units": "",
+			"description": "Car left unit vector Y component, positive up."
+		},
+		{
+			"id": "vehicle_left_direction_z",
+			"type": "float32",
+			"units": "",
+			"description": "Car left unit vector Z component, positive forward."
+		},
+		{
+			"id": "vehicle_forward_direction_x",
+			"type": "float32",
+			"units": "",
+			"description": "Car forward unit vector X component, positive left."
+		},
+		{
+			"id": "vehicle_forward_direction_y",
+			"type": "float32",
+			"units": "",
+			"description": "Car forward unit vector Y component, positive up."
+		},
+		{
+			"id": "vehicle_forward_direction_z",
+			"type": "float32",
+			"units": "",
+			"description": "Car forward unit vector Z component, positive forward."
+		},
+		{
+			"id": "vehicle_up_direction_x",
+			"type": "float32",
+			"units": "",
+			"description": "Car up unit vector X component, positive left."
+		},
+		{
+			"id": "vehicle_up_direction_y",
+			"type": "float32",
+			"units": "",
+			"description": "Car up unit vector Y component, positive up."
+		},
+		{
+			"id": "vehicle_up_direction_z",
+			"type": "float32",
+			"units": "",
+			"description": "Car up unit vector Z component, positive forward."
+		},
+		{
+			"id": "vehicle_hub_position_bl",
+			"type": "float32",
+			"units": "metre",
+			"description": "Wheel hub height displacement, back left, positive up."
+		},
+		{
+			"id": "vehicle_hub_position_br",
+			"type": "float32",
+			"units": "metre",
+			"description": "Wheel hub height displacement, back right, positive up."
+		},
+		{
+			"id": "vehicle_hub_position_fl",
+			"type": "float32",
+			"units": "metre",
+			"description": "Wheel hub height displacement, front left, positive up."
+		},
+		{
+			"id": "vehicle_hub_position_fr",
+			"type": "float32",
+			"units": "metre",
+			"description": "Wheel hub height displacement, front right, positive up."
+		},
+		{
+			"id": "vehicle_hub_velocity_bl",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Wheel hub vertical velocity, back left, positive up."
+		},
+		{
+			"id": "vehicle_hub_velocity_br",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Wheel hub vertical velocity, back right, positive up."
+		},
+		{
+			"id": "vehicle_hub_velocity_fl",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Wheel hub vertical velocity, front left, positive up."
+		},
+		{
+			"id": "vehicle_hub_velocity_fr",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Wheel hub vertical velocity, front right, positive up."
+		},
+		{
+			"id": "vehicle_cp_forward_speed_bl",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Contact patch forward speed, back left."
+		},
+		{
+			"id": "vehicle_cp_forward_speed_br",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Contact patch forward speed, back right."
+		},
+		{
+			"id": "vehicle_cp_forward_speed_fl",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Contact patch forward speed, front left."
+		},
+		{
+			"id": "vehicle_cp_forward_speed_fr",
+			"type": "float32",
+			"units": "metre per second",
+			"description": "Contact patch forward speed, front right."
+		},
+		{
+			"id": "vehicle_brake_temperature_bl",
+			"type": "float32",
+			"units": "degree Celsius",
+			"description": "Brake temperature, back left."
+		},
+		{
+			"id": "vehicle_brake_temperature_br",
+			"type": "float32",
+			"units": "degree Celsius",
+			"description": "Brake temperature, back right."
+		},
+		{
+			"id": "vehicle_brake_temperature_fl",
+			"type": "float32",
+			"units": "degree Celsius",
+			"description": "Brake temperature, front left."
+		},
+		{
+			"id": "vehicle_brake_temperature_fr",
+			"type": "float32",
+			"units": "degree Celsius",
+			"description": "Brake temperature, front right."
+		},
+		{
+			"id": "vehicle_engine_rpm_max",
+			"type": "float32",
+			"units": "revolution per minute",
+			"description": "Engine rotation rate, maximum."
+		},
+		{
+			"id": "vehicle_engine_rpm_idle",
+			"type": "float32",
+			"units": "revolution per minute",
+			"description": "Engine rotation rate, at idle."
+		},
+		{
+			"id": "vehicle_engine_rpm_current",
+			"type": "float32",
+			"units": "revolution per minute",
+			"description": "Engine rotation rate, current."
+		},
+		{
+			"id": "vehicle_throttle",
+			"type": "float32",
+			"units": "",
+			"description": "Throttle pedal after assists and overrides, 0 (off) to 1 (full)."
+		},
+		{
+			"id": "vehicle_brake",
+			"type": "float32",
+			"units": "",
+			"description": "Brake pedal after assists and overrides, 0 (off) to 1 (full)."
+		},
+		{
+			"id": "vehicle_clutch",
+			"type": "float32",
+			"units": "",
+			"description": "Clutch pedal after assists and overrides, 0 (off) to 1 (full)."
+		},
+		{
+			"id": "vehicle_steering",
+			"type": "float32",
+			"units": "",
+			"description": "Steering after assists and overrides, -1 (full left) to 1 (full right)."
+		},
+		{
+			"id": "vehicle_handbrake",
+			"type": "float32",
+			"units": "",
+			"description": "Handbrake after assists and overrides, 0 (off) to 1 (full)."
+		},
+		{
+			"id": "game_total_time",
+			"type": "float32",
+			"units": "second",
+			"description": "Time spent in game since boot."
+		},
+		{
+			"id": "game_delta_time",
+			"type": "float32",
+			"units": "second",
+			"description": "Time spent since last frame."
+		},
+		{
+			"id": "game_frame_count",
+			"type": "uint64",
+			"units": "count",
+			"description": "Frame count in game since boot."
+		},
+		{
+			"id": "stage_current_time",
+			"type": "float32",
+			"units": "second",
+			"description": "Time spent on current stage."
+		},
+		{
+			"id": "stage_current_distance",
+			"type": "float64",
+			"units": "metre",
+			"description": "Distance reached on current stage."
+		},
+		{
+			"id": "stage_length",
+			"type": "float64",
+			"units": "metre",
+			"description": "Total length of current stage."
+		},
+		{
+			"id": "stage_shakedown",
+			"type": "boolean",
+			"units": "",
+			"description": "Is in a shakedown event."
+		},
+		{
+			"id": "vehicle_id",
+			"type": "uint16",
+			"units": "uid",
+			"description": "Vehicle unique identifier. See ids.json 'vehicles'."
+		},
+		{
+			"id": "vehicle_class_id",
+			"type": "uint16",
+			"units": "uid",
+			"description": "Vehicle class unique identifier. See ids.json 'vehicle_classes'."
+		},
+		{
+			"id": "vehicle_manufacturer_id",
+			"type": "uint16",
+			"units": "uid",
+			"description": "Vehicle manufacturer unique identifier. See ids.json 'vehicle_manufacturers'."
+		},
+		{
+			"id": "location_id",
+			"type": "uint16",
+			"units": "uid",
+			"description": "Location unique identifier. See ids.json 'locations'."
+		},
+		{
+			"id": "route_id",
+			"type": "uint16",
+			"units": "uid",
+			"description": "Route unique identifier. See ids.json 'routes'."
+		}
+	]
+}

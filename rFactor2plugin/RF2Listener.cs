@@ -73,9 +73,9 @@ namespace rFactor2plugin
                         viewStream.ReadAsync(data, 0, data.Length);
                         scViewStream.ReadAsync(scData, 0, scData.Length);
 
-                        var rf2data = rF2Telemetry.FromBytes(data);
-                        var rf2Scoring = rF2Scoring.FromBytes(scData);
-                        var rf2Ext = rF2Extended.FromBytes(dataExt);
+                        var rf2data = Marshalizable<rF2Telemetry>.FromBytes(data);
+                        var rf2Scoring = Marshalizable<rF2Scoring>.FromBytes(scData);
+                        var rf2Ext = Marshalizable<rF2Extended>.FromBytes(dataExt);
 
                         GetPlayerIndex(rf2Scoring, out int idx);
 

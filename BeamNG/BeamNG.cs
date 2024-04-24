@@ -77,19 +77,5 @@ namespace BeamNG
         {
             get => acceleration[1];
         }
-
-        public static StructBeamNG FromBytes(byte[] data)
-        {
-            StructBeamNG d4 = new StructBeamNG();
-            try
-            {
-                GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                d4 = (StructBeamNG)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(StructBeamNG));
-                h.Free();
-            }
-            catch { }
-
-            return d4;
-        }
     }
 }
