@@ -18,6 +18,7 @@ Supported Game Titles:
 * Le Mans Ultimate
 * RaceRoom Racing Experience
 * rFactor 2
+* Richard Burn Rally
 * WRC Generations
 * BeamNG.Drive
 
@@ -27,7 +28,6 @@ WIP:
 * F1 2018
 * F1 2019
 * F1 2020
-* Richard Burn Rally
 * rFactor 1
 * Trackmania
 
