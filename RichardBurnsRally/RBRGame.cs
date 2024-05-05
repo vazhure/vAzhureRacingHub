@@ -41,6 +41,7 @@ namespace RichardBurnsRally
         public RBRGame()
         {
             uDPClient.OnDataReceivedEvent += UDPClient_OnDataReceivedEvent;
+            uDPClient.OnTimeout += UDPClient_OnTimeout;
 
             monitor = new ProcessMonitor(ExecutableProcessName);
             monitor.OnProcessRunningStateChanged += delegate (object o, bool bRunning)
@@ -49,7 +50,7 @@ namespace RichardBurnsRally
                 if (bRunning)
                 {
                     dataSet = new TelemetryDataSet(this);
-                    uDPClient.Run(udpPort);
+                    uDPClient.Run(udpPort, 5000);
                 }
                 else
                 {
@@ -58,6 +59,12 @@ namespace RichardBurnsRally
                 OnGameStateChanged?.Invoke(this, new EventArgs());
             };
             monitor.Start();
+        }
+
+        private void UDPClient_OnTimeout(object sender, EventArgs e)
+        {
+            dataSet = new TelemetryDataSet(this);
+            OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
         }
 
         private void UDPClient_OnDataReceivedEvent(object sender, byte[] bytes)
@@ -78,13 +85,13 @@ namespace RichardBurnsRally
                 carData.Steering = data.control.steering;
                 carData.Speed = data.car.speed;
 
-                aMMotionData.Pitch = data.car.pitch/ 90f;
-                aMMotionData.Roll = data.car.roll / 90f;
+                aMMotionData.Pitch = data.car.pitch / 45f;
+                aMMotionData.Roll = data.car.roll / 45f;
                 aMMotionData.Yaw = data.car.yaw / 180f;
-                aMMotionData.Sway = -data.car.accelerations.sway / 9.81f;
-                aMMotionData.Surge = data.car.accelerations.surge / 9.81f;
-                aMMotionData.Heave = data.car.accelerations.heave / 9.81f;
-                //aMMotionData.Position = new double[] { data.car.positionX, data.car.positionY, data.car.positionZ };
+                aMMotionData.Sway = -data.car.accelerations.sway / 98.1f;
+                aMMotionData.Surge = data.car.accelerations.surge / 98.1f;
+                aMMotionData.Heave = data.car.accelerations.heave / 98.1f;
+                aMMotionData.Position = new double[] { data.car.positionX, data.car.positionY, data.car.positionZ };
 
                 carData.RPM = data.car.engine.rpm;
                 carData.MaxRPM = Math.Max(carData.RPM, carData.MaxRPM);
@@ -101,6 +108,8 @@ namespace RichardBurnsRally
 
         public void OnQuit()
         {
+            dataSet = new TelemetryDataSet(this);
+            OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
             monitor?.Stop();
         }
 
