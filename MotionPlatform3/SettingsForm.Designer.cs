@@ -462,6 +462,7 @@ namespace MotionPlatform3
             this.labelPitch.Size = new System.Drawing.Size(31, 13);
             this.labelPitch.TabIndex = 17;
             this.labelPitch.Text = "Pitch";
+            this.toolTips.SetToolTip(this.labelPitch, "Forward/backward");
             this.labelPitch.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
             this.labelPitch.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
             this.labelPitch.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
@@ -515,6 +516,7 @@ namespace MotionPlatform3
             this.labelRoll.Size = new System.Drawing.Size(25, 13);
             this.labelRoll.TabIndex = 21;
             this.labelRoll.Text = "Roll";
+            this.toolTips.SetToolTip(this.labelRoll, "Left/right");
             this.labelRoll.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
             this.labelRoll.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
             this.labelRoll.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
@@ -558,6 +560,7 @@ namespace MotionPlatform3
             this.labelHeave.Size = new System.Drawing.Size(39, 13);
             this.labelHeave.TabIndex = 25;
             this.labelHeave.Text = "Heave";
+            this.toolTips.SetToolTip(this.labelHeave, "Up/down");
             this.labelHeave.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
             this.labelHeave.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
             this.labelHeave.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
@@ -601,6 +604,7 @@ namespace MotionPlatform3
             this.label12.Size = new System.Drawing.Size(35, 13);
             this.label12.TabIndex = 29;
             this.label12.Text = "Surge";
+            this.toolTips.SetToolTip(this.label12, "Forward/backward");
             // 
             // lblSurge
             // 
@@ -641,6 +645,7 @@ namespace MotionPlatform3
             this.label14.Size = new System.Drawing.Size(33, 13);
             this.label14.TabIndex = 33;
             this.label14.Text = "Sway";
+            this.toolTips.SetToolTip(this.label14, "Left/right");
             // 
             // lblSway
             // 

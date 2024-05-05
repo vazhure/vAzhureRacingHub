@@ -159,7 +159,7 @@ namespace MotionPlatform3
 
             chkEnabled.Checked = _plugin.settings.Enabled;
 
-            lblGame.Text = _plugin.Telemetry?.GamePlugin?.Name;
+            lblGame.Text = _plugin.Telemetry?.GamePlugin?.Name ?? "";
 
             InitComPorts();
 
@@ -359,7 +359,7 @@ namespace MotionPlatform3
 
         private void BtnResetData_Click(object sender, EventArgs e)
         {
-            _plugin.ResetActiveGameData();
+            _plugin.RestoreActiveGameData();
         }
 
         private void ChkEnabled_OnSwitch(object sender, EventArgs e)
@@ -368,8 +368,15 @@ namespace MotionPlatform3
         }
 
         private void ChkCollect_OnSwitch(object sender, EventArgs e)
-        {
-            _plugin.settings.mode = chkCollect.Checked ? MODE.CollectingGameData : MODE.Run;
+        {            
+            if (chkCollect.Checked)
+            {
+                if (MessageBox.Show("Reset telemetry data and collect new data?", "Telemetry", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    _plugin.ResetActiveGameData();
+                _plugin.settings.mode = MODE.CollectingGameData;
+            }
+            else
+                _plugin.settings.mode = MODE.Run;
         }
 
         private void BtnTestSpeed_Click(object sender, EventArgs e)

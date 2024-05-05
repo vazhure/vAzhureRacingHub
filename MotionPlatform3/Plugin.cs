@@ -346,7 +346,11 @@ namespace MotionPlatform3
 
         private TelemetryDataSet tds = new TelemetryDataSet(null);
 
-        public TelemetryDataSet Telemetry => tds;
+        public TelemetryDataSet Telemetry
+        {
+            get => tds;
+            internal set => tds = value;
+        }
 
         public void OnTelemetry(IVAzhureRacingApp app, TelemetryDataSet data)
         {
@@ -417,16 +421,23 @@ namespace MotionPlatform3
                             }
                             else
                             {
-                                TimeSpan ts = DateTime.Now - _tm;
-                                if (ts.TotalSeconds > 1)
+                                if (plugin.Telemetry?.GamePlugin is IGamePlugin gamePlugin)
                                 {
-                                    plugin.ProcessIdle();
-                                }
-                                else
-                                {
-                                    plugin.ProcessTelemetry();
-                                    _tm = DateTime.Now;
-                                }
+                                    if (gamePlugin.IsRunning)
+                                    {
+                                        TimeSpan ts = DateTime.Now - _tm;
+                                        if (ts.TotalSeconds > 1)
+                                        {
+                                            plugin.ProcessIdle();
+                                        }
+                                        else
+                                        {
+                                            plugin.ProcessTelemetry();
+                                        }
+                                    }
+                                    else
+                                        plugin.Telemetry = null;
+                                }                                   
                             }
                         }
                     }
@@ -486,6 +497,13 @@ namespace MotionPlatform3
                 gd.Reset();
         }
 
+        internal void RestoreActiveGameData()
+        {
+            string name = tds?.GamePlugin?.Name;
+            if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
+                settings.gamesData.Remove(gd);
+        }
+
         KalmanFilter swayFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
         KalmanFilter surgeFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
         KalmanFilter heaveFilter = new KalmanFilter(1, 1, 0.05f, 1, 0.05f, 0.0f);
@@ -506,7 +524,7 @@ namespace MotionPlatform3
             float roll = 0;
             float sway = 0;
             float surge = 0;
-            float heave = heaveFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
+            float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
 
             int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max) :
                 (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
@@ -522,7 +540,7 @@ namespace MotionPlatform3
             if (!settings.Enabled)
                 return;
             float pitch = 0;
-            float roll = rollFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
+            float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
             float sway = 0;
             float surge = 0;
             float heave = 0;
@@ -540,7 +558,7 @@ namespace MotionPlatform3
         {
             if (!settings.Enabled)
                 return;
-            float pitch = pitchFilter.Filter((settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f));
+            float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
             float roll = 0;
             float sway = 0;
             float surge = 0;
@@ -569,6 +587,12 @@ namespace MotionPlatform3
                     float absHeave = Math.Max(Math.Abs(gd.minHeave), Math.Abs(gd.maxHeave));
                     float absSway = Math.Max(Math.Abs(gd.minSway), Math.Abs(gd.maxSway));
                     float absSurge = Math.Max(Math.Abs(gd.minSurge), Math.Abs(gd.maxSurge));
+
+                    absPitch = absPitch <= float.Epsilon ? 1 : absPitch;
+                    absRoll = absRoll <= float.Epsilon ? 1 : absRoll;
+                    absHeave = absHeave <= float.Epsilon ? 1 : absHeave;
+                    absSway = absSway <= float.Epsilon ? 1 : absSway;
+                    absSurge = absSurge <= float.Epsilon ? 1 : absSurge;
 
                     float overal = settings.OveralCoefficient / 100.0f;
                     float pitchAmount = settings.PitchCoefficient / 100.0f;
@@ -793,21 +817,6 @@ namespace MotionPlatform3
 
         public GameData()
         {
-        }
-
-        public GameData(string gameName)
-        {
-            GameName = gameName;
-            Reset();
-        }
-
-        public object Clone()
-        {
-            return MemberwiseClone();
-        }
-
-        public void Reset()
-        {
             maxABSVibration = 1;
             maxPitch = 1;
             maxRoll = 1;
@@ -823,6 +832,35 @@ namespace MotionPlatform3
             minSurge = -1;
             minSway = -1;
             minYaw = -1;
+        }
+
+        public GameData(string gameName): this()
+        {
+            GameName = gameName;
+        }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
+
+        public void Reset()
+        {
+            maxABSVibration = 0;
+            maxPitch = 0;
+            maxRoll = 0;
+            maxHeave = 0;
+            maxSurge = 0;
+            maxSway = 0;
+            maxYaw = 0;
+
+            minABSVibration = 0;
+            minPitch = 0;
+            minRoll = 0;
+            minHeave = 0;
+            minSurge = 0;
+            minSway = 0;
+            minYaw = 0;
         }
 
         public void Update(AMMotionData data)
@@ -891,7 +929,7 @@ namespace MotionPlatform3
         public bool Enabled { get; set; } = true;
         public int SpeedOverride { get; set; } = 100;
         public int Acceleration { get; set; } = 900;
-        public int MaxSpeed { get; set; } = 150;
+        public int MaxSpeed { get; set; } = 120;
         public int MinSpeed { get; set; } = 10;
         public int LowSpeedOverride { get; set; } = 40;
         public int PitchCoefficient { get; set; } = 100;
