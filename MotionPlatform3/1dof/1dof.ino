@@ -262,9 +262,9 @@ const uint8_t HOME_DIRECTION = HIGH;
 
 #define MIN_REVERSE_DELAY 6  // Delay between DIR and STEP signal on direction change, us
 
-#define MMPERSEC2DELAY(mmps) 1000000 / (STEPS_PER_REVOLUTIONS * mmps / MM_PER_REV)
+#define MMPERSEC2DELAY(mmps) 500000 / (STEPS_PER_REVOLUTIONS * mmps / MM_PER_REV)
 
-#define MAX_SPEED_MM_SEC 150
+#define MAX_SPEED_MM_SEC 120
 #define MIN_SPEED_MM_SEC 10
 #define SLOW_SPEED_MM_SEC 20
 #define DEFAULT_SPEED_MM_SEC 90
@@ -319,7 +319,7 @@ void receiveEvent(int size) {
   if (size >= 5 && Wire.readBytes(&cmd, 1) == 1 && Wire.readBytes((uint8_t*)&data, sizeof(uint32_t)) == sizeof(uint32_t)) {
     switch (cmd) {
       case COMMAND::CMD_HOME:
-        if (mode != MODE::HOMEING;) {
+        if (mode != MODE::HOMEING) {
           mode = MODE::HOMEING;
           currentPos = 0;
           targetPos = MAX_POS;
