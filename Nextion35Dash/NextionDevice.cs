@@ -329,6 +329,9 @@ namespace Nextion35Dash
 
             byte state = 0;
 
+            if (m_dataSet.CarData.ShiftUpRPM > 0 && m_dataSet.CarData.RPM >= m_dataSet.CarData.ShiftUpRPM)
+                return 0xFF;
+
             float t = m_dataSet.CarData.MaxRPM > 0 ? (float)m_dataSet.CarData.RPM / (float)m_dataSet.CarData.MaxRPM : 0;
             t = (t - 0.5f) * 9 / 0.5f;
 
@@ -511,6 +514,9 @@ namespace Nextion35Dash
 
                         if (settings.EnableLeds)
                         {
+                            if (currentLedProfile?.Game != m_dataSet.GamePlugin?.Name)
+                                currentLedProfile = null;
+
                             if (customLeds.Count > 0 && (currentLedProfile == null || !customLeds.Contains(currentLedProfile)))
                             {
                                 currentLedProfile = customLeds.Where(p => p.Game == m_dataSet.GamePlugin?.Name && p.Vechicle == carData.CarName).FirstOrDefault();
