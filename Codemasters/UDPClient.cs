@@ -28,17 +28,19 @@ namespace Codemasters
         private DateTime _tm = DateTime.Now;
         //readonly StringBuilder sb = new StringBuilder();
 
-        //public void Finish()
-        //{
-        //    if (gameid == GamePlugin.CodemastersGame.EAWRC)
-        //    {
-        //        if (sb.Length > 0)
-        //        {
-        //            string file_name = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", "WRC", "telemetry.csv");
-        //            File.WriteAllText(file_name, sb.ToString());
-        //        }
-        //    }
-        //}
+        public void Finish()
+        {
+            ////if (gameid == GamePlugin.CodemastersGame.EAWRC)
+            //{
+            //    if (sb.Length > 0)
+            //    {
+            //        string file_name = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", "WRC", "telemetry.csv");
+            //        File.WriteAllText(file_name, sb.ToString());
+            //    }
+            //}
+        }
+
+        float _last_laptime = -1;
 
         public override void OnDataReceived(ref byte[] bytes)
         {
@@ -175,29 +177,68 @@ namespace Codemasters
                     carData.Clutch = data.clutch_input;
                     carData.Steering = data.steering_input * (float)Math.PI;
 
+                    //sb.AppendLine($"{data.gforce_lateral:0.000};{data.gforce_longitudinal:0.000};" +
+                    //    $"{data.pitch[0]:0.000};{data.pitch[1]:0.000};{data.pitch[2]:0.000};" +
+                    //    $"{data.roll[0]:0.000};{data.roll[1]:0.000};{data.roll[2]:0.000};");
+
+                    float accZ = 0;
+
                     if (gameid == GamePlugin.CodemastersGame.WRCG)
                     {
-                        float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[2] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
+                        accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[2] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[2];
 
                         aMMotionData.Pitch = -data.pitch[2];
                         aMMotionData.Roll = data.roll[2];
-
-                        aMMotionData.Heave = _acc = accZ / (9.81f * (float)Math.PI);
-                        aMMotionData.Sway = -data.gforce_lateral / (9.81f * (float)Math.PI);
-                        aMMotionData.Surge = -data.gforce_longitudinal / (9.81f * (float)Math.PI);
                     }
                     else
                     {
-                        float accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[1] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
+                        accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[1] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[1];
 
                         aMMotionData.Pitch = data.pitch[1];
                         aMMotionData.Roll = -data.roll[1];
+                    }
 
-                        aMMotionData.Heave = _acc = accZ / (9.81f * (float)Math.PI);
-                        aMMotionData.Sway = data.gforce_lateral / (float)Math.PI;
-                        aMMotionData.Surge = data.gforce_longitudinal / (float)Math.PI;
+                    _acc = accZ;
+
+                    switch (gameid)
+                    {
+                        default:
+                            {
+                                aMMotionData.Heave = accZ / 98.1f;
+                                aMMotionData.Sway = data.gforce_lateral;
+                                aMMotionData.Surge = data.gforce_longitudinal;
+                            }
+                            break;
+                        case GamePlugin.CodemastersGame.DIRT4:
+                        case GamePlugin.CodemastersGame.DIRTRALLY20:
+                            {
+                                aMMotionData.Heave = accZ / 98.1f;
+                                aMMotionData.Sway = data.gforce_lateral / (float)Math.PI;
+                                aMMotionData.Surge = data.gforce_longitudinal / (float)Math.PI;
+                            }
+                            break;
+                        case GamePlugin.CodemastersGame.DIRTRALLY:
+                            {
+                                aMMotionData.Heave = accZ / 98.1f;
+                                aMMotionData.Sway = 0; // non correct data in gforce_lateral and gforce_longitudinal
+                                aMMotionData.Surge = 0;
+                            }
+                            break;
+                        case GamePlugin.CodemastersGame.WRCG:
+                            {
+                                aMMotionData.Heave = accZ / (9.81f * (float)Math.PI);
+                                aMMotionData.Sway = -data.gforce_lateral / (9.81f * (float)Math.PI);
+                                aMMotionData.Surge = -data.gforce_longitudinal / (9.81f * (float)Math.PI);
+                                if (_last_laptime != data.lap_time)
+                                {
+                                    _last_laptime = data.lap_time;
+                                }
+                                else if ((data.engine_rate + 100) <= data.idle_rpm)
+                                    dataset.CarData.MotionData = new AMMotionData(); // Replay ?
+                            }
+                            break;
                     }
 
                     carData.Tires = new AMTireData[]

@@ -250,7 +250,7 @@ namespace Codemasters
             try
             {
                 monitor?.Stop();
-                //_client?.Finish();
+                _client?.Finish();
                 _client?.Stop();
             }
             catch { }
