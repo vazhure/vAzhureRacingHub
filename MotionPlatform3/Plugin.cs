@@ -628,7 +628,7 @@ namespace MotionPlatform3
 
                     if (settings.ClipByRange)
                     {
-                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge + roll + sway, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) : 
+                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge + roll + sway, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) :
                             (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
                         posRL = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge + roll + sway, -overal, overal), -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
                         posRR = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge - roll - sway, -overal, overal), -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
@@ -638,14 +638,15 @@ namespace MotionPlatform3
                     {
                         pitch *= overal;
                         roll *= overal;
-                        heave *= overal;
+                        heave *= -1 * overal;
                         sway *= overal;
                         surge *= overal;
-                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) : 
-                            (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
-                        posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
-                        posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
-                        posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
+
+                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) :
+                            (int)Math2.Mapf(heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
+                        posRL = (int)Math2.Mapf(heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
+                        posRR = (int)Math2.Mapf(heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
+                        posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
                     }
 
                     if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)

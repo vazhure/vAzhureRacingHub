@@ -126,7 +126,7 @@ namespace MotionPlatform3
                     }
                     catch { worker.CancelAsync(); }
 
-                    System.Threading.Thread.Sleep(10);
+                    Thread.Sleep(10);
                 }
             }
         }
@@ -138,6 +138,7 @@ namespace MotionPlatform3
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(10, _plugin.FrontAxisState));
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(11, _plugin.RearLeftAxisState));
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(12, _plugin.RearRightAxisState));
+            Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(13, _plugin.FrontRightAxisState));
 
             chkInvertHeave.Checked = _plugin.settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave);
             chkInvertRoll.Checked = _plugin.settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll);
@@ -159,7 +160,9 @@ namespace MotionPlatform3
 
             chkEnabled.Checked = _plugin.settings.Enabled;
 
-            lblGame.Text = _plugin.Telemetry?.GamePlugin?.Name ?? "";
+            IGamePlugin activeGame = _plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault();
+            lblGame.Text = activeGame == null ? "No active game" : activeGame.Name;
+            chkCollect.Enabled = btnResetData.Enabled = activeGame != null;            
 
             InitComPorts();
 
@@ -371,8 +374,11 @@ namespace MotionPlatform3
         {            
             if (chkCollect.Checked)
             {
-                if (MessageBox.Show("Reset telemetry data and collect new data?", "Telemetry", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    _plugin.ResetActiveGameData();
+                if (_plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault() is IGamePlugin)
+                {
+                    if (MessageBox.Show("Reset telemetry data and collect new data?", "Telemetry", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        _plugin.ResetActiveGameData();
+                }
                 _plugin.settings.mode = MODE.CollectingGameData;
             }
             else
