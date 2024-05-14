@@ -16,7 +16,7 @@ namespace RichardBurnsRally
 
         readonly Icon gameIcon = Properties.Resources.RichardBurnsRally;
         string sCustomGameIcon = "";
-        string sExecutablePath = @"c:\Richard Burns Rally\RichardBurnsRally_SSE.exe";
+        string sExecutablePath = @"C:\Richard Burns Rally\RichardBurnsRally_SSE.exe";
 
         public string UserIconPath { get => sCustomGameIcon; set => sCustomGameIcon = value; }
         public string UserExecutablePath { get => sExecutablePath; set => sExecutablePath = value; }
@@ -84,13 +84,14 @@ namespace RichardBurnsRally
                 carData.Throttle = data.control.throttle;
                 carData.Steering = data.control.steering;
                 carData.Speed = data.car.speed;
+                carData.Distance = data.stage.progress;
 
                 aMMotionData.Pitch = data.car.pitch / 45f;
                 aMMotionData.Roll = data.car.roll / 45f;
                 aMMotionData.Yaw = data.car.yaw / 180f;
-                aMMotionData.Sway = -data.car.accelerations.sway / 98.1f;
-                aMMotionData.Surge = data.car.accelerations.surge / 98.1f;
-                aMMotionData.Heave = data.car.accelerations.heave / 98.1f;
+                aMMotionData.Sway = -data.car.accelerations.sway / 9.81f;
+                aMMotionData.Surge = data.car.accelerations.surge / 9.81f;
+                aMMotionData.Heave = data.car.accelerations.heave / 9.81f;
                 aMMotionData.Position = new double[] { data.car.positionX, data.car.positionY, data.car.positionZ };
 
                 carData.RPM = data.car.engine.rpm;
@@ -100,7 +101,7 @@ namespace RichardBurnsRally
                 sessionInfo.SessionState = "Race";
                 sessionInfo.Flag = "Green";
                 sessionInfo.TotalLapsCount = 1;
-                sessionInfo.CurrentLapTime = (int)data.stage.raceTime;
+                sessionInfo.CurrentLapTime = (int)(data.stage.raceTime * 1000f);
 
                 OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
             }
@@ -125,8 +126,10 @@ namespace RichardBurnsRally
 
         public void Start(IVAzhureRacingApp app)
         {
-            if (File.Exists(sExecutablePath))
-                Utils.ExecuteCmd(sExecutablePath);
+            string cmd = sExecutablePath.Contains(" ") ? $"\"{sExecutablePath}\"" : sExecutablePath;
+
+            if (File.Exists(cmd))
+                Utils.ExecuteCmd(cmd);
             else
                 ShowSettings(app);
         }

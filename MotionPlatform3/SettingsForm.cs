@@ -159,6 +159,8 @@ namespace MotionPlatform3
             lblSpeed.Text = $"{_plugin.settings.SpeedOverride} mm/sec";
 
             chkEnabled.Checked = _plugin.settings.Enabled;
+            chkParkOnIdle.Checked = _plugin.settings.ParkOnIdle;
+            chkParkOnQuit.Checked = _plugin.settings.ParkOnQuit;
 
             IGamePlugin activeGame = _plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault();
             lblGame.Text = activeGame == null ? "No active game" : activeGame.Name;
@@ -320,6 +322,9 @@ namespace MotionPlatform3
 
             _plugin.settings.OveralCoefficient = sliderOveralEffects.Value;
             _plugin.settings.SmoothCoefficient = sliderSmooth.Value;
+
+            _plugin.settings.ParkOnIdle = chkParkOnIdle.Checked;
+            _plugin.settings.ParkOnQuit = chkParkOnQuit.Checked;
 
             _plugin.settings.Linearity = Math2.Mapf(sliderLinearity.Value, 100, 0, 1, 2);
 

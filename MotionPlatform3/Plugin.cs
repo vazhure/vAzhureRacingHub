@@ -379,11 +379,13 @@ namespace MotionPlatform3
 
         public void Quit(IVAzhureRacingApp app)
         {
-            // TODO:
             settings?.SaveSettings(Path.Combine(AssemblyPath, "settings.json"));
 
             bTaskRunning = false;
             mainLoop.Wait();
+
+            if (settings.ParkOnQuit)
+                Park();
         }
 
         public void ShowProperties(IVAzhureRacingApp app)
@@ -426,7 +428,7 @@ namespace MotionPlatform3
                                     if (gamePlugin.IsRunning)
                                     {
                                         TimeSpan ts = DateTime.Now - _tm;
-                                        if (ts.TotalSeconds > 1)
+                                        if (ts.TotalSeconds > 1 && plugin.settings.ParkOnIdle)
                                         {
                                             plugin.ProcessIdle();
                                         }
@@ -928,11 +930,13 @@ namespace MotionPlatform3
         /// Статус разрешения
         /// </summary>
         public bool Enabled { get; set; } = true;
+        public bool ParkOnIdle { get; set; } = true;
+        public bool ParkOnQuit { get; set; } = true;
         public int SpeedOverride { get; set; } = 100;
-        public int Acceleration { get; set; } = 900;
+        public int Acceleration { get; set; } = 500;
         public int MaxSpeed { get; set; } = 120;
         public int MinSpeed { get; set; } = 10;
-        public int LowSpeedOverride { get; set; } = 40;
+        public int LowSpeedOverride { get; set; } = 10;
         public int PitchCoefficient { get; set; } = 100;
         public int RollCoefficient { get; set; } = 100;
         public int HeaveCoefficient { get; set; } = 100;
@@ -941,7 +945,7 @@ namespace MotionPlatform3
         public int OveralCoefficient { get; set; } = 100;
         public bool ClipByRange { get; set; } = false;
         public float Linearity { get; set; } = 1.0f;
-        public int SmoothCoefficient { get; set; } = 50;
+        public int SmoothCoefficient { get; set; } = 80;
 
         public FilterSettings FilterSettings { get; set; } = new FilterSettings();
         public float StepsPerMM { get; set; } = 200;

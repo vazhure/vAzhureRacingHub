@@ -97,6 +97,8 @@ namespace MotionPlatform3
             this.lblLinearity = new System.Windows.Forms.Label();
             this.toolTips = new System.Windows.Forms.ToolTip(this.components);
             this.btnTestSpeed = new System.Windows.Forms.Button();
+            this.chkParkOnIdle = new vAzhureRacingAPI.VAzhureSwitchButton();
+            this.chkParkOnQuit = new vAzhureRacingAPI.VAzhureSwitchButton();
             ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
@@ -957,6 +959,40 @@ namespace MotionPlatform3
             this.btnTestSpeed.UseVisualStyleBackColor = true;
             this.btnTestSpeed.Click += new System.EventHandler(this.BtnTestSpeed_Click);
             // 
+            // chkParkOnIdle
+            // 
+            this.chkParkOnIdle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkParkOnIdle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.chkParkOnIdle.Checked = true;
+            this.chkParkOnIdle.Location = new System.Drawing.Point(575, 71);
+            this.chkParkOnIdle.MaximumSize = new System.Drawing.Size(98, 32);
+            this.chkParkOnIdle.MinimumSize = new System.Drawing.Size(98, 32);
+            this.chkParkOnIdle.Name = "chkParkOnIdle";
+            this.chkParkOnIdle.Size = new System.Drawing.Size(98, 32);
+            this.chkParkOnIdle.StateOff = ((System.Drawing.Image)(resources.GetObject("chkParkOnIdle.StateOff")));
+            this.chkParkOnIdle.StateOn = ((System.Drawing.Image)(resources.GetObject("chkParkOnIdle.StateOn")));
+            this.chkParkOnIdle.SwitchText = "Park on Idle";
+            this.chkParkOnIdle.TabIndex = 9;
+            this.toolTips.SetToolTip(this.chkParkOnIdle, "Switch to parking mode when the game is idle");
+            this.chkParkOnIdle.OnSwitch += new System.EventHandler(this.ChkEnabled_OnSwitch);
+            // 
+            // chkParkOnQuit
+            // 
+            this.chkParkOnQuit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkParkOnQuit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.chkParkOnQuit.Checked = true;
+            this.chkParkOnQuit.Location = new System.Drawing.Point(694, 71);
+            this.chkParkOnQuit.MaximumSize = new System.Drawing.Size(101, 32);
+            this.chkParkOnQuit.MinimumSize = new System.Drawing.Size(101, 32);
+            this.chkParkOnQuit.Name = "chkParkOnQuit";
+            this.chkParkOnQuit.Size = new System.Drawing.Size(101, 32);
+            this.chkParkOnQuit.StateOff = ((System.Drawing.Image)(resources.GetObject("chkParkOnQuit.StateOff")));
+            this.chkParkOnQuit.StateOn = ((System.Drawing.Image)(resources.GetObject("chkParkOnQuit.StateOn")));
+            this.chkParkOnQuit.SwitchText = "Park on Quit";
+            this.chkParkOnQuit.TabIndex = 9;
+            this.toolTips.SetToolTip(this.chkParkOnQuit, "Switch to parking mode when you quit application");
+            this.chkParkOnQuit.OnSwitch += new System.EventHandler(this.ChkEnabled_OnSwitch);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1001,6 +1037,8 @@ namespace MotionPlatform3
             this.Controls.Add(this.chkInvertRoll);
             this.Controls.Add(this.chkInvertPitch);
             this.Controls.Add(this.chkCollect);
+            this.Controls.Add(this.chkParkOnQuit);
+            this.Controls.Add(this.chkParkOnIdle);
             this.Controls.Add(this.chkEnabled);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.btnClose);
@@ -1098,5 +1136,7 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label lblName4;
         private System.Windows.Forms.Label lblPosFRR;
         private System.Windows.Forms.Label lblTargetFRR;
+        private vAzhureRacingAPI.VAzhureSwitchButton chkParkOnIdle;
+        private vAzhureRacingAPI.VAzhureSwitchButton chkParkOnQuit;
     }
 }
