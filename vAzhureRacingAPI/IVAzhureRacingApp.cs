@@ -19,6 +19,8 @@ namespace vAzhureRacingAPI
         event EventHandler<DeviceChangeEventsArgs> OnDeviceRemovePending;
         event EventHandler<DeviceChangeEventsArgs> OnDeviceRemoveComplete;
         event EventHandler<DeviceChangeEventsArgs> OnDeviceArrival;
+        event EventHandler OnGameStarted;
+        event EventHandler OnGameStopped;
         event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
 
         /// <summary>

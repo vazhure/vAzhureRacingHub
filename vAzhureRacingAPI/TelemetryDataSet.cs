@@ -372,15 +372,18 @@ namespace vAzhureRacingAPI
     {
         public double[] Position { get; set; } = { 0, 0, 0 };
         /// <summary>
-        /// forward and back
+        /// forward and back:
+        /// -1 = -180°, +1 = +180°
         /// </summary>
         public float Pitch { get; set; } = 0;
         /// <summary>
-        /// Left and right
+        /// Left and right:
+        /// -1 = -180°, +1 = +180°
         /// </summary>
         public float Roll { get; set; } = 0;
         /// <summary>
-        /// Rotation
+        /// Rotation:
+        /// -1 = -180°, +1 = +180°
         /// </summary>
         public float Yaw { get; set; } = 0;
         /// <summary>
@@ -425,7 +428,7 @@ namespace vAzhureRacingAPI
         public float[] LocalVelocity { get; set; } = { 0, 0, 0 };
 
         /// <summary>
-        /// 
+        /// Amount of ABS vibration
         /// </summary>
         public float ABSVibration { get; set; } = 0;
 
@@ -445,19 +448,61 @@ namespace vAzhureRacingAPI
         public string FinishStatus { get; set; } = "";
         public int DriversCount { get; set; }
         public int TotalLapsCount { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int RemainingTime { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int CurrentSector1Time { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int CurrentSector2Time { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int CurrentSector3Time { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int CurrentLapTime { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int LastSector1Time { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int LastSector2Time { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int LastSector3Time { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int LastLapTime { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int Sector1BestTime { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int Sector2BestTime { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int Sector3BestTime { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int BestLapTime { get; set; }
+        /// <summary>
+        /// time, ms
+        /// </summary>
         public int CurrentDelta { get; set; }
         public int CurrentLapNumber { get; set; }
         public int CurrentPosition { get; set; }
