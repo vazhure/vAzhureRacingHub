@@ -71,7 +71,7 @@ namespace vAzhureRacingHub
             this.btnPlugins.Size = new System.Drawing.Size(198, 40);
             this.btnPlugins.TabIndex = 2;
             this.btnPlugins.TabStop = false;
-            this.btnPlugins.Text = "Плагины";
+            this.btnPlugins.Text = "Plugins";
             this.btnPlugins.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnPlugins.UseVisualStyleBackColor = true;
             this.btnPlugins.Click += new System.EventHandler(this.OnButton);
@@ -90,7 +90,7 @@ namespace vAzhureRacingHub
             this.btnGames.Size = new System.Drawing.Size(198, 40);
             this.btnGames.TabIndex = 3;
             this.btnGames.TabStop = false;
-            this.btnGames.Text = "Игры и приложения";
+            this.btnGames.Text = "Games and Apps";
             this.btnGames.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnGames.UseVisualStyleBackColor = true;
             this.btnGames.Click += new System.EventHandler(this.OnButton);
@@ -109,7 +109,7 @@ namespace vAzhureRacingHub
             this.btnServer.Size = new System.Drawing.Size(198, 40);
             this.btnServer.TabIndex = 4;
             this.btnServer.TabStop = false;
-            this.btnServer.Text = "Сервер";
+            this.btnServer.Text = "Websocket";
             this.btnServer.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnServer.UseVisualStyleBackColor = true;
             this.btnServer.Click += new System.EventHandler(this.OnButton);
@@ -124,7 +124,7 @@ namespace vAzhureRacingHub
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Size = new System.Drawing.Size(727, 40);
             this.labelTitle.TabIndex = 0;
-            this.labelTitle.Text = "Настройки приложения";
+            this.labelTitle.Text = "Settings";
             this.labelTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.labelTitle.Paint += new System.Windows.Forms.PaintEventHandler(this.LabelTitle_Paint);
             // 
@@ -132,7 +132,7 @@ namespace vAzhureRacingHub
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
-            this.ClientSize = new System.Drawing.Size(782, 442);
+            this.ClientSize = new System.Drawing.Size(784, 444);
             this.ControlBox = false;
             this.Controls.Add(this.labelTitle);
             this.Controls.Add(this.btnServer);

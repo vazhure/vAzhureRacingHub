@@ -42,7 +42,7 @@ namespace vAzhureRacingHub
             this.labelFolder.Name = "labelFolder";
             this.labelFolder.Size = new System.Drawing.Size(166, 23);
             this.labelFolder.TabIndex = 0;
-            this.labelFolder.Text = "Директория плагинов";
+            this.labelFolder.Text = "Plugins folder";
             this.labelFolder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnSelectFolder
@@ -55,7 +55,7 @@ namespace vAzhureRacingHub
             this.btnSelectFolder.Size = new System.Drawing.Size(62, 23);
             this.btnSelectFolder.TabIndex = 2;
             this.btnSelectFolder.Text = "..";
-            this.toolTips.SetToolTip(this.btnSelectFolder, "Указать другую папку");
+            this.toolTips.SetToolTip(this.btnSelectFolder, "Click to pick new folder");
             this.btnSelectFolder.UseVisualStyleBackColor = true;
             this.btnSelectFolder.Click += new System.EventHandler(this.BtnSelectFolder_Click);
             // 
@@ -74,6 +74,7 @@ namespace vAzhureRacingHub
             // 
             // PluginsSettingsControl
             // 
+            this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.Controls.Add(this.btnSelectFolder);
             this.Controls.Add(this.labelPath);

@@ -55,7 +55,7 @@ namespace vAzhureRacingHub
             this.btnMinimize.Name = "btnMinimize";
             this.btnMinimize.Size = new System.Drawing.Size(40, 40);
             this.btnMinimize.TabIndex = 3;
-            this.toolTips.SetToolTip(this.btnMinimize, "Свернуть окно");
+            this.toolTips.SetToolTip(this.btnMinimize, "Collapse");
             this.btnMinimize.UseVisualStyleBackColor = true;
             this.btnMinimize.Click += new System.EventHandler(this.BtnMinimize_Click);
             // 
@@ -70,7 +70,7 @@ namespace vAzhureRacingHub
             this.btnExpand.Name = "btnExpand";
             this.btnExpand.Size = new System.Drawing.Size(40, 40);
             this.btnExpand.TabIndex = 4;
-            this.toolTips.SetToolTip(this.btnExpand, "Развернуть окно на весь экран");
+            this.toolTips.SetToolTip(this.btnExpand, "Maximize");
             this.btnExpand.UseVisualStyleBackColor = true;
             this.btnExpand.Click += new System.EventHandler(this.BtnExpand_Click);
             // 
@@ -85,7 +85,7 @@ namespace vAzhureRacingHub
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(40, 40);
             this.btnExit.TabIndex = 5;
-            this.toolTips.SetToolTip(this.btnExit, "Закрыть приложение");
+            this.toolTips.SetToolTip(this.btnExit, "Close application");
             this.btnExit.UseVisualStyleBackColor = true;
             this.btnExit.Click += new System.EventHandler(this.BtnExit_Click);
             // 
@@ -116,7 +116,7 @@ namespace vAzhureRacingHub
             this.btnSound.StateOn = ((System.Drawing.Image)(resources.GetObject("btnSound.StateOn")));
             this.btnSound.SwitchText = "";
             this.btnSound.TabIndex = 6;
-            this.toolTips.SetToolTip(this.btnSound, "Громкость звуков приложения");
+            this.toolTips.SetToolTip(this.btnSound, "Mute / Unmute");
             this.btnSound.OnSwitch += new System.EventHandler(this.BtnSound_OnSwitch);
             // 
             // volumeControl
@@ -130,7 +130,7 @@ namespace vAzhureRacingHub
             this.volumeControl.Size = new System.Drawing.Size(89, 24);
             this.volumeControl.Steps = 10;
             this.volumeControl.TabIndex = 7;
-            this.toolTips.SetToolTip(this.volumeControl, "Уровень громкости звуков приложения");
+            this.toolTips.SetToolTip(this.volumeControl, "Sound level");
             this.volumeControl.Value = 50;
             this.volumeControl.OnValueChanged += new System.EventHandler(this.VolumeControl_OnValueChanged);
             // 
@@ -145,7 +145,7 @@ namespace vAzhureRacingHub
             this.btnAbout.Size = new System.Drawing.Size(40, 40);
             this.btnAbout.TabIndex = 0;
             this.btnAbout.TabStop = false;
-            this.toolTips.SetToolTip(this.btnAbout, "О приложении...");
+            this.toolTips.SetToolTip(this.btnAbout, "About...");
             this.btnAbout.UseVisualStyleBackColor = true;
             this.btnAbout.Click += new System.EventHandler(this.BtnAbout_Click);
             // 
@@ -160,7 +160,7 @@ namespace vAzhureRacingHub
             this.btnSettings.Size = new System.Drawing.Size(40, 40);
             this.btnSettings.TabIndex = 0;
             this.btnSettings.TabStop = false;
-            this.toolTips.SetToolTip(this.btnSettings, "Отобразить настройки...");
+            this.toolTips.SetToolTip(this.btnSettings, "Settings...");
             this.btnSettings.UseVisualStyleBackColor = true;
             this.btnSettings.Click += new System.EventHandler(this.BtnSettings_Click);
             // 
@@ -172,7 +172,7 @@ namespace vAzhureRacingHub
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(636, 29);
             this.lblStatus.TabIndex = 8;
-            this.lblStatus.Text = "Ожидание...";
+            this.lblStatus.Text = "Waiting...";
             // 
             // titlesGames
             // 
@@ -188,7 +188,7 @@ namespace vAzhureRacingHub
             this.titlesGames.ShowTitle = true;
             this.titlesGames.Size = new System.Drawing.Size(758, 222);
             this.titlesGames.TabIndex = 9;
-            this.titlesGames.Title = "Игры и приложения";
+            this.titlesGames.Title = "Games and applications";
             this.titlesGames.TitleHeight = 64;
             this.titlesGames.TitleSpace = 8;
             this.titlesGames.TitleWidth = 64;
@@ -206,7 +206,7 @@ namespace vAzhureRacingHub
             this.titlesDevices.ShowTitle = true;
             this.titlesDevices.Size = new System.Drawing.Size(758, 126);
             this.titlesDevices.TabIndex = 9;
-            this.titlesDevices.Title = "Устройства и плагины";
+            this.titlesDevices.Title = "Devices and Plugins";
             this.titlesDevices.TitleHeight = 64;
             this.titlesDevices.TitleSpace = 8;
             this.titlesDevices.TitleWidth = 64;
@@ -215,7 +215,7 @@ namespace vAzhureRacingHub
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
-            this.ClientSize = new System.Drawing.Size(784, 444);
+            this.ClientSize = new System.Drawing.Size(786, 446);
             this.ControlBox = false;
             this.Controls.Add(this.titlesDevices);
             this.Controls.Add(this.titlesGames);

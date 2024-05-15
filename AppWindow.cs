@@ -2,6 +2,9 @@
 /// Разработчик:
 /// Журавлев Андрей Владимирович
 /// e-mail: avjuravlev@yandex.ru
+/// Developer:
+/// Andrey Zhuravlev
+/// e-mail: avjuravlev@yandex.com
 /// 
 
 using System;
@@ -99,15 +102,15 @@ namespace vAzhureRacingHub
                         {
                             case DBT_DEVICEARRIVAL:
                                 OnDeviceArrival?.Invoke(this, new DeviceChangeEventsArgs(port));
-                                BeginInvoke((Action)delegate { lblStatus.Text = $"Подключено устройство к порту {port}"; });
+                                BeginInvoke((Action)delegate { lblStatus.Text = $"Device connected to Port {port}"; });
                                 break;
                             case DBT_DEVICEREMOVEPENDING:
                                 OnDeviceRemovePending?.Invoke(this, new DeviceChangeEventsArgs(port));
-                                BeginInvoke((Action)delegate { lblStatus.Text = $"Отключение устройства от порта {port}"; });
+                                BeginInvoke((Action)delegate { lblStatus.Text = $"Device disconnecting from Port {port}"; });
                                 break;
                             case DBT_DEVICEREMOVECOMPLETE:
                                 OnDeviceRemoveComplete?.Invoke(this, new DeviceChangeEventsArgs(port));
-                                BeginInvoke((Action)delegate { lblStatus.Text = $"Устройство отсоединено от порта {port}"; });
+                                BeginInvoke((Action)delegate { lblStatus.Text = $"Device disconnected from Port {port}"; });
                                 break;
                         }
                     }
@@ -140,19 +143,19 @@ namespace vAzhureRacingHub
             server = new WebServer();
             server.OnClientConnected += delegate (object sender, WSClient e)
             {
-                SetStatusText($"Подключен клиент с адресом {e.IP}...");
+                SetStatusText($"Client connected with IP {e.IP}...");
             };
             server.OnClientDisconnected += delegate (object sender, WSClient e)
             {
-                SetStatusText($"Клиент с адресом {e.IP} отключен...");
+                SetStatusText($"Client with IP {e.IP} disconnected...");
             };
             server.OnServerStarted += delegate (object sender, EventArgs e)
             {
-                SetStatusText("Сервер запущен...");
+                SetStatusText("Server started...");
             };
             server.OnServerStopped += delegate (object sender, EventArgs e)
             {
-                SetStatusText("Сервер остановлен...");
+                SetStatusText("Server stopper...");
             };
 
             if (server.Enabled)
@@ -163,7 +166,7 @@ namespace vAzhureRacingHub
         {
             try
             {
-                SetStatusText("Завершение работы сервера...");
+                SetStatusText("Stopping the server...");
                 server?.Stop();
                 server?.Dispose();
             }
@@ -249,7 +252,7 @@ namespace vAzhureRacingHub
         /// </summary>
         private void ClosePlugins()
         {
-            SetStatusText("Завершение работы плагинов...");
+            SetStatusText("Finishing plugins...");
             Parallel.ForEach(initializedPlugins, customPlugin =>
             {
                 try
@@ -374,6 +377,8 @@ namespace vAzhureRacingHub
         public event EventHandler<DeviceChangeEventsArgs> OnDeviceRemovePending;
         public event EventHandler<DeviceChangeEventsArgs> OnDeviceArrival;
         public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
+        public event EventHandler OnGameStarted;
+        public event EventHandler OnGameStopped;
 
         public IList<ICustomDevicePlugin> CustomDevices => customDevices;
         public IList<IGamePlugin> GamePlugins => gamePlugins;
@@ -429,7 +434,7 @@ namespace vAzhureRacingHub
         {
             if (sender is ICustomDevicePlugin plugin)
             {
-                SetStatusText($"Устройство {plugin.DeviceName} отключено...");
+                SetStatusText($"Device {plugin.DeviceName} disconnected...");
                 titlesDevices.Invalidate();
             }
         }
@@ -438,7 +443,7 @@ namespace vAzhureRacingHub
         {
             if (sender is ICustomDevicePlugin plugin)
             {
-                SetStatusText($"Устройство {plugin.DeviceName} подключено...");
+                SetStatusText($"Device {plugin.DeviceName} connected...");
                 titlesDevices.Invalidate();
             }
         }
@@ -462,7 +467,7 @@ namespace vAzhureRacingHub
         /// </summary>
         public void About()
         {
-            MessageBox.Show(this, "version 1.0.041\r\nRelease Date: 2024-04-24", "vAzhure Racing Hub");
+            MessageBox.Show(this, "version 1.0.044\r\nRelease Date: 2024-05-15", "vAzhure Racing Hub");
         }
 
         AppSettings settings = new AppSettings();
@@ -551,11 +556,18 @@ namespace vAzhureRacingHub
         private void Game_OnGameStateChanged(object sender, EventArgs e)
         {
             if (sender is IGamePlugin game)
+            {
                 BeginInvoke((Action)delegate
                 {
-                    lblStatus.Text = game.IsRunning ? $"Игра {game.Name} запущена..." : $"Игра {game.Name} остановлена...";
+                    lblStatus.Text = game.IsRunning ? $"Game {game.Name} started..." : $"Game {game.Name} stopped...";
                     titlesGames.Invalidate();
                 });
+
+                if (game.IsRunning)
+                    OnGameStarted?.Invoke(game, new EventArgs());
+                else
+                    OnGameStopped?.Invoke(game, new EventArgs());
+            }
         }
 
         private void Game_OnTelemetry(object sender, TelemetryUpdatedEventArgs e)

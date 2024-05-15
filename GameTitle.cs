@@ -89,7 +89,7 @@ namespace vAzhureRacingHub
                 e.Graphics.FillRectangle(br, rcBtn);
             using (StringFormat sf = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
             {
-                e.Graphics.DrawString("ОПЦИИ", Parent.Font, Brushes.White, rcBtn, sf);
+                e.Graphics.DrawString("OPTIONS", Parent.Font, Brushes.White, rcBtn, sf);
             }
         }
 
@@ -112,7 +112,7 @@ namespace vAzhureRacingHub
 
             using (StringFormat sf = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
             {
-                e.Graphics.DrawString("ИГРАТЬ", Parent.Font, gamePlugin.IsRunning? Brushes.Gray : Brushes.White, rcBtn, sf);
+                e.Graphics.DrawString("PLAY", Parent.Font, gamePlugin.IsRunning? Brushes.Gray : Brushes.White, rcBtn, sf);
             }
         }
 

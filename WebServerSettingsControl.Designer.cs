@@ -75,7 +75,7 @@ namespace vAzhureRacingHub
             this.labelFolder.Name = "labelFolder";
             this.labelFolder.Size = new System.Drawing.Size(166, 23);
             this.labelFolder.TabIndex = 4;
-            this.labelFolder.Text = "Директория сервера";
+            this.labelFolder.Text = "Server folder";
             this.labelFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btnEnabled
@@ -84,13 +84,13 @@ namespace vAzhureRacingHub
             this.btnEnabled.Checked = false;
             this.btnEnabled.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnEnabled.Location = new System.Drawing.Point(16, 31);
-            this.btnEnabled.MaximumSize = new System.Drawing.Size(94, 32);
-            this.btnEnabled.MinimumSize = new System.Drawing.Size(94, 32);
+            this.btnEnabled.MaximumSize = new System.Drawing.Size(74, 32);
+            this.btnEnabled.MinimumSize = new System.Drawing.Size(74, 32);
             this.btnEnabled.Name = "btnEnabled";
-            this.btnEnabled.Size = new System.Drawing.Size(94, 32);
+            this.btnEnabled.Size = new System.Drawing.Size(74, 32);
             this.btnEnabled.StateOff = ((System.Drawing.Image)(resources.GetObject("btnEnabled.StateOff")));
             this.btnEnabled.StateOn = ((System.Drawing.Image)(resources.GetObject("btnEnabled.StateOn")));
-            this.btnEnabled.SwitchText = "Включен";
+            this.btnEnabled.SwitchText = "Enable";
             this.btnEnabled.TabIndex = 8;
             this.btnEnabled.OnSwitch += new System.EventHandler(this.BtnEnabled_OnSwitch);
             // 
@@ -103,7 +103,6 @@ namespace vAzhureRacingHub
             this.listClients.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.listClients.ForeColor = System.Drawing.Color.White;
             this.listClients.IntegralHeight = false;
-            this.listClients.ItemHeight = 16;
             this.listClients.Items.AddRange(new object[] {
             "192.168.1.17",
             "192.168.1.2",
@@ -119,7 +118,7 @@ namespace vAzhureRacingHub
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(166, 23);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Покдюченные клиенты";
+            this.label1.Text = "Clients";
             // 
             // label2
             // 
@@ -127,7 +126,7 @@ namespace vAzhureRacingHub
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(67, 23);
             this.label2.TabIndex = 4;
-            this.label2.Text = "Порт";
+            this.label2.Text = "Port";
             // 
             // numPort
             // 
@@ -146,7 +145,7 @@ namespace vAzhureRacingHub
             0,
             0});
             this.numPort.Name = "numPort";
-            this.numPort.Size = new System.Drawing.Size(89, 18);
+            this.numPort.Size = new System.Drawing.Size(89, 16);
             this.numPort.TabIndex = 10;
             this.numPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numPort.Value = new decimal(new int[] {
