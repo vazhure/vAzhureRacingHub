@@ -286,7 +286,7 @@ namespace MotionPlatform3
                 catch
                 {
                     Status = DeviceStatus.ConnectionError;
-                    OnConnected?.Invoke(this, new EventArgs());
+                    //OnConnected?.Invoke(this, new EventArgs());
                     return;
                 }
             }
@@ -497,6 +497,12 @@ namespace MotionPlatform3
             string name = tds?.GamePlugin?.Name;
             if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
                 gd.Reset();
+            else
+            {
+                gd = new GameData(name);
+                gd.Reset();
+                settings.gamesData.Add(gd);
+            }
         }
 
         internal void RestoreActiveGameData()

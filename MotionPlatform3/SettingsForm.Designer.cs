@@ -90,7 +90,6 @@ namespace MotionPlatform3
             this.lblSmooth = new System.Windows.Forms.Label();
             this.comboComPort = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.lblGame = new System.Windows.Forms.Label();
             this.btnResetData = new System.Windows.Forms.Button();
             this.sliderLinearity = new vAzhureRacingAPI.VAzhureSliderControl();
             this.label9 = new System.Windows.Forms.Label();
@@ -99,6 +98,7 @@ namespace MotionPlatform3
             this.btnTestSpeed = new System.Windows.Forms.Button();
             this.chkParkOnIdle = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.chkParkOnQuit = new vAzhureRacingAPI.VAzhureSwitchButton();
+            this.lblGame = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
@@ -884,16 +884,6 @@ namespace MotionPlatform3
             this.label7.TabIndex = 3;
             this.label7.Text = "COM Port";
             // 
-            // lblGame
-            // 
-            this.lblGame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblGame.AutoSize = true;
-            this.lblGame.Location = new System.Drawing.Point(474, 434);
-            this.lblGame.Name = "lblGame";
-            this.lblGame.Size = new System.Drawing.Size(68, 13);
-            this.lblGame.TabIndex = 43;
-            this.lblGame.Text = "Active Game";
-            // 
             // btnResetData
             // 
             this.btnResetData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -992,6 +982,16 @@ namespace MotionPlatform3
             this.chkParkOnQuit.TabIndex = 9;
             this.toolTips.SetToolTip(this.chkParkOnQuit, "Switch to parking mode when you quit application");
             this.chkParkOnQuit.OnSwitch += new System.EventHandler(this.ChkEnabled_OnSwitch);
+            // 
+            // lblGame
+            // 
+            this.lblGame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblGame.AutoSize = true;
+            this.lblGame.Location = new System.Drawing.Point(471, 435);
+            this.lblGame.Name = "lblGame";
+            this.lblGame.Size = new System.Drawing.Size(68, 13);
+            this.lblGame.TabIndex = 47;
+            this.lblGame.Text = "Active Game";
             // 
             // SettingsForm
             // 
@@ -1124,7 +1124,6 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label lblSmooth;
         private System.Windows.Forms.ComboBox comboComPort;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label lblGame;
         private System.Windows.Forms.Button btnResetData;
         private vAzhureRacingAPI.VAzhureSliderControl sliderLinearity;
         private System.Windows.Forms.Label label9;
@@ -1138,5 +1137,6 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label lblTargetFRR;
         private vAzhureRacingAPI.VAzhureSwitchButton chkParkOnIdle;
         private vAzhureRacingAPI.VAzhureSwitchButton chkParkOnQuit;
+        private System.Windows.Forms.Label lblGame;
     }
 }

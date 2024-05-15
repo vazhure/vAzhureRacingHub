@@ -18,6 +18,9 @@ namespace MotionPlatform3
         public SettingsForm(Plugin plugin)
         {
             _plugin = plugin;
+            _plugin.App.OnGameStarted += App_OnGameStarted;
+            _plugin.App.OnGameStopped += App_OnGameStopped;
+
             oldMode = plugin.settings.mode;
             InitializeComponent();
 
@@ -39,6 +42,32 @@ namespace MotionPlatform3
                     Thread.Sleep(100);
                 }
             };
+        }
+
+        private void App_OnGameStopped(object sender, EventArgs e)
+        {
+            if (sender is IGamePlugin game)
+            {
+                BeginInvoke((Action)delegate
+                {
+                    lblGame.Text = "No active game";
+                    chkCollect.Enabled = btnResetData.Enabled = false;
+                    Invalidate();
+                });
+            }
+        }
+
+        private void App_OnGameStarted(object sender, EventArgs e)
+        {
+            if (sender is IGamePlugin game)
+            {
+                BeginInvoke((Action)delegate
+                {
+                    lblGame.Text = game.Name;
+                    chkCollect.Enabled = btnResetData.Enabled = true;
+                    Invalidate();
+                });
+            }
         }
 
         private void Plugin_OnDisconnected(object sender, EventArgs e)
@@ -84,6 +113,8 @@ namespace MotionPlatform3
             _plugin.OnDisconnected -= Plugin_OnDisconnected;
             _plugin.App.OnDeviceArrival -= Application_OnDeviceArrival;
             _plugin.App.OnDeviceRemoveComplete -= Application_OnDeviceRemoveComplete;
+            _plugin.App.OnGameStarted -= App_OnGameStarted;
+            _plugin.App.OnGameStopped -= App_OnGameStopped;
 
             testWorker?.CancelAsync();
             stateWorker?.CancelAsync();
@@ -231,7 +262,6 @@ namespace MotionPlatform3
                     case DEVICE_MODE.PARKING: text = "PARKING"; color = Color.Green; break;
                 }
 
-                lblGame.Text = _plugin.Telemetry?.GamePlugin?.Name;
                 btnTestSpeed.Enabled = _plugin.IsDeviceReady;
 
                 string state = $"Homed: {e.State.flags.HasFlag(DEVICE_FLAGS.STATE_HOMED)}\r\n{e.State.speedMMperSEC} mm/sec";
