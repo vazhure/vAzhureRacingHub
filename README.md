@@ -18,7 +18,7 @@ Supported Game Titles:
 * Le Mans Ultimate
 * RaceRoom Racing Experience
 * rFactor 2
-* Richard Burn Rally
+* Richard Burns Rally
 * WRC Generations
 * BeamNG.Drive
 
