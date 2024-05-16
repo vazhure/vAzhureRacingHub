@@ -467,7 +467,7 @@ namespace vAzhureRacingHub
         /// </summary>
         public void About()
         {
-            MessageBox.Show(this, "version 1.0.044\r\nRelease Date: 2024-05-15", "vAzhure Racing Hub");
+            MessageBox.Show(this, "version 1.0.045\r\nRelease Date: 2024-05-16", "vAzhure Racing Hub");
         }
 
         AppSettings settings = new AppSettings();

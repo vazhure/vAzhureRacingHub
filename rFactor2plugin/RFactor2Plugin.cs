@@ -9,6 +9,7 @@ namespace rFactor2plugin
         readonly RFactor2GamePlugin rFactor2GamePlugin = new RFactor2GamePlugin();
         readonly LeMansUltimatePlugin leMansUltimatePlugin = new LeMansUltimatePlugin();
         RF2Listener listener = null;
+        RF1Game rF1 = null;
 
         public string Name => "rFactor 2";
 
@@ -24,6 +25,8 @@ namespace rFactor2plugin
         public bool Initialize(IVAzhureRacingApp app)
         {
             Console.WriteLine($"Plugin Initialization: {Name}");
+            rF1 = new RF1Game();
+            app.RegisterGame(rF1);
             app.RegisterGame(rFactor2GamePlugin);
             app.RegisterGame(leMansUltimatePlugin);
             listener = new RF2Listener( new GamePlugin[]{ rFactor2GamePlugin, leMansUltimatePlugin }, app);
@@ -42,6 +45,7 @@ namespace rFactor2plugin
         public void Quit(IVAzhureRacingApp app)
         {
             listener?.StopTrhead();
+            rF1.Quit();
         }
     }
 

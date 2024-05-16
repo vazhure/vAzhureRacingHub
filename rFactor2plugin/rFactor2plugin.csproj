@@ -51,6 +51,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="RF1.cs" />
+    <Compile Include="RF1Listener.cs" />
     <Compile Include="RF2.cs" />
     <Compile Include="RF2Listener.cs" />
     <Compile Include="RFactor2Plugin.cs" />
@@ -67,6 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\LeMansUltimate.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\rFactor1.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

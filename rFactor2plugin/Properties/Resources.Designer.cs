@@ -73,6 +73,16 @@ namespace rFactor2plugin.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon rFactor1 {
+            get {
+                object obj = ResourceManager.GetObject("rFactor1", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon rFactor2 {
             get {
                 object obj = ResourceManager.GetObject("rFactor2", resourceCulture);
