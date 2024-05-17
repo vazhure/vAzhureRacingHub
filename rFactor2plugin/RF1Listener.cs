@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using vAzhureRacingAPI;
 
@@ -16,6 +17,19 @@ namespace rFactor2plugin
         public RF1Listener(RF1Game game)
         {
             dataSet = new TelemetryDataSet(game);
+        }
+
+        static int sPlayerIdx = -1;
+
+        readonly StringBuilder sb = new StringBuilder();
+
+        public void Finish()
+        {
+            if (sb.Length > 0)
+            {
+                string file_name = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", "rF1telemetry.csv");
+                File.WriteAllText(file_name, sb.ToString());
+            }
         }
 
         public override void UserFunc()
@@ -50,7 +64,7 @@ namespace rFactor2plugin
 
                         sessionInfo.DriversCount = rfShared.numVehicles;
 
-                        if (rfShared.vehicle.Where(o => o.isPlayer).FirstOrDefault() is RFactor1.RfVehicleInfo vi)
+                        if (GetPlayerVechicle(rfShared.vehicle, ref sPlayerIdx, rfShared.numVehicles) is RFactor1.RfVehicleInfo vi)
                         {
                             carData.DriverName = vi.driverName;
                             carData.CarName = carData.CarClass = vi.vehicleClass;
@@ -79,6 +93,10 @@ namespace rFactor2plugin
                                 case RFactor1.RfFinishStatus.dq: sessionInfo.FinishStatus = "DQ"; break;
                                 default: sessionInfo.FinishStatus = ""; break;
                             }
+
+                            //sb.AppendLine($"{rfShared.localAccel.x:0.000};{rfShared.localAccel.y:0.000};{rfShared.localAccel.z:0.000};" +
+                            //    $"{rfShared.localRot.x:0.000};{rfShared.localRot.y:0.000};{rfShared.localRot.z:0.000};" +
+                            //    $"{vi.pitch:0.000};{vi.roll:0.000};{vi.yaw:0.000};");
                         }
 
                         carData.Clutch = rfShared.unfilteredClutch;
@@ -96,14 +114,18 @@ namespace rFactor2plugin
                         carData.OilTemp = rfShared.engineOilTemp;
                         carData.Distance = rfShared.lapDist;
 
-                        motionData.Pitch = rfShared.localRot.x / (float)Math.PI; // Check !
-                        motionData.Roll = rfShared.localRot.z / (float)Math.PI; // Check !
-                        motionData.Yaw = rfShared.localRot.y / (float)Math.PI; // Check !
+                        RFactor1.RfVec3 oriX = new RFactor1.RfVec3(){ x = rfShared.oriX.x,  y = rfShared.oriX.y, z = rfShared.oriX.z };
+                        RFactor1.RfVec3 oriY = new RFactor1.RfVec3() { x = rfShared.oriY.x, y = rfShared.oriY.y, z = rfShared.oriY.z };
+                        RFactor1.RfVec3 oriZ = new RFactor1.RfVec3() { x = rfShared.oriZ.x, y = rfShared.oriZ.y, z = rfShared.oriZ.z };
+
+                        motionData.Yaw = (float)Math.Atan2(oriZ.x, oriZ.z);
+                        motionData.Pitch = (float)Math.Atan2(-oriY.z, Math.Sqrt(oriX.z * oriX.z + oriZ.z * oriZ.z));
+                        motionData.Roll = (float)Math.Atan2(oriY.x, Math.Sqrt(oriX.x * oriX.x + oriZ.x * oriZ.x));
 
                         motionData.Sway = 0.3f * rfShared.localAccel.x / 9.81f;
                         motionData.Surge = 0.3f * -rfShared.localAccel.z / 9.81f;
                         motionData.Heave = 0.3f * rfShared.localAccel.y / 9.81f;
-                        
+
                         motionData.Position = rfShared.pos;
                         motionData.LocalVelocity = rfShared.localVel;
                         motionData.LocalRotAcceleration = rfShared.localRotAccel;
@@ -165,8 +187,8 @@ namespace rFactor2plugin
                             },
                         };
 
-                        sessionInfo.RemainingTime = rfShared.endET > rfShared.currentET ? 0 :
-                                (int)((rfShared.endET - rfShared.currentET) * 1000f);
+                        sessionInfo.RemainingTime = rfShared.currentET < 0 ? 0 :
+                            (int)((rfShared.endET - rfShared.currentET) * 1000);
 
                         sessionInfo.CurrentLapTime = (int)((rfShared.currentET - rfShared.lapStartET) * 1000f);
                         sessionInfo.CurrentLapNumber = rfShared.lapNumber;
@@ -183,6 +205,28 @@ namespace rFactor2plugin
                 }
             }
             catch { }
+        }
+
+        private RFactor1.RfVehicleInfo GetPlayerVechicle(RFactor1.RfVehicleInfo[] vehicle, ref int idx, int count)
+        {
+            if (idx > 0 && idx < count)
+            {
+                if (vehicle[idx].isPlayer)
+                    return vehicle[idx];
+            }
+         
+            for (int t = 0; t < count; t++)
+            {
+                if (vehicle[t].isPlayer)
+                {
+                    idx = t;
+                    return vehicle[t];
+                }
+            }
+            
+            idx = -1;
+
+            return new RFactor1.RfVehicleInfo();
         }
     }
 
@@ -236,6 +280,7 @@ namespace rFactor2plugin
         public void Quit()
         {
             rF1Listener.StopTrhead();
+            rF1Listener.Finish();
             processMonitor.Stop();
         }
 

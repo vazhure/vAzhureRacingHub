@@ -118,9 +118,14 @@ namespace rFactor2plugin
                             sessionInfo.Valid = false;
                             weatherData.Valid = false;
 
-                            motionData.Pitch = (float)vt.mLocalRot.x / (float)Math.PI;
-                            motionData.Roll = (float)vt.mLocalRot.y / (float)Math.PI;
-                            motionData.Yaw = (float)vt.mLocalRot.z / (float)Math.PI;
+                            rF2Vec3 oriX = new rF2Vec3() { x = vt.mOri[0].x, y = vt.mOri[0].y, z = vt.mOri[0].z };
+                            rF2Vec3 oriY = new rF2Vec3() { x = vt.mOri[1].x, y = vt.mOri[1].y, z = vt.mOri[1].z };
+                            rF2Vec3 oriZ = new rF2Vec3() { x = vt.mOri[2].x, y = vt.mOri[2].y, z = vt.mOri[2].z };
+
+                            motionData.Yaw = (float)Math.Atan2(oriZ.x, oriZ.z);
+                            motionData.Pitch = (float)Math.Atan2(-oriY.z, Math.Sqrt(oriX.z * oriX.z + oriZ.z * oriZ.z));
+                            motionData.Roll = (float)Math.Atan2(oriY.x, Math.Sqrt(oriX.x * oriX.x + oriZ.x * oriZ.x));
+
                             motionData.Sway = vt.Sway / (float)Math.PI;
                             motionData.Surge = -vt.Surge / (float)Math.PI;
                             motionData.Heave = vt.Heave / (float)Math.PI;
