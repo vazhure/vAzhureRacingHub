@@ -10,6 +10,7 @@ namespace rFactor2plugin
         readonly LeMansUltimatePlugin leMansUltimatePlugin = new LeMansUltimatePlugin();
         RF2Listener listener = null;
         RF1Game rF1 = null;
+        Automobilista automobilista = null;
 
         public string Name => "rFactor 2";
 
@@ -25,11 +26,13 @@ namespace rFactor2plugin
         public bool Initialize(IVAzhureRacingApp app)
         {
             Console.WriteLine($"Plugin Initialization: {Name}");
+            automobilista = new Automobilista();
+            app.RegisterGame(automobilista);
             rF1 = new RF1Game();
             app.RegisterGame(rF1);
             app.RegisterGame(rFactor2GamePlugin);
             app.RegisterGame(leMansUltimatePlugin);
-            listener = new RF2Listener( new GamePlugin[]{ rFactor2GamePlugin, leMansUltimatePlugin }, app);
+            listener = new RF2Listener(new GamePlugin[] { rFactor2GamePlugin, leMansUltimatePlugin }, app);
             listener.StartThread();
             listener.OnThreadError += delegate (object sender, EventArgs e)
             {
@@ -46,6 +49,7 @@ namespace rFactor2plugin
         {
             listener?.StopTrhead();
             rF1.Quit();
+            automobilista.Quit();
         }
     }
 
@@ -62,7 +66,7 @@ namespace rFactor2plugin
 
         public uint SteamGameID => 365960U;
 
-        public string[] ExecutableProcessName => new string[] { rFactor2Constants.RFACTOR2_PROCESS_NAME};
+        public string[] ExecutableProcessName => new string[] { rFactor2Constants.RFACTOR2_PROCESS_NAME };
 
         public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
         public event EventHandler OnGameStateChanged;
@@ -87,9 +91,9 @@ namespace rFactor2plugin
 
         public string UserIconPath
         {
-            get 
+            get
             {
-                return sUserIconPath; 
+                return sUserIconPath;
             }
             set
             {
@@ -157,7 +161,7 @@ namespace rFactor2plugin
                 return Utils.IsProcessRunning(ExecutableProcessName);
             }
         }
-        
+
         public override bool Running => IsRunning;
 
         string sUserIconPath = "";

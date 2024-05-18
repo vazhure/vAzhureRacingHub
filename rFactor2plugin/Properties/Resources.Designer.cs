@@ -63,6 +63,16 @@ namespace rFactor2plugin.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon AMS {
+            get {
+                object obj = ResourceManager.GetObject("AMS", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon LeMansUltimate {
             get {
                 object obj = ResourceManager.GetObject("LeMansUltimate", resourceCulture);

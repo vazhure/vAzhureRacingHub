@@ -83,6 +83,7 @@ void SharedMemoryMapPlugin::Startup() {
 	if (strstr(exe, "Dedicated.exe") != NULL) {
 		strcat(tag, pid);
 	}
+
 	// init handle and try to create, read if existing
 	hMap = INVALID_HANDLE_VALUE;
 	hMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(rfShared), TEXT(tag));
