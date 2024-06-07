@@ -61,19 +61,20 @@ enum FLAGS : uint8_t { NONE = 0,
                        STATE_HOMED = 1 << 1,
 };
 
-struct __attribute__((aligned(2))) STATE {
+struct __attribute__((packed)) STATE {
   MODE mode;
   FLAGS flags;
   uint8_t speedMMperSEC;  // Max PWM in percents [10.100]
-  int32_t currentpos;     // motor pos
-  int32_t targetpos;      // motor target pos
-  int32_t min;            // min pos (in poteciometer units)
-  int32_t max;            // max pos (in poteciometer units)
+  uint8_t _reserved;
+  int32_t currentpos;  // motor pos
+  int32_t targetpos;   // motor target pos
+  int32_t min;         // min pos (in poteciometer units)
+  int32_t max;         // max pos (in poteciometer units)
 };
 
 const int STATE_LEN = sizeof(STATE);  // should be 20
 
-struct __attribute__((aligned(2))) PCCMD {
+struct __attribute__((packed)) PCCMD {
   uint8_t header = 0;
   uint8_t len;  // len
   COMMAND cmd;
@@ -100,10 +101,10 @@ void setup() {
   int32_t posB = analogRead(ROT_POT2_PIN);
 
   // init structures
-  st[0] = { MODE::UNKNOWN /*set MODE::READY for 3DOF*/, FLAGS::STATE_HOMED, 100, POS_CENTER, POS_CENTER, POS_MIN, POS_MAX };  // NOT CONNECTED
-  st[1] = { MODE::READY, FLAGS::STATE_HOMED, 100, posA, POS_CENTER, POS_MIN, POS_MAX };
-  st[2] = { MODE::READY, FLAGS::STATE_HOMED, 100, posB, POS_CENTER, POS_MIN, POS_MAX };
-  st[3] = { MODE::UNKNOWN, FLAGS::STATE_HOMED, 100, POS_CENTER, POS_CENTER, POS_MIN, POS_MAX };  // NOT CONNECTED
+  st[0] = { MODE::UNKNOWN /*set MODE::READY for 3DOF*/, FLAGS::STATE_HOMED, 100, 0, POS_CENTER, POS_CENTER, POS_MIN, POS_MAX };  // NOT CONNECTED
+  st[1] = { MODE::READY, FLAGS::STATE_HOMED, 100, posA, 0, POS_CENTER, POS_MIN, POS_MAX };
+  st[2] = { MODE::READY, FLAGS::STATE_HOMED, 100, posB, 0, POS_CENTER, POS_MIN, POS_MAX };
+  st[3] = { MODE::UNKNOWN, FLAGS::STATE_HOMED, 100, 0, POS_CENTER, POS_CENTER, POS_MIN, POS_MAX };  // NOT CONNECTED
 
   Serial.begin(SERIAL_BAUD_RATE);
 }
