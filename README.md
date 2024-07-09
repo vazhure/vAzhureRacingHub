@@ -14,6 +14,8 @@ Supported Game Titles:
 * Dirt Rally
 * Dirt Rally 2
 * EA Sports WRC
+* Forza Horizon 4
+* Forza Horizon 5
 * iRacing
 * KartKraft
 * Kart Racing Pro
@@ -30,6 +32,8 @@ WIP:
 * F1 2018
 * F1 2019
 * F1 2020
+* F1 2022
+* Forza Motorsport
 * Trackmania
 
 My Discord: https://discord.gg/ynHCkrsmMA
