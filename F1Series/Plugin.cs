@@ -1,0 +1,51 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using vAzhureRacingAPI;
+
+namespace F1Series
+{
+    public class Plugin : ICustomPlugin
+    {
+        public string Name => "F1 Series Plugin";
+
+        public string Description => "F1 Series Plugin";
+
+        public ulong Version => 1UL;
+
+        public bool CanClose(IVAzhureRacingApp _)
+        {
+            return true;
+        }
+
+        public bool Initialize(IVAzhureRacingApp app)
+        {
+            // TODO
+
+            //Console.WriteLine($"Packet size of PacketMotionData {Marshal.SizeOf(typeof(F12024.PacketMotionData))}");
+            //Console.WriteLine($"Packet size of PacketMotionExData {Marshal.SizeOf(typeof(F12024.PacketMotionExData))}");
+            //Console.WriteLine($"Packet size of PacketLapData {Marshal.SizeOf(typeof(F12024.PacketLapData))}");
+            //Console.WriteLine($"Packet size of PacketLobbyInfoData {Marshal.SizeOf(typeof(F12024.PacketLobbyInfoData))}");
+            //Console.WriteLine($"Packet size of PacketParticipantsData {Marshal.SizeOf(typeof(F12024.PacketParticipantsData))}");
+            //Console.WriteLine($"Packet size of PacketSessionData {Marshal.SizeOf(typeof(F12024.PacketSessionData))}");
+            //Console.WriteLine($"Packet size of PacketSessionHistoryData {Marshal.SizeOf(typeof(F12024.PacketSessionHistoryData))}");
+            //Console.WriteLine($"Packet size of PacketTimeTrialData {Marshal.SizeOf(typeof(F12024.PacketTimeTrialData))}");
+            //Console.WriteLine($"Packet size of PacketTyreSetsData {Marshal.SizeOf(typeof(F12024.PacketTyreSetsData))}");
+            //Console.WriteLine($"Packet size of PacketCarDamageData {Marshal.SizeOf(typeof(F12024.PacketCarDamageData))}");
+            //Console.WriteLine($"Packet size of PacketCarSetupData {Marshal.SizeOf(typeof(F12024.PacketCarSetupData))}");
+            //Console.WriteLine($"Packet size of PacketCarStatusData {Marshal.SizeOf(typeof(F12024.PacketCarStatusData))}");
+            //Console.WriteLine($"Packet size of PacketCarTelemetryData {Marshal.SizeOf(typeof(F12024.PacketCarTelemetryData))}");
+            //Console.WriteLine($"Packet size of PacketEventData {Marshal.SizeOf(typeof(F12024.PacketEventData))}");
+
+            return true;
+        }
+
+        public void Quit(IVAzhureRacingApp app)
+        {
+            // TODO
+        }
+    }
+}
