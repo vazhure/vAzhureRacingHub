@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace F1Series
@@ -38,6 +39,43 @@ namespace F1Series
             Cobblestone = 9,
             Metal = 10,
             Ridged = 11,
+        }
+
+        [Flags]
+        public enum ButtonFlags : uint
+        {
+            CrossorA = 0x00000001,
+            TriangleorY = 0x00000002,
+            CircleorB = 0x00000004,
+            SquareorX = 0x00000008,
+            DpadLeft = 0x00000010,
+            DpadRight = 0x00000020,
+            DpadUp = 0x00000040,
+            DpadDown = 0x00000080,
+            OptionsorMenu = 0x00000100,
+            L1orLB = 0x00000200,
+            R1orRB = 0x00000400,
+            L2orLT = 0x00000800,
+            R2orRT = 0x00001000,
+            LeftStickClick = 0x00002000,
+            RightStickClick = 0x00004000,
+            RightStickLeft = 0x00008000,
+            RightStickRight = 0x00010000,
+            RightStickUp = 0x00020000,
+            RightStickDown = 0x00040000,
+            Special = 0x00080000,
+            UDPAction1 = 0x00100000,
+            UDPAction2 = 0x00200000,
+            UDPAction3 = 0x00400000,
+            UDPAction4 = 0x00800000,
+            UDPAction5 = 0x01000000,
+            UDPAction6 = 0x02000000,
+            UDPAction7 = 0x04000000,
+            UDPAction8 = 0x08000000,
+            UDPAction9 = 0x10000000,
+            UDPAction10 = 0x20000000,
+            UDPAction11 = 0x40000000,
+            UDPAction12 = 0x80000000,
         }
 
         public static readonly string[] SessionTypes = new string[]
