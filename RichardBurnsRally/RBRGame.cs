@@ -86,8 +86,8 @@ namespace RichardBurnsRally
                 carData.Speed = data.car.speed;
                 carData.Distance = data.stage.progress;
 
-                aMMotionData.Pitch = data.car.pitch / 45f;
-                aMMotionData.Roll = data.car.roll / 45f;
+                aMMotionData.Pitch = data.car.pitch / 180f;
+                aMMotionData.Roll = data.car.roll / 180f;
                 aMMotionData.Yaw = data.car.yaw / 180f;
                 aMMotionData.Sway = -data.car.accelerations.sway / 9.81f;
                 aMMotionData.Surge = data.car.accelerations.surge / 9.81f;
@@ -126,10 +126,8 @@ namespace RichardBurnsRally
 
         public void Start(IVAzhureRacingApp app)
         {
-            string cmd = sExecutablePath.Contains(" ") ? $"\"{sExecutablePath}\"" : sExecutablePath;
-
-            if (File.Exists(cmd))
-                Utils.ExecuteCmd(cmd);
+            if (File.Exists(sExecutablePath))
+                Utils.ExecuteCmd(sExecutablePath);
             else
                 ShowSettings(app);
         }
