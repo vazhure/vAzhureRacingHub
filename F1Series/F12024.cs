@@ -24,7 +24,7 @@ namespace F1Series
             TimeTrial = 14
         };
 
-        public enum SurfaceType
+        public enum SurfaceType : byte
         {
             Tarmac = 0,
             RumbleStrip = 1,
