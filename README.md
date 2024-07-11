@@ -1,7 +1,7 @@
 # vAzhureRacingHub
 Application for Sim Racing Games. Supporting plugins and external devices via Serial Port
-![2024-05-18_15-11-11](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/1e65998d-477a-4690-bb6e-8e3cf724f21f)
-
+![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/a030f20a-ed1b-444e-8bc5-9b3101006d77)
+![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/a0eb3d30-476e-4d16-9a57-8bbbd850b900)
 ![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/854e9e48-29b4-4987-8002-dd5b09e4b3de)
 
 Supported Game Titles:
@@ -17,6 +17,8 @@ Supported Game Titles:
 * Forza Horizon 4
 * Forza Horizon 5
 * Forza Motorsport (2023)
+* F1 2022
+* F1 2024
 * iRacing
 * KartKraft
 * Kart Racing Pro
@@ -29,11 +31,12 @@ Supported Game Titles:
 * BeamNG.Drive
 
 WIP:
+* American Truck Simulator
+* European Truck Simulator
 * Grid 2019
 * F1 2018
 * F1 2019
 * F1 2020
-* F1 2022
 * Trackmania
 
 My Discord: https://discord.gg/ynHCkrsmMA
