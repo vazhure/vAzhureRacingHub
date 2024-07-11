@@ -566,10 +566,16 @@ namespace Nextion35Dash
                         SendData("fuel bco", "fuel.bco=" + fuelClr.ToString());
 
                         // Electronics
+                        if (carData.Electronics.HasFlag(CarElectronics.DRS))
+                        {
+                            SendData("DRS", "drs.pco=" + cWhite565.ToString());
+                            SendData("DRS BG", "drs.bco=" + cBlue565.ToString());
+                        }
+                        else
                         if (carData.Electronics.HasFlag(CarElectronics.DRS_EN))
                         {
-                            SendData("DRS", "drs.pco=" + (carData.Electronics.HasFlag(CarElectronics.DRS) ? cWhite565.ToString() : cBlack565.ToString()));
-                            SendData("DRS BG", "drs.bco=" + (carData.Electronics.HasFlag(CarElectronics.DRS) ? cBlue565.ToString() : cYellow565.ToString()));
+                            SendData("DRS", "drs.pco=" + cBlack565.ToString());
+                            SendData("DRS BG", "drs.bco=" + cYellow565.ToString());
                         }
                         else
                         {
