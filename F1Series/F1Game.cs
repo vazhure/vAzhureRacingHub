@@ -114,6 +114,8 @@ namespace F1Series
 
                         AMMotionData motionData = mCarData.CarData.MotionData;
 
+                        motionData.Position = new double[] { carMotionData.m_worldPositionX, carMotionData.m_worldPositionY, carMotionData.m_worldPositionZ };
+
                         motionData.Pitch = carMotionData.m_pitch / (float)Math.PI;
                         motionData.Roll = carMotionData.m_roll / (float)Math.PI;
                         motionData.Yaw = carMotionData.m_yaw / (float)Math.PI;
@@ -335,6 +337,50 @@ namespace F1Series
                         }
 
                         OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(mCarData));
+                    }
+                    break;
+                case F12022.PacketID.Event:
+                    {
+                        var data = Marshalizable<F12022.PacketEventData>.FromBytes(bytes);
+
+                        string code = BitConverter.ToString(data.m_eventStringCode);
+                        var carData = mCarData.CarData;
+
+                        switch (code)
+                        {
+                            case "DRSE": carData.Electronics |= CarElectronics.DRS_EN; break;
+                            case "DRSD": carData.Electronics &= ~CarElectronics.DRS_EN; break;
+                            case "CHQF": carData.Flags = TelemetryFlags.FlagChequered; break;
+                        }
+                        
+                        OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(mCarData));
+                    }
+                    break;
+                case F12022.PacketID.SessionHistory:
+                    {
+                        var data = Marshalizable<F12022.PacketSessionHistoryData>.FromBytes(bytes);
+
+                        if (data.m_carIdx == header.m_playerCarIndex)
+                        {
+                            var sessionInfo = mCarData.SessionInfo;
+
+                            if (data.m_numLaps > 0)
+                            {
+                                int prevLap = data.m_numLaps - 1;
+                                sessionInfo.LastSector1Time = data.m_lapHistoryData[prevLap].m_sector1TimeInMS;
+                                sessionInfo.LastSector2Time = data.m_lapHistoryData[prevLap].m_sector2TimeInMS;
+                                sessionInfo.LastSector3Time = data.m_lapHistoryData[prevLap].m_sector3TimeInMS;
+                            }
+
+                            if (data.m_bestLapTimeLapNum < data.m_numLaps)
+                                sessionInfo.BestLapTime = (int)data.m_lapHistoryData[data.m_bestLapTimeLapNum].m_lapTimeInMS;
+                            if (data.m_bestSector1LapNum < data.m_numLaps)
+                                sessionInfo.Sector1BestTime = data.m_lapHistoryData[data.m_bestSector1LapNum].m_sector1TimeInMS;
+                            if (data.m_bestSector2LapNum < data.m_numLaps)
+                                sessionInfo.Sector2BestTime = data.m_lapHistoryData[data.m_bestSector2LapNum].m_sector2TimeInMS;
+                            if (data.m_bestSector3LapNum < data.m_numLaps)
+                                sessionInfo.Sector3BestTime = data.m_lapHistoryData[data.m_bestSector3LapNum].m_sector3TimeInMS;
+                        }
                     }
                     break;
             }
