@@ -57,6 +57,11 @@ namespace F1Series
             Ridged = 11,
         }
 
+        public enum FiaFlags : sbyte
+        {
+            Invalid = -1, None = 0, Green = 1, Blue = 2, Yellow = 3, Red = 4
+        }
+
         [Flags]
         public enum ButtonFlags : uint
         {
@@ -93,6 +98,26 @@ namespace F1Series
             UDPAction11 = 0x40000000,
             UDPAction12 = 0x80000000,
         }
+
+        // F1 visual (can be different from actual compound)
+        // 16 = soft, 17 = medium, 18 = hard, 7 = inter, 8 = wet
+        // F1 Classic – same as above
+        // F2 ‘19, 15 = wet, 19 – super soft, 20 = soft
+        // 21 = medium , 22 = hard
+
+        public static readonly Dictionary<int, string> CompoundID = new Dictionary<int, string>
+        {
+            {16, "soft"},
+            {20, "soft"},
+            {17, "medium"},
+            {21, "medium" } ,
+            {18, "hard"},
+            {22,"hard" },
+            {7,   "inter"},
+            {8,  "wet" },
+            {15, "wet"},
+            {19, "super soft"},
+        };
 
         public static readonly Dictionary<string, string> EventStringCodes = new Dictionary<string, string>
         {
@@ -357,18 +382,48 @@ namespace F1Series
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct PacketHeader
         {
-            public ushort m_packetFormat;            // 2022
-            public byte m_gameMajorVersion;        // Game major version - "X.00"
-            public byte m_gameMinorVersion;        // Game minor version - "1.XX"
-            public byte m_packetVersion;           // Version of this packet type, all start from 1
+            /// <summary>
+            /// 2022
+            /// </summary>
+            public ushort m_packetFormat;            
+            /// <summary>
+            /// Game major version - "X.00"
+            /// </summary>
+            public byte m_gameMajorVersion;        
+            /// <summary>
+            /// Game minor version - "1.XX"
+            /// </summary>
+            public byte m_gameMinorVersion;        
+            /// <summary>
+            /// Version of this packet type, all start from 1
+            /// </summary>
+            public byte m_packetVersion;           
+            /// <summary>
+            /// Identifier for the packet type, see below
+            /// </summary>
             [MarshalAs(UnmanagedType.U1)]
-            public PacketID m_packetId;                // Identifier for the packet type, see below
-            public ulong m_sessionUID;              // Unique identifier for the session
-            public float m_sessionTime;             // Session timestamp
-            public uint m_frameIdentifier;         // Identifier for the frame the data was retrieved on
-            public byte m_playerCarIndex;          // Index of player's car in the array
-            public byte m_secondaryPlayerCarIndex; // Index of secondary player's car in the array (splitscreen)
-                                                   // 255 if no second player
+            public PacketID m_packetId;                
+            /// <summary>
+            /// Unique identifier for the session
+            /// </summary>
+            public ulong m_sessionUID;
+            /// <summary>
+            /// Session timestamp
+            /// </summary>
+            public float m_sessionTime;
+            /// <summary>
+            /// Identifier for the frame the data was retrieved on
+            /// </summary>
+            public uint m_frameIdentifier;
+            /// <summary>
+            /// Index of player's car in the array
+            /// </summary>
+            public byte m_playerCarIndex;
+            /// <summary>
+            /// Index of secondary player's car in the array (splitscreen)
+            /// 255 if no second player
+            /// </summary>
+            public byte m_secondaryPlayerCarIndex;                               
         };
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -496,7 +551,10 @@ namespace F1Series
             public byte m_aiDifficulty;              // AI Difficulty rating – 0-110
             public uint m_seasonLinkIdentifier;      // Identifier for season - persists across saves
             public uint m_weekendLinkIdentifier;     // Identifier for weekend - persists across saves
-            public uint m_sessionLinkIdentifier;     // Identifier for session - persists across saves
+            /// <summary>
+            /// // Identifier for session - persists across saves
+            /// </summary>
+            public uint m_sessionLinkIdentifier;     
             public byte m_pitStopWindowIdealLap;     // Ideal lap to pit on for current strategy (player)
             public byte m_pitStopWindowLatestLap;    // Latest lap to pit on for current strategy (player)
             public byte m_pitStopRejoinPosition;     // Predicted position to rejoin at (player)
@@ -528,12 +586,27 @@ namespace F1Series
             public float m_totalDistance;       // Total distance travelled in session in metres – could
                                                 // be negative if line hasn’t been crossed yet
             public float m_safetyCarDelta;            // Delta in seconds for safety car
-            public byte m_carPosition;             // Car race position
-            public byte m_currentLapNum;       // Current lap number
-            public byte m_pitStatus;               // 0 = none, 1 = pitting, 2 = in pit area
+            /// <summary>
+            /// Car race position
+            /// </summary>
+            public byte m_carPosition;             // 
+            /// <summary>
+            /// Current lap number
+            /// </summary>
+            public byte m_currentLapNum;       // 
+            /// <summary>
+            /// 0 = none, 1 = pitting, 2 = in pit area
+            /// </summary>
+            public byte m_pitStatus;
             public byte m_numPitStops;                 // Number of pit stops taken in this race
-            public byte m_sector;                  // 0 = sector1, 1 = sector2, 2 = sector3
-            public byte m_currentLapInvalid;       // Current lap invalid - 0 = valid, 1 = invalid
+            /// <summary>
+            ///  0 = sector1, 1 = sector2, 2 = sector3
+            /// </summary>
+            public byte m_sector;
+            /// <summary>
+            /// Current lap invalid - 0 = valid, 1 = invalid
+            /// </summary>
+            public byte m_currentLapInvalid;       // 
             public byte m_penalties;               // Accumulated time penalties in seconds to be added
             public byte m_warnings;                  // Accumulated number of warnings issued
             public byte m_numUnservedDriveThroughPens;  // Num drive through pens left to serve
@@ -704,7 +777,10 @@ namespace F1Series
             public byte m_networkId;      // Network id – unique identifier for network players
             public byte m_teamId;                 // Team id - see appendix
             public byte m_myTeam;                 // My team flag – 1 = My Team, 0 = otherwise
-            public byte m_raceNumber;             // Race number of the car
+            /// <summary>
+            /// Race number of the car
+            /// </summary>
+            public byte m_raceNumber;
             public byte m_nationality;            // Nationality of the driver
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 48)]
             public string m_name;               // Name of participant in UTF-8 format – null terminated
@@ -772,27 +848,75 @@ namespace F1Series
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct CarTelemetryData
         {
-            public ushort m_speed;                    // Speed of car in kilometres per hour
-            public float m_throttle;                 // Amount of throttle applied (0.0 to 1.0)
-            public float m_steer;                    // Steering (-1.0 (full lock left) to 1.0 (full lock right))
-            public float m_brake;                    // Amount of brake applied (0.0 to 1.0)
-            public byte m_clutch;                   // Amount of clutch applied (0 to 100)
-            public sbyte m_gear;                     // Gear selected (1-8, N=0, R=-1)
-            public ushort m_engineRPM;                // Engine RPM
-            public byte m_drs;                      // 0 = off, 1 = on
-            public byte m_revLightsPercent;         // Rev lights indicator (percentage)
-            public ushort m_revLightsBitValue;        // Rev lights (bit 0 = leftmost LED, bit 14 = rightmost LED)
+            /// <summary>
+            /// Speed of car in kilometres per hour
+            /// </summary>
+            public ushort m_speed;
+            /// <summary>
+            /// Amount of throttle applied (0.0 to 1.0)
+            /// </summary>
+            public float m_throttle;
+            /// <summary>
+            /// Steering (-1.0 (full lock left) to 1.0 (full lock right))
+            /// </summary>
+            public float m_steer;
+            /// <summary>
+            /// Amount of brake applied (0.0 to 1.0)
+            /// </summary>
+            public float m_brake;
+            /// <summary>
+            /// Amount of clutch applied (0 to 100)
+            /// </summary>
+            public byte m_clutch;
+            /// <summary>
+            /// Gear selected (1-8, N=0, R=-1)
+            /// </summary>
+            public sbyte m_gear;
+            /// <summary>
+            /// Engine RPM
+            /// </summary>
+            public ushort m_engineRPM;
+            /// <summary>
+            /// 0 = off, 1 = on
+            /// </summary>
+            public byte m_drs;
+            /// <summary>
+            /// Rev lights indicator (percentage)
+            /// </summary>
+            public byte m_revLightsPercent;
+            /// <summary>
+            /// Rev lights (bit 0 = leftmost LED, bit 14 = rightmost LED)
+            /// </summary>
+            public ushort m_revLightsBitValue;
+            /// <summary>
+            /// Brakes temperature (celsius)
+            /// </summary>
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public ushort[] m_brakesTemperature;     // Brakes temperature (celsius)
+            public ushort[] m_brakesTemperature;
+            /// <summary>
+            /// Tyres surface temperature (celsius)
+            /// </summary>
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public byte[] m_tyresSurfaceTemperature; // Tyres surface temperature (celsius)
+            public byte[] m_tyresSurfaceTemperature;
+            /// <summary>
+            /// Tyres inner temperature (celsius)
+            /// </summary>
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public byte[] m_tyresInnerTemperature; // Tyres inner temperature (celsius)
-            public ushort m_engineTemperature;        // Engine temperature (celsius)
+            public byte[] m_tyresInnerTemperature;
+            /// <summary>
+            /// Engine temperature (celsius)
+            /// </summary>
+            public ushort m_engineTemperature;
+            /// <summary>
+            /// Tyres pressure (PSI)
+            /// </summary>
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public float[] m_tyresPressure;         // Tyres pressure (PSI)
+            public float[] m_tyresPressure;
+            /// <summary>
+            /// Driving surface, see appendices
+            /// </summary>
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public byte[] m_surfaceType;           // Driving surface, see appendices
+            public byte[] m_surfaceType;
         };
 
         /// <summary>
@@ -820,11 +944,26 @@ namespace F1Series
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct CarStatusData
         {
-            public byte m_tractionControl;          // Traction control - 0 = off, 1 = medium, 2 = full
-            public byte m_antiLockBrakes;           // 0 (off) - 1 (on)
-            public byte m_fuelMix;                  // Fuel mix - 0 = lean, 1 = standard, 2 = rich, 3 = max
-            public byte m_frontBrakeBias;           // Front brake bias (percentage)
-            public byte m_pitLimiterStatus;         // Pit limiter status - 0 = off, 1 = on
+            /// <summary>
+            /// Traction control - 0 = off, 1 = medium, 2 = full
+            /// </summary>
+            public byte m_tractionControl;          // 
+            /// <summary>
+            /// 0 (off) - 1 (on)
+            /// </summary>
+            public byte m_antiLockBrakes;           // 
+            /// <summary>
+            /// Fuel mix - 0 = lean, 1 = standard, 2 = rich, 3 = max
+            /// </summary>
+            public byte m_fuelMix;
+            /// <summary>
+            /// Front brake bias (percentage)
+            /// </summary>
+            public byte m_frontBrakeBias;
+            /// <summary>
+            /// Pit limiter status - 0 = off, 1 = on
+            /// </summary>
+            public byte m_pitLimiterStatus;
             public float m_fuelInTank;               // Current fuel mass
             public float m_fuelCapacity;             // Fuel capacity
             public float m_fuelRemainingLaps;        // Fuel remaining in terms of laps (value on MFD)
@@ -882,7 +1021,7 @@ namespace F1Series
                                                  // 3 = finished, 4 = didnotfinish, 5 = disqualified
                                                  // 6 = not classified, 7 = retired
             public uint m_bestLapTimeInMS;       // Best lap time of the session in milliseconds
-            double m_totalRaceTime;         // Total race time in seconds without penalties
+            public double m_totalRaceTime;         // Total race time in seconds without penalties
             public byte m_penaltiesTime;         // Total penalties accumulated in seconds
             public byte m_numPenalties;          // Number of penalties applied to this driver
             public byte m_numTyreStints;         // Number of tyres stints up to maximum

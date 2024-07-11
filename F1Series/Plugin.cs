@@ -17,9 +17,17 @@ namespace F1Series
             return true;
         }
 
+        private readonly F1Game f12022Game = new F1Game(2022);
+        private readonly F1Game f12024Game = new F1Game(2024);
+
         public bool Initialize(IVAzhureRacingApp app)
         {
-            // TODO
+            try
+            {
+                app.RegisterGame(f12022Game);
+                app.RegisterGame(f12024Game);
+            }
+            catch { return false; }
 
             // F1 2022
             //Console.WriteLine($"Packet size of PacketCarDamageData {Marshal.SizeOf(typeof(F12022.PacketCarDamageData))}");
@@ -72,7 +80,8 @@ namespace F1Series
 
         public void Quit(IVAzhureRacingApp app)
         {
-            // TODO
+            f12022Game.Quit();
+            f12024Game.Quit();
         }
     }
 }

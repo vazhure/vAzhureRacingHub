@@ -48,6 +48,7 @@
     <Compile Include="F12022.cs" />
     <Compile Include="F12023.cs" />
     <Compile Include="F12024.cs" />
+    <Compile Include="F1Game.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

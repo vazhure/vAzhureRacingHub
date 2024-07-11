@@ -40,6 +40,11 @@ namespace F1Series
             Ridged = 11,
         }
 
+        public enum FiaFlags : sbyte
+        {
+            Invalid = -1, None = 0, Green = 1, Blue = 2, Yellow = 3, Red = 4
+        }
+
         [Flags]
         public enum ButtonFlags : uint
         {
@@ -349,7 +354,8 @@ namespace F1Series
             public byte m_gameMajorVersion;        // Game major version - "X.00"
             public byte m_gameMinorVersion;        // Game minor version - "1.XX"
             public byte m_packetVersion;           // Version of this packet type, all start from 1
-            public byte m_packetId;                // Identifier for the packet type, see below
+            [MarshalAs(UnmanagedType.U1)]
+            public PackedID m_packetId;                // Identifier for the packet type, see below
             public ulong m_sessionUID;              // Unique identifier for the session
             public float m_sessionTime;             // Session timestamp
             public uint m_frameIdentifier;         // Identifier for the frame the data was retrieved on
@@ -875,7 +881,7 @@ namespace F1Series
                                                  // 3 = finished, 4 = didnotfinish, 5 = disqualified
                                                  // 6 = not classified, 7 = retired
             public uint m_bestLapTimeInMS;       // Best lap time of the session in milliseconds
-            double m_totalRaceTime;         // Total race time in seconds without penalties
+            public double m_totalRaceTime;         // Total race time in seconds without penalties
             public byte m_penaltiesTime;         // Total penalties accumulated in seconds
             public byte m_numPenalties;          // Number of penalties applied to this driver
             public byte m_numTyreStints;         // Number of tyres stints up to maximum

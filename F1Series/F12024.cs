@@ -41,6 +41,11 @@ namespace F1Series
             Ridged = 11,
         }
 
+        public enum FiaFlags : sbyte
+        {
+            Invalid = -1, None = 0, Green = 1, Blue = 2, Yellow = 3, Red = 4
+        }
+
         [Flags]
         public enum ButtonFlags : uint
         {
