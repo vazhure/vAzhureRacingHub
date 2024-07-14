@@ -1,6 +1,6 @@
 # vAzhureRacingHub
 Application for Sim Racing Games. Supporting plugins and external devices via Serial Port
-![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/a030f20a-ed1b-444e-8bc5-9b3101006d77)
+![vAzhureRacingHub 14 07 2024 17_50_36](https://github.com/user-attachments/assets/f2d46979-feb7-4ff7-a96b-b9a0005071c2)
 ![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/a0eb3d30-476e-4d16-9a57-8bbbd850b900)
 ![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/854e9e48-29b4-4987-8002-dd5b09e4b3de)
 
@@ -19,10 +19,12 @@ Supported Game Titles:
 * Forza Motorsport (2023)
 * F1 2022
 * F1 2024
+* GTR 2
 * iRacing
 * KartKraft
 * Kart Racing Pro
 * Le Mans Ultimate
+* Race 07
 * RaceRoom Racing Experience
 * rFactor
 * rFactor 2
