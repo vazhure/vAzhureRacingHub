@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
+using System.Reflection;
 using vAzhureRacingAPI;
 
 namespace F1Series
@@ -34,12 +36,40 @@ namespace F1Series
 
         private void LoadSettings()
         {
-            // TODO:
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            if (File.Exists(path))
+            {
+                try
+                {
+                    string json = File.ReadAllText(path);
+
+                    settings = ObjectSerializeHelper.DeserializeJson<F1GameSettings>(json);
+                }
+                catch { }
+            }
         }
 
         private void SaveSettings()
         {
-            // TODO :
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string json = "";
+            if (File.Exists(path))
+            {
+                try
+                {
+                    json = File.ReadAllText(path);
+                }
+                catch { }
+            }
+            string jsonNew = settings.GetJson();
+            if (json != jsonNew)
+            {
+                try
+                {
+                    File.WriteAllText(path, jsonNew);
+                }
+                catch { }
+            }
         }
 
         public string Name => $"F1 {m_version}";
@@ -956,7 +986,7 @@ namespace F1Series
             }
         }
 
-        public string[] ExecutableProcessName => new string[] { $"F1_{m_version - 2000}" };
+        public string[] ExecutableProcessName => new string[] { $"F1_{m_version - 2000}", $"F1_{m_version - 2000}_Trial" };
 
         public string UserIconPath { get => settings.ExecutableIcon; set => settings.ExecutableIcon = value; }
         public string UserExecutablePath { get => settings.ExecutableLink; set => settings.ExecutableLink = value; }
