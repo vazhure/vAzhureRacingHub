@@ -6,7 +6,7 @@ namespace F1Series
 {
     public static class F12023
     {
-        public enum PackedID : byte
+        public enum PacketID : byte
         {
             Motion = 0,
             Session = 1,
@@ -355,7 +355,7 @@ namespace F1Series
             public byte m_gameMinorVersion;        // Game minor version - "1.XX"
             public byte m_packetVersion;           // Version of this packet type, all start from 1
             [MarshalAs(UnmanagedType.U1)]
-            public PackedID m_packetId;                // Identifier for the packet type, see below
+            public PacketID m_packetId;                // Identifier for the packet type, see below
             public ulong m_sessionUID;              // Unique identifier for the session
             public float m_sessionTime;             // Session timestamp
             public uint m_frameIdentifier;         // Identifier for the frame the data was retrieved on

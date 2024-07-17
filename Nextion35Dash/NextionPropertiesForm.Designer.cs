@@ -58,8 +58,12 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.comboPage = new System.Windows.Forms.ComboBox();
-            this.treeProfiles = new Nextion35Dash.TreeViewExt();
             this.chkMainDevice = new vAzhureRacingAPI.VAzhureSwitchButton();
+            this.comboPressure = new System.Windows.Forms.ComboBox();
+            this.comboSpeed = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.treeProfiles = new Nextion35Dash.TreeViewExt();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -68,18 +72,18 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(16, 337);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(57, 13);
+            this.label1.Size = new System.Drawing.Size(53, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "COM порт";
+            this.label1.Text = "COM Port";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(16, 367);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(118, 13);
+            this.label2.Size = new System.Drawing.Size(58, 13);
             this.label2.TabIndex = 2;
-            this.label2.Text = "Скорость соединения";
+            this.label2.Text = "Baud Rate";
             this.toolTips.SetToolTip(this.label2, "Выберите скорость соединения");
             // 
             // comboComPort
@@ -147,7 +151,7 @@
             this.sliderLedBrightness.SmallStep = 5;
             this.sliderLedBrightness.Steps = 10;
             this.sliderLedBrightness.TabIndex = 7;
-            this.toolTips.SetToolTip(this.sliderLedBrightness, "Яркость светодиодов");
+            this.toolTips.SetToolTip(this.sliderLedBrightness, "Leds brightness");
             this.sliderLedBrightness.Value = 33;
             this.sliderLedBrightness.Vertical = false;
             this.sliderLedBrightness.OnValueChanged += new System.EventHandler(this.SliderLedBrightness_OnValueChanged);
@@ -169,13 +173,13 @@
             this.chkEnableLeds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.chkEnableLeds.Checked = true;
             this.chkEnableLeds.Location = new System.Drawing.Point(405, 51);
-            this.chkEnableLeds.MaximumSize = new System.Drawing.Size(104, 32);
-            this.chkEnableLeds.MinimumSize = new System.Drawing.Size(104, 32);
+            this.chkEnableLeds.MaximumSize = new System.Drawing.Size(63, 32);
+            this.chkEnableLeds.MinimumSize = new System.Drawing.Size(63, 32);
             this.chkEnableLeds.Name = "chkEnableLeds";
-            this.chkEnableLeds.Size = new System.Drawing.Size(104, 32);
+            this.chkEnableLeds.Size = new System.Drawing.Size(63, 32);
             this.chkEnableLeds.StateOff = ((System.Drawing.Image)(resources.GetObject("chkEnableLeds.StateOff")));
             this.chkEnableLeds.StateOn = ((System.Drawing.Image)(resources.GetObject("chkEnableLeds.StateOn")));
-            this.chkEnableLeds.SwitchText = "Светодиоды";
+            this.chkEnableLeds.SwitchText = "Leds";
             this.chkEnableLeds.TabIndex = 6;
             this.toolTips.SetToolTip(this.chkEnableLeds, "Включение или отключение светодиодной полосы");
             this.chkEnableLeds.OnSwitch += new System.EventHandler(this.ChkEnableLeds_OnSwitch);
@@ -185,13 +189,13 @@
             this.chkEnabled.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.chkEnabled.Checked = true;
             this.chkEnabled.Location = new System.Drawing.Point(405, 13);
-            this.chkEnabled.MaximumSize = new System.Drawing.Size(91, 32);
-            this.chkEnabled.MinimumSize = new System.Drawing.Size(91, 32);
+            this.chkEnabled.MaximumSize = new System.Drawing.Size(80, 32);
+            this.chkEnabled.MinimumSize = new System.Drawing.Size(80, 32);
             this.chkEnabled.Name = "chkEnabled";
-            this.chkEnabled.Size = new System.Drawing.Size(91, 32);
+            this.chkEnabled.Size = new System.Drawing.Size(80, 32);
             this.chkEnabled.StateOff = ((System.Drawing.Image)(resources.GetObject("chkEnabled.StateOff")));
             this.chkEnabled.StateOn = ((System.Drawing.Image)(resources.GetObject("chkEnabled.StateOn")));
-            this.chkEnabled.SwitchText = "Включено";
+            this.chkEnabled.SwitchText = "Enabled";
             this.chkEnabled.TabIndex = 5;
             this.toolTips.SetToolTip(this.chkEnabled, "Включение или отключение передачи данных на устройство");
             this.chkEnabled.OnSwitch += new System.EventHandler(this.ChkEnabled_OnSwitch);
@@ -207,7 +211,7 @@
             this.btnFirmware.Name = "btnFirmware";
             this.btnFirmware.Size = new System.Drawing.Size(375, 31);
             this.btnFirmware.TabIndex = 4;
-            this.btnFirmware.Text = "Образ прошивки дисплея";
+            this.btnFirmware.Text = "Firmware";
             this.btnFirmware.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.toolTips.SetToolTip(this.btnFirmware, "Открыть папку с прошивкой дисплея");
             this.btnFirmware.UseVisualStyleBackColor = true;
@@ -218,11 +222,11 @@
             this.btnDelete.FlatAppearance.BorderSize = 0;
             this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDelete.Image = global::Nextion35Dash.Properties.Resources.trash16;
-            this.btnDelete.Location = new System.Drawing.Point(759, 129);
+            this.btnDelete.Location = new System.Drawing.Point(759, 198);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(26, 24);
             this.btnDelete.TabIndex = 15;
-            this.toolTips.SetToolTip(this.btnDelete, "Удалить пресет");
+            this.toolTips.SetToolTip(this.btnDelete, "Remove Preset");
             this.btnDelete.UseVisualStyleBackColor = true;
             this.btnDelete.Click += new System.EventHandler(this.BtnDelete_Click);
             // 
@@ -232,11 +236,11 @@
             this.btnEdit.FlatAppearance.BorderSize = 0;
             this.btnEdit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEdit.Image = global::Nextion35Dash.Properties.Resources.pen16;
-            this.btnEdit.Location = new System.Drawing.Point(727, 129);
+            this.btnEdit.Location = new System.Drawing.Point(727, 198);
             this.btnEdit.Name = "btnEdit";
             this.btnEdit.Size = new System.Drawing.Size(26, 24);
             this.btnEdit.TabIndex = 14;
-            this.toolTips.SetToolTip(this.btnEdit, "Редактировать пресет");
+            this.toolTips.SetToolTip(this.btnEdit, "Edit Preset");
             this.btnEdit.UseVisualStyleBackColor = true;
             this.btnEdit.Click += new System.EventHandler(this.BtnEdit_Click);
             // 
@@ -246,11 +250,11 @@
             this.btnAdd.FlatAppearance.BorderSize = 0;
             this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAdd.Image = global::Nextion35Dash.Properties.Resources.add16;
-            this.btnAdd.Location = new System.Drawing.Point(695, 129);
+            this.btnAdd.Location = new System.Drawing.Point(695, 198);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(26, 24);
             this.btnAdd.TabIndex = 13;
-            this.toolTips.SetToolTip(this.btnAdd, "Добавить пресет");
+            this.toolTips.SetToolTip(this.btnAdd, "Append Preset");
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.BtnAdd_Click);
             // 
@@ -263,18 +267,18 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(116, 31);
             this.button1.TabIndex = 18;
-            this.button1.Text = "Отмена";
+            this.button1.Text = "Cancel";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.ButtonCancel_Click);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(402, 132);
+            this.label3.Location = new System.Drawing.Point(402, 201);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(44, 13);
+            this.label3.Size = new System.Drawing.Size(37, 13);
             this.label3.TabIndex = 11;
-            this.label3.Text = "Пресет";
+            this.label3.Text = "Preset";
             // 
             // comboPresets
             // 
@@ -286,7 +290,7 @@
             this.comboPresets.Items.AddRange(new object[] {
             "Авто",
             "Вручную"});
-            this.comboPresets.Location = new System.Drawing.Point(480, 129);
+            this.comboPresets.Location = new System.Drawing.Point(480, 198);
             this.comboPresets.Name = "comboPresets";
             this.comboPresets.Size = new System.Drawing.Size(209, 21);
             this.comboPresets.TabIndex = 12;
@@ -308,9 +312,9 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(402, 96);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(55, 13);
+            this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 9;
-            this.label4.Text = "Страница";
+            this.label4.Text = "Dash Page";
             // 
             // comboPage
             // 
@@ -329,6 +333,69 @@
             this.comboPage.TabIndex = 10;
             this.comboPage.SelectedIndexChanged += new System.EventHandler(this.ComboPage_SelectedIndexChanged);
             // 
+            // chkMainDevice
+            // 
+            this.chkMainDevice.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.chkMainDevice.Checked = false;
+            this.chkMainDevice.Location = new System.Drawing.Point(18, 390);
+            this.chkMainDevice.MaximumSize = new System.Drawing.Size(115, 32);
+            this.chkMainDevice.MinimumSize = new System.Drawing.Size(115, 32);
+            this.chkMainDevice.Name = "chkMainDevice";
+            this.chkMainDevice.Size = new System.Drawing.Size(115, 32);
+            this.chkMainDevice.StateOff = ((System.Drawing.Image)(resources.GetObject("chkMainDevice.StateOff")));
+            this.chkMainDevice.StateOn = ((System.Drawing.Image)(resources.GetObject("chkMainDevice.StateOn")));
+            this.chkMainDevice.SwitchText = "Primary Device";
+            this.chkMainDevice.TabIndex = 19;
+            this.chkMainDevice.OnSwitch += new System.EventHandler(this.ChkMainDevice_OnSwitch);
+            // 
+            // comboPressure
+            // 
+            this.comboPressure.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.comboPressure.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboPressure.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboPressure.ForeColor = System.Drawing.Color.White;
+            this.comboPressure.FormattingEnabled = true;
+            this.comboPressure.Items.AddRange(new object[] {
+            "kPa",
+            "PSI"});
+            this.comboPressure.Location = new System.Drawing.Point(480, 120);
+            this.comboPressure.Name = "comboPressure";
+            this.comboPressure.Size = new System.Drawing.Size(101, 21);
+            this.comboPressure.TabIndex = 3;
+            // 
+            // comboSpeed
+            // 
+            this.comboSpeed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.comboSpeed.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboSpeed.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboSpeed.ForeColor = System.Drawing.Color.White;
+            this.comboSpeed.FormattingEnabled = true;
+            this.comboSpeed.Items.AddRange(new object[] {
+            "km/h",
+            "mph"});
+            this.comboSpeed.Location = new System.Drawing.Point(480, 147);
+            this.comboSpeed.Name = "comboSpeed";
+            this.comboSpeed.Size = new System.Drawing.Size(101, 21);
+            this.comboSpeed.TabIndex = 3;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(402, 123);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(75, 13);
+            this.label5.TabIndex = 9;
+            this.label5.Text = "Pressure Units";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(402, 150);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(65, 13);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "Speed Units";
+            // 
             // treeProfiles
             // 
             this.treeProfiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -340,7 +407,7 @@
             this.treeProfiles.FullRowSelect = true;
             this.treeProfiles.HideSelection = false;
             this.treeProfiles.LineColor = System.Drawing.Color.White;
-            this.treeProfiles.Location = new System.Drawing.Point(405, 159);
+            this.treeProfiles.Location = new System.Drawing.Point(405, 227);
             this.treeProfiles.Name = "treeProfiles";
             treeNode1.Name = "Node4";
             treeNode1.Text = "BMW M8 GT3 2019";
@@ -355,34 +422,19 @@
             this.treeProfiles.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode2,
             treeNode5});
-            this.treeProfiles.Size = new System.Drawing.Size(380, 287);
+            this.treeProfiles.Size = new System.Drawing.Size(380, 219);
             this.treeProfiles.TabIndex = 16;
             this.treeProfiles.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TreeProfiles_AfterSelect);
             this.treeProfiles.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.TreeProfiles_NodeMouseDoubleClick);
             this.treeProfiles.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TreeProfiles_KeyDown);
             this.treeProfiles.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TreeProfiles_KeyUp);
             // 
-            // chkMainDevice
-            // 
-            this.chkMainDevice.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
-            this.chkMainDevice.Checked = false;
-            this.chkMainDevice.Location = new System.Drawing.Point(18, 390);
-            this.chkMainDevice.MaximumSize = new System.Drawing.Size(152, 32);
-            this.chkMainDevice.MinimumSize = new System.Drawing.Size(152, 32);
-            this.chkMainDevice.Name = "chkMainDevice";
-            this.chkMainDevice.Size = new System.Drawing.Size(152, 32);
-            this.chkMainDevice.StateOff = ((System.Drawing.Image)(resources.GetObject("chkMainDevice.StateOff")));
-            this.chkMainDevice.StateOn = ((System.Drawing.Image)(resources.GetObject("chkMainDevice.StateOn")));
-            this.chkMainDevice.SwitchText = "Основное устройство";
-            this.chkMainDevice.TabIndex = 19;
-            this.chkMainDevice.OnSwitch += new System.EventHandler(this.ChkMainDevice_OnSwitch);
-            // 
             // NextionPropertiesForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
-            this.ClientSize = new System.Drawing.Size(794, 492);
+            this.ClientSize = new System.Drawing.Size(794, 486);
             this.ControlBox = false;
             this.Controls.Add(this.chkMainDevice);
             this.Controls.Add(this.btnDelete);
@@ -398,9 +450,13 @@
             this.Controls.Add(this.btnFirmware);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnOK);
+            this.Controls.Add(this.comboSpeed);
+            this.Controls.Add(this.comboPressure);
             this.Controls.Add(this.comboBaudRate);
             this.Controls.Add(this.comboComPort);
             this.Controls.Add(this.label2);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label1);
@@ -445,5 +501,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox comboPage;
         private vAzhureRacingAPI.VAzhureSwitchButton chkMainDevice;
+        private System.Windows.Forms.ComboBox comboPressure;
+        private System.Windows.Forms.ComboBox comboSpeed;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }

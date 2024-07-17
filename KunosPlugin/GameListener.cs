@@ -65,7 +65,7 @@ namespace KunosPlugin
                         {
                             viewStreamStatic.ReadAsync(dataStatic, 0, dataStatic.Length);
 
-                            var pageFileStatic = SPageFileStatic.FromBytes(dataStatic);
+                            var pageFileStatic = Marshalizable<SPageFileStatic>.FromBytes(dataStatic);
 
                             string carModel = pageFileStatic.CarModel;
 
@@ -88,7 +88,7 @@ namespace KunosPlugin
                         {
                             viewStreamGraphics.ReadAsync(dataGraphics, 0, dataGraphics.Length);
 
-                            var graphics = SPageFileGraphics.FromBytes(dataGraphics);
+                            var graphics = Marshalizable<SPageFileGraphics>.FromBytes(dataGraphics);
 
                             sTireCompound = graphics.tyreCompound;
 

@@ -235,7 +235,7 @@ namespace Nextion35Dash
 
             if (serialPort.IsOpen)
             {
-                if (!SendData("page", "page intro"))
+                if (!SendData("page", $"page {settings.IntroPage}"))
                 {
                     return;
                 }
@@ -469,6 +469,8 @@ namespace Nextion35Dash
         private CustomLeds currentLedProfile = null;
         string oldPage = "";
 
+        bool _oldLedState = false;
+
         /// <summary>
         /// Основной цикл процесса
         /// </summary>
@@ -484,13 +486,25 @@ namespace Nextion35Dash
                 if (!IsConnected)
                     break;
 
+                if (_oldLedState != Settings.EnableLeds)
+                {
+                    UpdateLeds();
+                    _oldLedState = Settings.EnableLeds;
+                }
+
+                if (!Settings.Enabled)
+                {
+                    Thread.Sleep(1000);
+                    continue;
+                }
+
                 try
                 {
                     AMSessionInfo sessionInfo = m_dataSet.SessionInfo;
                     AMCarData carData = m_dataSet.CarData;
                     AMWeatherData weatherData = m_dataSet.WeatherData;
 
-                    if (Settings.Enabled && (Nextion35Plugin.sPlugin.GetPrimaryDevice() == this) && _dataArrived)
+                    if ((Nextion35Plugin.sPlugin.GetPrimaryDevice() == this) && _dataArrived)
                     {
                         _dataArrived = false;
                         _timeLastFrame = DateTime.Now;
@@ -535,7 +549,7 @@ namespace Nextion35Dash
                         SendData("position", "pos.txt=\"" + (sessionInfo.CurrentPosition > 0 ? sessionInfo.CurrentPosition.ToString(CultureInfo.InvariantCulture) : "") + '\"');
                         SendData("lap", "lap.txt=\"" + (sessionInfo.CurrentLapNumber > 0 ? sessionInfo.CurrentLapNumber.ToString(CultureInfo.InvariantCulture) : "") + '\"');
                         SendData("rpm", FormattableString.Invariant($"rpm.txt=\"{(int)carData.RPM}\""));
-                        SendData("speed", FormattableString.Invariant($"spd.txt=\"{(int)carData.Speed}\""));
+                        SendData("speed", FormattableString.Invariant($"spd.txt=\"{(settings.SpeedUnits == DeviceSettings.SpeedUnitsEnum.kmph ? (int)carData.Speed : (int)(carData.Speed * 0.62137119))}\""));
                         SendData("rpmBar", FormattableString.Invariant($"bar.val={bar}"));
                         SendData("fuel", FormattableString.Invariant($"fuel.txt=\"{carData.FuelLevel:N2}\""));
                         SendData("brake bias", FormattableString.Invariant($"bias.txt=\"{carData.BrakeBias:N1}\""));
@@ -645,19 +659,23 @@ namespace Nextion35Dash
                             if (carData.Tires[0].Detached)
                                 SendData("pressure FL", "pfl.txt=\"\"");
                             else
-                                SendData("pressure FL", FormattableString.Invariant($"pfl.txt=\"{carData.Tires[0].Pressure / 6.89476:N1}\""));
+                                SendData("pressure FL", settings.PressureUnits == DeviceSettings.PressureUnitsEnum.kPa ? FormattableString.Invariant($"pfl.txt=\"{carData.Tires[0].Pressure:N1}\"") :
+                                    FormattableString.Invariant($"pfl.txt=\"{carData.Tires[0].Pressure / 6.89476:N1}\""));
                             if (carData.Tires[1].Detached)
                                 SendData("pressure FR", "pfr.txt=\"\"");
                             else
-                                SendData("pressure FR", FormattableString.Invariant($"pfr.txt=\"{carData.Tires[1].Pressure / 6.89476:N1}\""));
+                                SendData("pressure FR", settings.PressureUnits == DeviceSettings.PressureUnitsEnum.kPa ? FormattableString.Invariant($"pfr.txt=\"{carData.Tires[1].Pressure:N1}\"") :
+                                    FormattableString.Invariant($"pfr.txt=\"{carData.Tires[1].Pressure / 6.89476:N1}\""));
                             if (carData.Tires[2].Detached)
                                 SendData("pressure RL", "prl.txt=\"\"");
                             else
-                                SendData("pressure RL", FormattableString.Invariant($"prl.txt=\"{carData.Tires[2].Pressure / 6.89476:N1}\""));
+                                SendData("pressure RL", settings.PressureUnits == DeviceSettings.PressureUnitsEnum.kPa ? FormattableString.Invariant($"prl.txt=\"{carData.Tires[2].Pressure:N1}\"") :
+                                    FormattableString.Invariant($"prl.txt=\"{carData.Tires[2].Pressure / 6.89476:N1}\""));
                             if (carData.Tires[3].Detached)
                                 SendData("pressure RR", "prr.txt=\"\"");
                             else
-                                SendData("pressure RR", FormattableString.Invariant($"prr.txt=\"{carData.Tires[3].Pressure / 6.89476:N1}\""));
+                                SendData("pressure RR", settings.PressureUnits == DeviceSettings.PressureUnitsEnum.kPa ? FormattableString.Invariant($"prr.txt=\"{carData.Tires[3].Pressure:N1}\"") :
+                                    FormattableString.Invariant($"prr.txt=\"{carData.Tires[3].Pressure / 6.89476:N1}\""));
 
                             // Temperature
                             double tfl = carData.Tires == null ? 30 : (carData.Tires[0].Temperature[0] + carData.Tires[0].Temperature[1] + carData.Tires[0].Temperature[2]) / 3;
@@ -691,8 +709,9 @@ namespace Nextion35Dash
 
                     if ((DateTime.Now - _timeLastFrame).TotalSeconds > cTimeout)
                     {
-                        SendData("page", "page black");
+                        SendData("page", $"page {settings.SleepPage}", true);
                         SendData("clock", $"dt.txt=\"{datetime}\"");
+                        UpdateLeds();
                         ClearCommandsCash();
                         Thread.Sleep(1000);
                         continue;
@@ -716,7 +735,7 @@ namespace Nextion35Dash
                 Thread.Sleep(Settings.Enabled ? 1000 / fps : 1000);
             }
 
-            SendData("page1", "page intro");
+            SendData("page1", $"page {settings.IntroPage}");
             ClearCommandsCash();
             bRunning = false;
             Status = DeviceStatus.Disconnected;
@@ -933,6 +952,10 @@ namespace Nextion35Dash
         /// Имя отображаемой страницы по умолчанию
         /// </summary>
         public string DefaultPage { get; set; } = "page0";
+        public string IntroPage { get; set; } = "intro";
+        public string SleepPage { get; set; } = "black";
+
+        public string[] Pages { get; set; } = { "page0", "page1", "page2" };
         /// <summary>
         /// Частота обновления, кадров в секунду
         /// </summary>
@@ -948,13 +971,16 @@ namespace Nextion35Dash
         /// <summary>
         /// Единица изменения скорости: 0 - км/ч, 1 - миль/ч
         /// </summary>
-        public int SpeedUnits = 0;
+        public SpeedUnitsEnum SpeedUnits = SpeedUnitsEnum.kmph;
         /// <summary>
         /// Единица изменения давления: 0 - kPa, 1 - PSI
         /// </summary>
-        public int PressureUnits = 0;
+        public PressureUnitsEnum PressureUnits = PressureUnitsEnum.PSI;
 
         public bool PrimaryDevice = false;
+
+        public enum SpeedUnitsEnum : int { kmph = 0, mph = 1 }
+        public enum PressureUnitsEnum : int { kPa = 0, PSI = 1 }
 
         public object Clone()
         {

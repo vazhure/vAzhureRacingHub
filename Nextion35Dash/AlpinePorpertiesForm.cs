@@ -43,6 +43,11 @@ namespace Nextion35Dash
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            if (nextion.Settings.Pages?.Count() > 0)
+            {
+                comboPage.Items.Clear();
+                comboPage.Items.AddRange(nextion.Settings.Pages);
+            }
             comboPage.SelectedItem = nextion.Settings.DefaultPage;
             chkMainDevice.Checked = nextion.Settings.PrimaryDevice;
             InitPresets();
@@ -95,7 +100,7 @@ namespace Nextion35Dash
 
             treeProfiles.Nodes.Clear();
 
-            TreeNode user = treeProfiles.Nodes.Add("Пользовательские профили");
+            TreeNode user = treeProfiles.Nodes.Add("User Profiles");
             user.SelectedImageIndex = user.ImageIndex = 0;
 
             foreach (CustomLedsA leds in nextion?.customLeds)
@@ -125,7 +130,7 @@ namespace Nextion35Dash
         {
             InitComPorts();
 
-            if (MessageBox.Show(this, "Использовать данное устройство?", $"Новое устройство ({e.Port})", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show(this, "Use Device?", $"New Device detected ({e.Port})", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 if (comboComPort.FindString(e.Port) is int t && t > 0)
                 {
@@ -155,7 +160,7 @@ namespace Nextion35Dash
 
             try
             {
-                comboSpeedUnits.SelectedIndex = nextion.Settings.SpeedUnits;
+                comboSpeedUnits.SelectedIndex = (int)nextion.Settings.SpeedUnits;
             }
             catch
             {
@@ -164,7 +169,7 @@ namespace Nextion35Dash
 
             try
             {
-                comboPressureUnits.SelectedIndex = nextion.Settings.PressureUnits;
+                comboPressureUnits.SelectedIndex = (int)nextion.Settings.PressureUnits;
             }
             catch
             {
@@ -183,7 +188,7 @@ namespace Nextion35Dash
             string[] ports = SerialPort.GetPortNames();
 
             comboComPort.Items.Clear();
-            comboComPort.Items.Add("Не подключен");
+            comboComPort.Items.Add("Not connected");
             if (ports.Length > 0)
             {
                 comboComPort.Items.AddRange(ports);
@@ -241,8 +246,8 @@ namespace Nextion35Dash
             oldSettings.LedBrightness = sliderLedBrightness.Value;
             oldSettings.PresetMode = comboPresets.SelectedIndex == 0 ? PresetMode.Auto : PresetMode.Manual;
             oldSettings.DefaultPage = comboPage.SelectedItem as string ?? oldSettings.DefaultPage;
-            oldSettings.SpeedUnits = comboSpeedUnits.SelectedIndex;
-            oldSettings.PressureUnits = comboPressureUnits.SelectedIndex;
+            oldSettings.SpeedUnits = (DeviceSettings.SpeedUnitsEnum) comboSpeedUnits.SelectedIndex;
+            oldSettings.PressureUnits = (DeviceSettings.PressureUnitsEnum)comboPressureUnits.SelectedIndex;
             oldSettings.PrimaryDevice = chkMainDevice.Checked;
 
             if (comboComPort.SelectedItem is string port)
@@ -271,7 +276,7 @@ namespace Nextion35Dash
             nextion.Settings = oldSettings;
         }
 
-        private void SliderLedBrightness_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void SliderLedBrightness_MouseUp(object sender, MouseEventArgs e)
         {
             if (nextion.IsConnected)
             {
@@ -339,12 +344,12 @@ namespace Nextion35Dash
         {
             if (node.ImageIndex == 0 && node.Parent == null)
             {
-                MessageBox.Show(this, "Удаление данной папки запрещено!");
+                MessageBox.Show(this, "Prohibited!");
             }
             else
             {
-                string msg = node.Nodes.Count > 0 ? $"Удалить все профили игры {node.Text}?" : $"Удалить профиль {node.Text}?";
-                if (MessageBox.Show(this, msg, "Профили", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                string msg = node.Nodes.Count > 0 ? $"Remove all Profiles for {node.Text}?" : $"Remove Profile {node.Text}?";
+                if (MessageBox.Show(this, msg, "Profiles", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     if (node.Tag is CustomLedsA leds)
                     {
@@ -372,13 +377,13 @@ namespace Nextion35Dash
             {
                 btnEdit.Enabled = node?.Tag != null;
                 btnDelete.Enabled = node?.ImageIndex != 0;
-                toolTips.SetToolTip(btnDelete, node?.Tag != null ? "Удалить пресет" : "Удалить пресеты игры");
-                toolTips.SetToolTip(btnAdd, node?.ImageIndex == 0 ? "Добавить пользовательский пресет" : "Создать пресет текущей машины");
+                toolTips.SetToolTip(btnDelete, node?.Tag != null ? "Remove Preset" : "Remove Game Presets");
+                toolTips.SetToolTip(btnAdd, node?.ImageIndex == 0 ? "Append User Preset" : "Create Preset for current vehicle");
             }
             else
             {
                 btnEdit.Enabled = btnDelete.Enabled = false;
-                toolTips.SetToolTip(btnAdd, "Создать пресет текущей машины");
+                toolTips.SetToolTip(btnAdd, "Create Preset for current vehicle");
             }
         }
 
@@ -428,7 +433,7 @@ namespace Nextion35Dash
             }
             else
             {
-                if (MessageBox.Show(this, "Создать пользовательский пресет?", "Создание пресета", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                if (MessageBox.Show(this, "Create User Preset?", "Create Preset", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 {
                     // TODO:
                     //CustomLeds customLeds = CustomLeds.CreateDefaults(nextion.m_dataSet.CarData.CarName, nextion.m_dataSet.GamePlugin.Name);

@@ -99,6 +99,8 @@ namespace iRacingPlugin
             if (double.TryParse(wrapper.Data.SessionInfo.WeekendInfo.TrackLength, out double length))
                 dataSet.SessionInfo.TrackLength = length * 1000f;
 
+            //int sessionNum = wrapper.Data.GetInt("SessionNum");
+
             carIdx = wrapper.Data.SessionInfo.DriverInfo.DriverCarIdx;
             dataSet.CarData.CarName = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarScreenName;
             dataSet.CarData.CarClass = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarClassShortName;
@@ -107,6 +109,7 @@ namespace iRacingPlugin
             dataSet.CarData.CarClass = wrapper.Data.SessionInfo.DriverInfo.Drivers[carIdx].CarClassShortName;
             dataSet.CarData.MaxRPM = wrapper.Data.SessionInfo.DriverInfo.DriverCarRedLine;
             dataSet.SessionInfo.DriversCount = wrapper.Data.SessionInfo.DriverInfo.PaceCarIdx;
+            //dataSet.SessionInfo.TotalLapsCount = wrapper.Data.SessionInfo.SessionInfo.Sessions[]
         }
 
         private void OnTelemetryData()
@@ -151,7 +154,7 @@ namespace iRacingPlugin
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = wrapper.Data.GetFloat("LFcoldPressure") / 6.89475728f, // kPa to PSI
+                    Pressure = wrapper.Data.GetFloat("LFcoldPressure") , // kPa
                     Wear = 1.0f - wrapper.Data.GetFloat("LFwearM"),
                     Temperature = new double []
                     {
@@ -164,7 +167,7 @@ namespace iRacingPlugin
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = wrapper.Data.GetFloat("RFcoldPressure")/ 6.89475728f, // kPa to PSI
+                    Pressure = wrapper.Data.GetFloat("RFcoldPressure"), // kPa
                     Wear = 1.0f - wrapper.Data.GetFloat("RFwearM"),
                     Temperature = new double []
                     {
@@ -177,7 +180,7 @@ namespace iRacingPlugin
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = wrapper.Data.GetFloat("LRcoldPressure") / 6.89475728f,// kPa to PSI
+                    Pressure = wrapper.Data.GetFloat("LRcoldPressure"),// kPa
                     Wear = 1.0f - wrapper.Data.GetFloat("LRwearM"),
                     Temperature = new double []
                     {
@@ -190,7 +193,7 @@ namespace iRacingPlugin
                 new AMTireData
                 {
                     BrakeTemperature = 0,
-                    Pressure = wrapper.Data.GetFloat("RRcoldPressure") / 6.89475728f,// kPa to PSI
+                    Pressure = wrapper.Data.GetFloat("RRcoldPressure"), // kPa
                     Wear = 1.0f - wrapper.Data.GetFloat("RRwearM"),
                     Temperature = new double []
                     {
@@ -202,11 +205,14 @@ namespace iRacingPlugin
                 },
             };
 
-            sessionInfo.CurrentLapTime = wrapper.Data.GetInt("LapCurrentLapTime") * 1000;
-            sessionInfo.BestLapTime = wrapper.Data.GetInt("LapBestLapTime") * 1000;
-            sessionInfo.LastLapTime = wrapper.Data.GetInt("LapLastLapTime") * 1000;
-            sessionInfo.CurrentDelta = wrapper.Data.GetInt("LapDeltaToSessionBestLap") * 1000;
-            sessionInfo.RemainingLaps = wrapper.Data.GetInt("SessionLapsRemainEx") * 1000;
+            sessionInfo.CurrentLapNumber = wrapper.Data.GetInt("CarIdxLap", carIdx);
+            sessionInfo.CurrentLapTime = (int)(wrapper.Data.GetFloat("LapCurrentLapTime") * 1000f);
+            sessionInfo.BestLapTime = (int)(wrapper.Data.GetFloat("LapBestLapTime") * 1000f);
+            sessionInfo.LastLapTime = (int)(wrapper.Data.GetFloat("LapLastLapTime") * 1000f);
+            sessionInfo.CurrentDelta = (int)(wrapper.Data.GetFloat("LapDeltaToSessionBestLap") * 1000f);
+            sessionInfo.RemainingTime = (int)(wrapper.Data.GetDouble("SessionTimeRemain") * 1000.0);
+            sessionInfo.RemainingLaps = wrapper.Data.GetInt("SessionLapsRemain");
+            //sessionInfo.TotalLapsCount = wrapper.Data.GetInt("SessionLaps");
 
             // Car Depending parameters
 
@@ -258,12 +264,6 @@ namespace iRacingPlugin
                 (sessionFlags.HasFlag(Flags.YellowWaving) ? TelemetryFlags.FlagYellow : TelemetryFlags.FlagNone) |
                 (sessionFlags.HasFlag(Flags.Yellow) ? TelemetryFlags.FlagYellow : TelemetryFlags.FlagNone);
 
-            sessionInfo.RemainingTime = (int)(wrapper.Data.GetDouble("SessionTimeRemain") * 1000.0);
-            sessionInfo.CurrentLapNumber = wrapper.Data.GetInt("CarIdxLap", carIdx);
-            sessionInfo.CurrentLapTime = (int)(wrapper.Data.GetFloat("LapCurrentLapTime") * 1000.0);
-            sessionInfo.LastLapTime = (int)(wrapper.Data.GetFloat("LapLastLapTime") * 1000.0);
-            sessionInfo.BestLapTime = (int)(wrapper.Data.GetFloat("LapBestNLapTime") * 1000.0);
-            sessionInfo.CurrentDelta = (int)(wrapper.Data.GetFloat("LapDeltaToBestLap") * 1000.0);
             sessionInfo.Sector1BestTime = -1;
             sessionInfo.Sector2BestTime = -1;
             sessionInfo.CurrentSector1Time = -1;
@@ -279,7 +279,6 @@ namespace iRacingPlugin
                                carData.Flags.HasFlag(TelemetryFlags.FlagSlowDown) ? "SlowDown" :
                                carData.Flags.HasFlag(TelemetryFlags.FlagStopAndGo) ? "StopAndGo" :
                                carData.Flags.HasFlag(TelemetryFlags.FlagPenalty) ? "Penalty" : "";
-            sessionInfo.TotalLapsCount = wrapper.Data.GetInt("SessionLapsRemain");
 
             SessionState sessionState = (SessionState)wrapper.Data.GetBitField("SessionState");
 

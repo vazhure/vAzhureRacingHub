@@ -224,7 +224,7 @@ namespace ForzaHorizon
                     {
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempFrontLeft, dash.TireTempFrontLeft,dash.TireTempFrontLeft,dash.TireTempFrontLeft },
                             BrakeTemperature = 100,
                             Detached = false,
@@ -232,7 +232,7 @@ namespace ForzaHorizon
                         },
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempFrontRight, dash.TireTempFrontRight, dash.TireTempFrontRight, dash.TireTempFrontRight },
                             BrakeTemperature = 100,
                             Detached = false,
@@ -240,7 +240,7 @@ namespace ForzaHorizon
                         },
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempRearLeft, dash.TireTempRearLeft, dash.TireTempRearLeft, dash.TireTempRearLeft },
                             BrakeTemperature = 100,
                             Detached = false,
@@ -248,7 +248,7 @@ namespace ForzaHorizon
                         },
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempRearRight, dash.TireTempRearRight, dash.TireTempRearRight, dash.TireTempRearRight },
                             BrakeTemperature = 100,
                             Detached = false,
@@ -283,7 +283,7 @@ namespace ForzaHorizon
                     cardata.Steering = dash.Steer / 127.0f;
                     cardata.Position = dash.RacePosition;
                     cardata.Lap = dash.LapNumber;
-                    cardata.FuelLevel = dash.Fuel;
+                    cardata.FuelLevel = dash.Fuel * 100.0; // Percent
 
                     // No motion in menu
                     motionData.Yaw = dash.IsRaceOn > 0 ? (float)(dash.Yaw / Math.PI) : 0;
@@ -309,28 +309,28 @@ namespace ForzaHorizon
                     {
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempFrontLeft, dash.TireTempFrontLeft,dash.TireTempFrontLeft,dash.TireTempFrontLeft },
                             BrakeTemperature = 100,
                             Detached = false
                         },
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempFrontRight, dash.TireTempFrontRight, dash.TireTempFrontRight, dash.TireTempFrontRight },
                             BrakeTemperature = 100,
                             Detached = false
                         },
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempRearLeft, dash.TireTempRearLeft, dash.TireTempRearLeft, dash.TireTempRearLeft },
                             BrakeTemperature = 100,
                             Detached = false
                         },
                         new AMTireData()
                         {
-                            Pressure = 2.0,
+                            Pressure = 140,
                             Temperature = new double[]{ dash.TireTempRearRight, dash.TireTempRearRight, dash.TireTempRearRight, dash.TireTempRearRight },
                             BrakeTemperature = 100,
                             Detached = false

@@ -6,7 +6,7 @@ namespace F1Series
 {
     public static class F12024
     {
-        public enum PackedID : byte
+        public enum PacketID : byte
         {
             Motion = 0,
             Session = 1,
@@ -401,7 +401,7 @@ namespace F1Series
             /// Identifier for the packet type, see below
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
-            public PackedID m_packetId;
+            public PacketID m_packetId;
             /// <summary>
             /// Unique identifier for the session
             /// </summary>

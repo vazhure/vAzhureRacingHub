@@ -44,6 +44,11 @@ namespace Nextion35Dash
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            if (nextion.Settings.Pages?.Count() > 0)
+            {
+                comboPage.Items.Clear();
+                comboPage.Items.AddRange(nextion.Settings.Pages);
+            }
             comboPage.SelectedItem = nextion.Settings.DefaultPage;
             chkMainDevice.Checked = nextion.Settings.PrimaryDevice;
             InitPresets();
@@ -153,6 +158,24 @@ namespace Nextion35Dash
             chkEnableLeds.Checked = nextion.Settings.EnableLeds;
             sliderLedBrightness.Value = oldSettings.LedBrightness;
             lblLedBrightness.Text = $"{sliderLedBrightness.Value}";
+
+            try
+            {
+                comboSpeed.SelectedIndex = (int)nextion.Settings.SpeedUnits;
+            }
+            catch
+            {
+                comboSpeed.SelectedIndex = 0;
+            }
+
+            try
+            {
+                comboPressure.SelectedIndex = (int)nextion.Settings.PressureUnits;
+            }
+            catch
+            {
+                comboPressure.SelectedIndex = 0;
+            }
         }
 
         private void UpdateImage()
@@ -225,6 +248,8 @@ namespace Nextion35Dash
             oldSettings.PresetMode = comboPresets.SelectedIndex == 0 ? PresetMode.Auto : PresetMode.Manual;
             oldSettings.DefaultPage = comboPage.SelectedItem as string ?? oldSettings.DefaultPage;
             oldSettings.PrimaryDevice = chkMainDevice.Checked;
+            oldSettings.SpeedUnits = (DeviceSettings.SpeedUnitsEnum)comboSpeed.SelectedIndex;
+            oldSettings.PressureUnits = (DeviceSettings.PressureUnitsEnum)comboPressure.SelectedIndex;
 
             if (comboComPort.SelectedItem is string port)
             {
