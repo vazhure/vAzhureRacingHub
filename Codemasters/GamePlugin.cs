@@ -276,7 +276,9 @@ namespace Codemasters
                         try
                         {
                             if (bAskToPatch == false || MessageBox.Show("Config file not patched! Patch now?", Name, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
                                 xmlDoc.Save(config_file_name);
+                            }
                         }
                         catch (Exception e)
                         {

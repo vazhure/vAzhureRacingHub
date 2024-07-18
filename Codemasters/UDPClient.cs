@@ -148,8 +148,10 @@ namespace Codemasters
                     carData.FuelLevel = data.fuel_in_tank;
                     carData.FuelCapacity = data.fuel_capacity;
                     carData.Distance = data.lap_distance;
-
+                    carData.Lap = (int)data.lap;
+                    carData.Position = (int)data.race_position;
                     sessionInfo.Sector = (int)data.race_sector;
+
                     sessionInfo.Flag = "Green";
                     carData.Flags = data.lap_time > 0 ? TelemetryFlags.FlagGreen : TelemetryFlags.FlagNone;
                     //sessionInfo.CurrentSector1Time = (int)(data.sector_time_1 * 1000.0f);
@@ -242,6 +244,7 @@ namespace Codemasters
                             break;
                         case GamePlugin.CodemastersGame.DIRT4:
                         case GamePlugin.CodemastersGame.DIRTRALLY20:
+                        case GamePlugin.CodemastersGame.GRID2019:
                             {
                                 aMMotionData.Heave = accZ / 98.1f;
                                 aMMotionData.Sway = data.gforce_lateral / (float)Math.PI;

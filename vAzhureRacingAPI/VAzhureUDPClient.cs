@@ -85,7 +85,7 @@ namespace vAzhureRacingAPI
                 finally
                 {
                     _udpstate.client?.BeginReceive(new AsyncCallback(OnUdpData), _udpstate);
-                    dtLast = new DateTime();
+                    dtLast = DateTime.Now;
                     timer.Enabled = true;
                 }
             }
