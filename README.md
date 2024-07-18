@@ -1,8 +1,9 @@
 # vAzhureRacingHub
 Application for Sim Racing Games. Supporting plugins and external devices via Serial Port
-![vAzhureRacingHub 14 07 2024 17_50_36](https://github.com/user-attachments/assets/f2d46979-feb7-4ff7-a96b-b9a0005071c2)
-![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/a0eb3d30-476e-4d16-9a57-8bbbd850b900)
+![image](https://github.com/user-attachments/assets/778e9fbe-836b-4ef9-830a-57a4c90abdfd)
+![image](https://github.com/user-attachments/assets/25a9a4de-d619-4ac3-b4f5-d022322f1c93)
 ![image](https://github.com/vazhure/vAzhureRacingHub/assets/124382776/854e9e48-29b4-4987-8002-dd5b09e4b3de)
+![image](https://github.com/user-attachments/assets/c88f9783-8864-49a8-b4b5-195558c2527f)
 
 Supported Game Titles:
 * Assetto Corsa
@@ -20,6 +21,7 @@ Supported Game Titles:
 * F1 2022
 * F1 2024
 * GTR 2
+* Grid 2019
 * iRacing
 * KartKraft
 * Kart Racing Pro
@@ -35,7 +37,6 @@ Supported Game Titles:
 WIP:
 * American Truck Simulator
 * European Truck Simulator
-* Grid 2019
 * F1 2018
 * F1 2019
 * F1 2020
