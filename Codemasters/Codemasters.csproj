@@ -82,6 +82,9 @@
   <ItemGroup>
     <None Include="Resources\eawrc.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Grid.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo D| xcopy "$(TargetPath)" "C:\ProgramData\vAzhureRacingHub\Plugins\Codemasters" /e /y /d</PostBuildEvent>

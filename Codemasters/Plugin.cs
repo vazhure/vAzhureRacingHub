@@ -23,6 +23,7 @@ namespace Codemasters
             new GamePlugin(GamePlugin.CodemastersGame.DIRTRALLY20),
             new GamePlugin(GamePlugin.CodemastersGame.WRCG),
             new GamePlugin(GamePlugin.CodemastersGame.EAWRC),
+            new GamePlugin(GamePlugin.CodemastersGame.GRID2019),
         };
 
         public bool Initialize(IVAzhureRacingApp app)

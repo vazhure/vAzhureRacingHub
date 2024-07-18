@@ -1,8 +1,6 @@
 ﻿using Codemasters.Structs;
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using vAzhureRacingAPI;
 
 namespace Codemasters
@@ -21,6 +19,13 @@ namespace Codemasters
             gameid = id;
             dataset = new TelemetryDataSet(game);
             structSize = id == GamePlugin.CodemastersGame.EAWRC ? Marshal.SizeOf(typeof(WRC_DATA)) : Marshal.SizeOf(typeof(DIRT_4_DATA_MODE3));
+            OnTimeout += UDPClient_OnTimeout;
+        }
+
+        private void UDPClient_OnTimeout(object sender, EventArgs e)
+        {
+            dataset?.LoadDefaults();
+            OnDataArrived?.Invoke(this, new TelemetryUpdatedEventArgs(dataset));
         }
 
         private float _vY = 0;
@@ -75,6 +80,19 @@ namespace Codemasters
                     double x = data.vehicle_acceleration_x * data.vehicle_roll_z - data.vehicle_acceleration_z * data.vehicle_roll_x;
                     double y = data.vehicle_acceleration_x * data.vehicle_roll_x + data.vehicle_acceleration_z * data.vehicle_roll_z;
 
+                    //Vector3 fwd = new Vector3(data.vehicle_pitch_x, data.vehicle_pitch_y, data.vehicle_pitch_z);
+                    //Vector3 rht = new Vector3(data.vehicle_roll_x, data.vehicle_roll_y, data.vehicle_roll_z);
+                    //Vector3 up = Vector3.Cross(fwd, rht);
+                    //Vector3 pos = new Vector3(data.vehicle_position_x, data.vehicle_position_y, data.vehicle_position_z);
+
+                    //Matrix4x4 transform = new Matrix4x4(rht.X, rht.Y, rht.Z, 0.0f,
+                    //                        up.X, up.Y, up.Z, 0.0f,
+                    //                        fwd.X, fwd.Y, fwd.Z, 0.0f,
+                    //                        pos.X, pos.Y, pos.Z, 1.0f);
+
+                    //// TODO:
+                    //Vector3 acc = Vector3.Transform(new Vector3(data.vehicle_acceleration_x, data.vehicle_acceleration_y, data.vehicle_acceleration_z), transform);
+
                     aMMotionData.Sway = (float)(y / 20.0);
                     aMMotionData.Surge = -(float)(x / 20.0);
 
@@ -122,7 +140,7 @@ namespace Codemasters
                     aMMotionData.LocalAcceleration = new float[] { 0, 0, 0 };
 
                     carData.Gear = data.gear > 9 ? (short)0 : (short)(data.gear + 1); // Rear gear == 10
-                    carData.Lap = (int)data.lap;
+                    carData.Lap = (int)data.lap + 1;
                     carData.MaxRPM = (uint)(data.max_rpm * 10.0f);
                     carData.RPM = (uint)(data.engine_rate * 10.0f);
                     carData.Speed = data.speed * 3.6f; // meters per second -> km per hour
@@ -133,6 +151,7 @@ namespace Codemasters
 
                     sessionInfo.Sector = (int)data.race_sector;
                     sessionInfo.Flag = "Green";
+                    carData.Flags = data.lap_time > 0 ? TelemetryFlags.FlagGreen : TelemetryFlags.FlagNone;
                     //sessionInfo.CurrentSector1Time = (int)(data.sector_time_1 * 1000.0f);
                     //sessionInfo.CurrentSector2Time = (int)(data.sector_time_2 * 1000.0f);
 
@@ -150,7 +169,7 @@ namespace Codemasters
                     {
                         default:
                         case 0:
-                            sessionInfo.SessionState = "";
+                            sessionInfo.SessionState = "Race";
                             break;
                         case 1:
                             sessionInfo.SessionState = "Pitting";
@@ -185,6 +204,16 @@ namespace Codemasters
 
                     if (gameid == GamePlugin.CodemastersGame.WRCG)
                     {
+                        //Vector3 fwd = -new Vector3(data.pitch[0], data.pitch[1], data.pitch[2]);
+                        //Vector3 rht = -new Vector3(data.roll[0], data.roll[1], data.roll[2]);
+                        //Vector3 up = Vector3.Cross(rht, fwd);
+                        //Vector3 pos = new Vector3(data.position[0], data.position[1], data.position[2]);
+
+                        //Matrix4x4 transform = new Matrix4x4(rht.X, rht.Z, rht.Y, 0.0f,
+                        //                        up.X, up.Z, up.Y, 0.0f,
+                        //                        fwd.X, fwd.Z, fwd.Y, 0.0f,
+                        //                        pos.X, pos.Z, pos.Y, 1.0f);
+
                         accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[2] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[2];
 
@@ -245,7 +274,7 @@ namespace Codemasters
                     {
                         new AMTireData()
                         {
-                            Pressure = data.tyre_pressure[0],
+                            Pressure = data.tyre_pressure[0] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
                             BrakeTemperature = data.brake_temp[0],
@@ -253,7 +282,7 @@ namespace Codemasters
                         },
                         new AMTireData()
                         {
-                            Pressure = data.tyre_pressure[1],
+                            Pressure = data.tyre_pressure[1] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
                             BrakeTemperature = data.brake_temp[1],
@@ -261,7 +290,7 @@ namespace Codemasters
                         },
                         new AMTireData()
                         {
-                            Pressure = data.tyre_pressure[2],
+                            Pressure = data.tyre_pressure[2] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
                             BrakeTemperature = data.brake_temp[2],
@@ -269,7 +298,7 @@ namespace Codemasters
                         },
                         new AMTireData()
                         {
-                            Pressure = data.tyre_pressure[3],
+                            Pressure = data.tyre_pressure[3] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
                             BrakeTemperature = data.brake_temp[3],

@@ -19,7 +19,8 @@ namespace vAzhureRacingAPI
 
         UdpState _udpstate = new UdpState();
 
-        readonly Timer timer = new Timer(); 
+        readonly Timer timer = new Timer();
+        DateTime dtLast = new DateTime();
 
         private volatile bool m_bRunning = false;
 
@@ -36,7 +37,14 @@ namespace vAzhureRacingAPI
                 _udpstate.client.BeginReceive(new AsyncCallback(OnUdpData), _udpstate);
                 timer.Stop();
                 timer.Interval = timeout;
-                timer.AutoReset = false;
+                timer.AutoReset = true;
+                timer.Elapsed += delegate (object sender, ElapsedEventArgs e)
+                {
+                    TimeSpan ts = DateTime.Now - dtLast;
+                    if (ts.TotalMilliseconds > timeout)
+                        OnTimeout?.Invoke(this, new EventArgs());
+                    timer.Enabled = false;
+                };
                 timer.Start();
             }
             catch
@@ -77,8 +85,8 @@ namespace vAzhureRacingAPI
                 finally
                 {
                     _udpstate.client?.BeginReceive(new AsyncCallback(OnUdpData), _udpstate);
-                    timer.Stop();
-                    timer.Start();
+                    dtLast = new DateTime();
+                    timer.Enabled = true;
                 }
             }
         }

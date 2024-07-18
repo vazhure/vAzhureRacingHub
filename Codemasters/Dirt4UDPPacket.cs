@@ -282,13 +282,22 @@ namespace Codemasters.Structs
         public float vehicle_acceleration_x;
         public float vehicle_acceleration_y;
         public float vehicle_acceleration_z;
-        public float vehicle_roll_x;
+        /// <summary>
+        /// Left
+        /// </summary>
+        public float vehicle_roll_x; 
         public float vehicle_roll_y;
         public float vehicle_roll_z;
+        /// <summary>
+        /// Forward
+        /// </summary>
         public float vehicle_pitch_x;
         public float vehicle_pitch_y;
         public float vehicle_pitch_z;
-        public float vehicle_yaw_x;
+        /// <summary>
+        /// UP
+        /// </summary>
+        public float vehicle_yaw_x; 
         public float vehicle_yaw_y;
         public float vehicle_yaw_z;
         public float vehicle_hub_position_bl;
