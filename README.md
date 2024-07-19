@@ -8,6 +8,8 @@ Application for Sim Racing Games. Supporting plugins and external devices via Se
 Supported Game Titles:
 * Assetto Corsa
 * Assetto Corsa Competizione
+* American Truck Simulator
+* European Truck Simulator
 * Project Cars 2
 * Automobilista 1
 * Automobilista 2
@@ -35,8 +37,6 @@ Supported Game Titles:
 * BeamNG.Drive
 
 WIP:
-* American Truck Simulator
-* European Truck Simulator
 * F1 2018
 * F1 2019
 * F1 2020
