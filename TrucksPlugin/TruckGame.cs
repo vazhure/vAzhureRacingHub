@@ -118,12 +118,23 @@ namespace TrucksPlugin
                     car.Steering = data.userSteer;
                     car.Brake = data.userBrake;
                     car.Clutch = data.userClutch;
-
+                    car.FuelLevel = data.fuel;
+                    car.FuelCapacity = data.fuelCapacity;
+                    car.FuelConsumptionPerLap = data.fuelAvgConsumption;
+                    car.OilPressure = data.oilPressure;
+                    car.OilTemp = data.oilTemperature;
+                    car.WaterTemp = data.waterTemperature;
                     motion.Position = new double[] { data.coordinateX, data.coordinateY, data.coordinateZ };
 
                     // TODO: 
-                    motion.Pitch = 0; //-data.rotationZ / (float)Math.PI;
-                    motion.Roll = 0; //-data.rotationX / (float)Math.PI;
+                    motion.Pitch = -data.Pitch / 0.25f;
+                    motion.Roll = -data.Roll / 0.5f;
+                    motion.Yaw = data.Heading * 2f - 1f;
+
+                    car.Tires[0].Pressure = 175;
+                    car.Tires[1].Pressure = 175;
+                    car.Tires[2].Pressure = 175;
+                    car.Tires[3].Pressure = 175;
 
                     motion.Surge = -data.accelerationZ / 9.81f;
                     motion.Sway = -data.accelerationX / 9.81f;

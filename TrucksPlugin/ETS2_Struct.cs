@@ -16,19 +16,19 @@ namespace TrucksPlugin
         public uint ets2_version_major;
         public uint ets2_version_minor;
 
+        public byte align1;
+        public byte align2;
+
         #region Rev1
         /// <summary>
         /// Is the engine enabled? 
         /// deprecated and removed since rev 5
         /// </summary>
-        [MarshalAs(UnmanagedType.U1)] public bool _engine_enabled;
+        [MarshalAs(UnmanagedType.I1)] public bool _engine_enabled;
         /// <summary>
         /// Is Trailer attached?
         /// </summary>
-        [MarshalAs(UnmanagedType.U1)] public bool trailer_attached;
-
-        public byte align1;
-        public byte align2;
+        [MarshalAs(UnmanagedType.I1)] public bool trailer_attached;
 
         /// <summary>
         /// Speed, meters per second
@@ -48,9 +48,21 @@ namespace TrucksPlugin
         public float coordinateY;
         public float coordinateZ;
 
-        public float rotationX;
-        public float rotationY;
-        public float rotationZ;
+        /// <summary>
+        /// Heading
+        /// Stored in unit range where <0,1) corresponds to <0,360).
+        /// </summary>
+        public float Heading;
+        /// <summary>
+        /// Pitch
+        /// Stored in unit range where <-0.25,0.25> corresponds to <-90,90>.
+        /// </summary>
+        public float Pitch;
+        /// <summary>
+        /// Roll
+        /// Stored in unit range where <-0.5,0.5> corresponds to <-180,180>.
+        /// </summary>
+        public float Roll;
 
         /// <summary>
         /// Gear currently selected in the engine.
@@ -169,49 +181,49 @@ namespace TrucksPlugin
         /// <summary>
         /// Speed selected for the cruise control in m/s
         /// </summary>
-        [MarshalAs(UnmanagedType.U1)] public bool cruiseControl;
-        [MarshalAs(UnmanagedType.U1)] public bool wipers;
+        [MarshalAs(UnmanagedType.I1)] public bool cruiseControl;
+        [MarshalAs(UnmanagedType.I1)] public bool wipers;
 
         /// <summary>
         /// Is the parking brake enabled?
         /// </summary>
-        [MarshalAs(UnmanagedType.U1)] public bool parkBrake;
+        [MarshalAs(UnmanagedType.I1)] public bool parkBrake;
         /// <summary>
         /// Is the motor brake enabled?
         /// </summary>
-        [MarshalAs(UnmanagedType.U1)] public bool motorBrake;
+        [MarshalAs(UnmanagedType.I1)] public bool motorBrake;
 
-        [MarshalAs(UnmanagedType.U1)] public bool electricEnabled;
-        [MarshalAs(UnmanagedType.U1)] public bool engineEnabled;
+        [MarshalAs(UnmanagedType.I1)] public bool electricEnabled;
+        [MarshalAs(UnmanagedType.I1)] public bool engineEnabled;
 
-        [MarshalAs(UnmanagedType.U1)] public bool blinkerLeftActive;
-        [MarshalAs(UnmanagedType.U1)] public bool blinkerRightActive;
-        [MarshalAs(UnmanagedType.U1)] public bool blinkerLeftOn;
-        [MarshalAs(UnmanagedType.U1)] public bool blinkerRightOn;
+        [MarshalAs(UnmanagedType.I1)] public bool blinkerLeftActive;
+        [MarshalAs(UnmanagedType.I1)] public bool blinkerRightActive;
+        [MarshalAs(UnmanagedType.I1)] public bool blinkerLeftOn;
+        [MarshalAs(UnmanagedType.I1)] public bool blinkerRightOn;
 
-        [MarshalAs(UnmanagedType.U1)] public bool lightsParking;
-        [MarshalAs(UnmanagedType.U1)] public bool lightsBeamLow;
-        [MarshalAs(UnmanagedType.U1)] public bool lightsBeamHigh;
+        [MarshalAs(UnmanagedType.I1)] public bool lightsParking;
+        [MarshalAs(UnmanagedType.I1)] public bool lightsBeamLow;
+        [MarshalAs(UnmanagedType.I1)] public bool lightsBeamHigh;
 
         public uint lightsAuxFront;
         public uint lightsAuxRoof;
 
-        [MarshalAs(UnmanagedType.U1)] public bool lightsBeacon;
-        [MarshalAs(UnmanagedType.U1)] public bool lightsBrake;
-        [MarshalAs(UnmanagedType.U1)] public bool lightsReverse;
+        [MarshalAs(UnmanagedType.I1)] public bool lightsBeacon;
+        [MarshalAs(UnmanagedType.I1)] public bool lightsBrake;
+        [MarshalAs(UnmanagedType.I1)] public bool lightsReverse;
 
-        [MarshalAs(UnmanagedType.U1)] public bool batteryVoltageWarning;
+        [MarshalAs(UnmanagedType.I1)] public bool batteryVoltageWarning;
         /// <summary>
         /// Is the air pressure warning active?
         /// </summary>
-        [MarshalAs(UnmanagedType.U1)] public bool airPressureWarning;
+        [MarshalAs(UnmanagedType.I1)] public bool airPressureWarning;
         /// <summary>
         /// Are the emergency brakes active as result of low air pressure?
         /// </summary>
-        [MarshalAs(UnmanagedType.U1)] public bool airPressureEmergency;
-        [MarshalAs(UnmanagedType.U1)] public bool adblueWarning;
-        [MarshalAs(UnmanagedType.U1)] public bool oilPressureWarning;
-        [MarshalAs(UnmanagedType.U1)] public bool waterTemperatureWarning;
+        [MarshalAs(UnmanagedType.I1)] public bool airPressureEmergency;
+        [MarshalAs(UnmanagedType.I1)] public bool adblueWarning;
+        [MarshalAs(UnmanagedType.I1)] public bool oilPressureWarning;
+        [MarshalAs(UnmanagedType.I1)] public bool waterTemperatureWarning;
 
         public float airPressure;
         public float brakeTemperature;
