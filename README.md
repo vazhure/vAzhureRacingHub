@@ -9,7 +9,7 @@ Supported Game Titles:
 * Assetto Corsa
 * Assetto Corsa Competizione
 * American Truck Simulator
-* European Truck Simulator
+* Euro Truck Simulator 2
 * Project Cars 2
 * Automobilista 1
 * Automobilista 2
