@@ -157,7 +157,10 @@ namespace Race07Plugin
 
         public void Start(IVAzhureRacingApp app)
         {
-            Utils.RunSteamGame(SteamGameID);
+            if (!Utils.RunSteamGame(SteamGameID))
+            {
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+            }
         }
 
         public System.Drawing.Icon GetIcon()

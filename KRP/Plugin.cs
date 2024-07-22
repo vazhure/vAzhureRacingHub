@@ -175,7 +175,7 @@ namespace KRP
                         CarData.WaterTemp = data.m_KartData.m_fWaterTemperature;
 
                         CarData.MotionData.Pitch = data.m_KartData.m_fPitch / 180.0f;
-                        CarData.MotionData.Roll = data.m_KartData.m_fRoll / 180.0f;
+                        CarData.MotionData.Roll = -data.m_KartData.m_fRoll / 180.0f;
                         CarData.MotionData.Yaw = data.m_KartData.m_fYaw / 180.0f;
                         CarData.MotionData.Heave = data.m_KartData.m_fAccelerationY / 9.81f;
                         CarData.MotionData.Sway = -data.m_KartData.m_fAccelerationX / 9.81f;
@@ -320,7 +320,10 @@ namespace KRP
 
         public void Start(IVAzhureRacingApp app)
         {
-            Utils.RunSteamGame(SteamGameID);
+            if (!Utils.RunSteamGame(SteamGameID))
+            {
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+            }
         }
 
         public void Dispose()

@@ -42,8 +42,10 @@ namespace vAzhureRacingAPI
                 {
                     TimeSpan ts = DateTime.Now - dtLast;
                     if (ts.TotalMilliseconds > timeout)
+                    {
                         OnTimeout?.Invoke(this, new EventArgs());
-                    timer.Enabled = false;
+                        timer.Enabled = false;
+                    }
                 };
                 timer.Start();
             }

@@ -143,9 +143,12 @@ namespace BeamNG
             // TODO
         }
 
-        public void Start(IVAzhureRacingApp _)
+        public void Start(IVAzhureRacingApp app)
         {
-            Utils.RunSteamGame(SteamGameID);
+            if (!Utils.RunSteamGame(SteamGameID))
+            {
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+            }
         }
 
         public override void OnDataReceived(ref byte[] bytes)

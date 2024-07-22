@@ -18,6 +18,7 @@ namespace F1Series
         }
 
         private readonly F1Game f12022Game = new F1Game(2022);
+        private readonly F1Game f12023Game = new F1Game(2023);
         private readonly F1Game f12024Game = new F1Game(2024);
 
         public bool Initialize(IVAzhureRacingApp app)
@@ -25,6 +26,7 @@ namespace F1Series
             try
             {
                 app.RegisterGame(f12022Game);
+                app.RegisterGame(f12023Game);
                 app.RegisterGame(f12024Game);
             }
             catch { return false; }
@@ -81,6 +83,7 @@ namespace F1Series
         public void Quit(IVAzhureRacingApp app)
         {
             f12022Game.Quit();
+            f12023Game.Quit();
             f12024Game.Quit();
         }
     }

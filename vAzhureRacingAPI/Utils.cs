@@ -13,6 +13,11 @@ namespace vAzhureRacingAPI
         {
             string cmd = $"steam://rungameid/{steamID}";
 
+            if (!IsProcessRunning(new string[] { "steam", "SteamService" }))
+            {
+                return false;
+            }
+
             try
             {
                 Process.Start(cmd);
@@ -21,6 +26,7 @@ namespace vAzhureRacingAPI
             {
                 return false;
             }
+
             return true;
         }
 

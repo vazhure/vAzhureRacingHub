@@ -82,7 +82,7 @@ namespace RaceRoomPlugin
                     using (var viewStream = memoryFile.CreateViewStream(0L, data.Length, MemoryMappedFileAccess.Read))
                     {
                         viewStream.ReadAsync(data, 0, data.Length);
-                        var pageFileContent = RaceRoomSharedMemory.FromBytes(data);
+                        var pageFileContent = Marshalizable<RaceRoomSharedMemory>.FromBytes(data);
 
                         bool bInGame = pageFileContent.GamePaused == 0 &&
                             pageFileContent.GameInReplay == 0 &&
@@ -408,7 +408,7 @@ namespace RaceRoomPlugin
         {
             if (!Utils.RunSteamGame(SteamGameID))
             {
-                app.SetStatusText($"Ошибка запуска игры {Name}!");
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
             }
         }
 

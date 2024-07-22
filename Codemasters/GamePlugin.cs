@@ -18,6 +18,7 @@ namespace Codemasters
         public class GameSettings
         {
             public int Port { get; set; } = 20777;
+            public string ExecutablePath = "";
         }
 
         GameSettings settings = new GameSettings();
@@ -35,6 +36,7 @@ namespace Codemasters
                     case CodemastersGame.WRCG: return "WRC Generations";
                     case CodemastersGame.EAWRC: return "EA SPORTS WRC";
                     case CodemastersGame.GRID2019: return "Grid (2019)";
+                    case CodemastersGame.GRIDLEGENDS: return "Grid Legends";
                 }
                 return "error";
             }
@@ -53,6 +55,7 @@ namespace Codemasters
                     case CodemastersGame.WRCG: return 1953520U;
                     case CodemastersGame.EAWRC: return 1849250U;
                     case CodemastersGame.GRID2019: return 703860U;
+                    case CodemastersGame.GRIDLEGENDS: return 1307710;
                 }
                 return 0U;
             }
@@ -71,6 +74,7 @@ namespace Codemasters
                     case CodemastersGame.WRCG: return new string[] { "WRCG" };
                     case CodemastersGame.EAWRC: return new string[] { "wrc" };
                     case CodemastersGame.GRID2019: return new string[] { "Grid_dx12" };
+                    case CodemastersGame.GRIDLEGENDS: return new string[] { "GridLegends", "GridLegends_Trial" };
                 }
                 return new string[] { };
             }
@@ -78,8 +82,7 @@ namespace Codemasters
 
         string userIconPath;
         public string UserIconPath { get => userIconPath; set => userIconPath = value; }
-        string userExecutablePath;
-        public string UserExecutablePath { get => userExecutablePath; set => userExecutablePath = value; }
+        public string UserExecutablePath { get => settings.ExecutablePath; set => settings.ExecutablePath = value; }
 
         public bool IsRunning => Utils.IsProcessRunning(ExecutableProcessName);
 
@@ -87,15 +90,16 @@ namespace Codemasters
         public event EventHandler OnGameStateChanged;
         public event EventHandler OnGameIconChanged;
 
-        public enum CodemastersGame { DIRT4, DIRT5, DIRTRALLY, DIRTRALLY20, WRCG, EAWRC, GRID2019 };
+        public enum CodemastersGame { DIRT4, DIRT5, DIRTRALLY, DIRTRALLY20, WRCG, EAWRC, GRID2019, GRIDLEGENDS };
         public GamePlugin(CodemastersGame game)
         {
             if (game == CodemastersGame.WRCG)
                 Port = 20888;
 
+            _game = game;
+
             LoadSettings();
 
-            _game = game;
             _client = new UDPClient(this, game);
             _client.OnDataArrived += OnDataArrived;
 
@@ -105,7 +109,11 @@ namespace Codemasters
                 if (bRunning)
                     _client?.Run(Port);
                 else
+                {
                     _client?.Stop();
+                    _client?.ResetTelemetry();
+                }
+
                 OnGameStateChanged?.Invoke(this, new EventArgs());
             };
             monitor.Start();
@@ -133,9 +141,15 @@ namespace Codemasters
 
         public void Start(IVAzhureRacingApp app)
         {
+            if (settings.ExecutablePath != string.Empty)
+            {
+                if (Utils.ExecuteCmd(settings.ExecutablePath))
+                    return;
+            }
+
             if (!Utils.RunSteamGame(SteamGameID))
             {
-                app.SetStatusText($"Ошибка запуска игры {Name}!");
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
             }
         }
 
@@ -156,6 +170,7 @@ namespace Codemasters
                 case CodemastersGame.WRCG: return Properties.Resources.WRCG;
                 case CodemastersGame.EAWRC: return Properties.Resources.eawrc;
                 case CodemastersGame.GRID2019: return Properties.Resources.Grid;
+                case CodemastersGame.GRIDLEGENDS: return Properties.Resources.GridLegends;
             }
         }
 
@@ -249,6 +264,12 @@ namespace Codemasters
                                         bChanged = true;
                                     }
                                 }
+                                else
+                                {
+                                    xn.Attributes.Append(xmlDoc.CreateAttribute("enabled"));
+                                    xn.Attributes["enabled"].Value = "true";
+                                    bChanged = true;
+                                }
 
                                 if (xn.Attributes.GetNamedItem("port") is XmlAttribute port)
                                 {
@@ -258,6 +279,27 @@ namespace Codemasters
                                         bChanged = true;
                                     }
                                 }
+                                else
+                                {
+                                    xn.Attributes.Append(xmlDoc.CreateAttribute("port"));
+                                    xn.Attributes["port"].Value = $"{Port}";
+                                    bChanged = true;
+                                }
+
+                                if (xn.Attributes.GetNamedItem("ip") is XmlAttribute ip)
+                                {
+                                    if (ip.Value != "127.0.0.1")
+                                    {
+                                        ip.Value = "127.0.0.1";
+                                        bChanged = true;
+                                    }
+                                }
+                                else
+                                {
+                                    xn.Attributes.Append(xmlDoc.CreateAttribute("ip"));
+                                    xn.Attributes["ip"].Value = "127.0.0.1";
+                                    bChanged = true;
+                                }
 
                                 if (xn.Attributes.GetNamedItem("extradata") is XmlAttribute extradata)
                                 {
@@ -266,6 +308,27 @@ namespace Codemasters
                                         extradata.Value = "3";
                                         bChanged = true;
                                     }
+                                }
+                                else
+                                {
+                                    xn.Attributes.Append(xmlDoc.CreateAttribute("extradata"));
+                                    xn.Attributes["extradata"].Value = "3";
+                                    bChanged = true;
+                                }
+
+                                if (xn.Attributes.GetNamedItem("delay") is XmlAttribute delay)
+                                {
+                                    if (delay.Value != "1")
+                                    {
+                                        delay.Value = "1";
+                                        bChanged = true;
+                                    }
+                                }
+                                else
+                                {
+                                    xn.Attributes.Append(xmlDoc.CreateAttribute("delay"));
+                                    xn.Attributes["delay"].Value = "1";
+                                    bChanged = true;
                                 }
                             }
                         }
@@ -286,6 +349,7 @@ namespace Codemasters
                         }
                     }
                 }
+                else MessageBox.Show("Configuration file not found! Run the game and close it!");
             }
         }
 

@@ -73,6 +73,16 @@ namespace F1Series.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon F1_23 {
+            get {
+                object obj = ResourceManager.GetObject("F1_23", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon F1_24 {
             get {
                 object obj = ResourceManager.GetObject("F1_24", resourceCulture);

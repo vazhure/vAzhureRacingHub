@@ -118,7 +118,12 @@ namespace ForzaHorizon
             if (settings.ExecutablePath != string.Empty)
                 Utils.ExecuteCmd(settings.ExecutablePath);
             else
-                Utils.RunSteamGame(SteamGameID);
+            {
+                if (!Utils.RunSteamGame(SteamGameID))
+                {
+                    app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+                }
+            }
         }
 
         private readonly ProcessMonitor monitor;

@@ -69,6 +69,9 @@
   <ItemGroup>
     <None Include="res\F1_24.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="res\F1_23.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo D| xcopy "$(TargetPath)" "C:\ProgramData\vAzhureRacingHub\Plugins\F1Series" /e /y /d</PostBuildEvent>

@@ -91,7 +91,10 @@ namespace TrucksPlugin
 
         public void Start(IVAzhureRacingApp app)
         {
-            Utils.RunSteamGame((uint)m_game);
+            if (!Utils.RunSteamGame(SteamGameID))
+            {
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+            }
         }
 
         private const string DefaultSharedMemoryMap = "Local\\Ets2TelemetryServer";

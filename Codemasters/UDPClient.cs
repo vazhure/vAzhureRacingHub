@@ -22,10 +22,15 @@ namespace Codemasters
             OnTimeout += UDPClient_OnTimeout;
         }
 
+        public void ResetTelemetry()
+        {
+            dataset.LoadDefaults();
+            OnDataArrived?.Invoke(this, new TelemetryUpdatedEventArgs(dataset));
+        }
+
         private void UDPClient_OnTimeout(object sender, EventArgs e)
         {
-            dataset?.LoadDefaults();
-            OnDataArrived?.Invoke(this, new TelemetryUpdatedEventArgs(dataset));
+            ResetTelemetry();
         }
 
         private float _vY = 0;
@@ -148,8 +153,17 @@ namespace Codemasters
                     carData.FuelLevel = data.fuel_in_tank;
                     carData.FuelCapacity = data.fuel_capacity;
                     carData.Distance = data.lap_distance;
-                    carData.Lap = (int)data.lap;
-                    carData.Position = (int)data.race_position;
+
+                    if (data.drs> 0)
+                        carData.Electronics |= CarElectronics.DRS_EN;
+                    else
+                        carData.Electronics &= ~CarElectronics.DRS_EN;
+
+                    carData.TcLevel = (short)data.traction_control;
+                    carData.AbsLevel = (short)data.abs;
+
+                    sessionInfo.CurrentLapNumber = carData.Lap = (int)data.lap;
+                    sessionInfo.CurrentPosition = carData.Position = (int)data.race_position;
                     sessionInfo.Sector = (int)data.race_sector;
 
                     sessionInfo.Flag = "Green";
@@ -245,6 +259,7 @@ namespace Codemasters
                         case GamePlugin.CodemastersGame.DIRT4:
                         case GamePlugin.CodemastersGame.DIRTRALLY20:
                         case GamePlugin.CodemastersGame.GRID2019:
+                        case GamePlugin.CodemastersGame.GRIDLEGENDS:
                             {
                                 aMMotionData.Heave = accZ / 98.1f;
                                 aMMotionData.Sway = data.gforce_lateral / (float)Math.PI;
@@ -280,7 +295,7 @@ namespace Codemasters
                             Pressure = data.tyre_pressure[0] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
-                            BrakeTemperature = data.brake_temp[0],
+                            BrakeTemperature = data.brake_temp[0] * 10.0,
                             Detached = false
                         },
                         new AMTireData()
@@ -288,7 +303,7 @@ namespace Codemasters
                             Pressure = data.tyre_pressure[1] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
-                            BrakeTemperature = data.brake_temp[1],
+                            BrakeTemperature = data.brake_temp[1] * 10.0,
                             Detached = false
                         },
                         new AMTireData()
@@ -296,7 +311,7 @@ namespace Codemasters
                             Pressure = data.tyre_pressure[2] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
-                            BrakeTemperature = data.brake_temp[2],
+                            BrakeTemperature = data.brake_temp[2] * 10.0,
                             Detached = false
                         },
                         new AMTireData()
@@ -304,7 +319,7 @@ namespace Codemasters
                             Pressure = data.tyre_pressure[3] * 6.89476,
                             Temperature = new double[]{ 60, 60, 60, 60},
                             Wear = 0,
-                            BrakeTemperature = data.brake_temp[3],
+                            BrakeTemperature = data.brake_temp[3] * 10.0,
                             Detached = false
                         },
                     };

@@ -332,7 +332,7 @@ namespace iRacingPlugin
         {
             if (!Utils.RunSteamGame(SteamGameID))
             {
-                app.SetStatusText($"Ошибка запуска игры {Name}!");
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
             }
         }
     }

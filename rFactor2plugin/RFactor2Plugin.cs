@@ -133,7 +133,7 @@ namespace rFactor2plugin
         {
             if (!Utils.RunSteamGame(SteamGameID))
             {
-                app.SetStatusText($"Ошибка запуска игры {Name}!");
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
             }
         }
     }
@@ -211,7 +211,7 @@ namespace rFactor2plugin
         {
             if (!Utils.RunSteamGame(SteamGameID))
             {
-                app.SetStatusText($"Ошибка запуска игры {Name}!");
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
             }
         }
     }

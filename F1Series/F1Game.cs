@@ -1006,6 +1006,7 @@ namespace F1Series
             {
                 default:
                 case 2022: return Properties.Resources.F1_22;
+                case 2023: return Properties.Resources.F1_23;
                 case 2024: return Properties.Resources.F1_24;
             }
         }
@@ -1020,7 +1021,12 @@ namespace F1Series
             if (settings.ExecutableLink != string.Empty)
                 Utils.ExecuteCmd(settings.ExecutableLink);
             else
-                Utils.RunSteamGame(SteamGameID);
+            {
+                if (!Utils.RunSteamGame(SteamGameID))
+                {
+                    app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+                }
+            }
         }
 
         public void Quit()
