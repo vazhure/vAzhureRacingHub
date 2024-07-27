@@ -24,7 +24,7 @@ namespace vAzhureRacingHub
         private CancellationTokenSource tokenSource;
         private CancellationToken token;
 
-        static readonly string[] gears = { "R", "N", "1", "2", "3", "4", "5", "6", "7", "8" };
+        static readonly string[] gears = { "R", "N", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14" };
         const string purple = "#bc00bc";
         const string green = " #00bc00";
         const string red = "#c10c0c";
@@ -253,7 +253,7 @@ namespace vAzhureRacingHub
                             TrackName = wsp.DataSet.SessionInfo.TrackName ?? "",
                             Speed = $"{wsp.DataSet.CarData.Speed:000}",
                             RPM = $"{wsp.DataSet.CarData.RPM:00000}",
-                            Gear = gears[wsp.DataSet.CarData.Gear],
+                            Gear = wsp.DataSet.CarData.Gear < gears.Length ? gears[wsp.DataSet.CarData.Gear] : "",
                             AirTemp = FormattableString.Invariant($"{wsp.DataSet.WeatherData.AmbientTemp:N1}&degC"),
                             RoadTemp = FormattableString.Invariant($"{wsp.DataSet.WeatherData.TrackTemp:N1}&degC"),
                             OilTemp = FormattableString.Invariant($"{wsp.DataSet.CarData.OilTemp:N1}&degC"),

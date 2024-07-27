@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace vAzhureRacingHub
@@ -25,6 +26,24 @@ namespace vAzhureRacingHub
             listClients.Items.Clear();
             if (webServer.Clients.Length > 0)
                 listClients.Items.AddRange(webServer.Clients);
+
+            if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
+            {
+                lblIP.Text = $"IP: {GetLocalIPAddress()}";
+            }
+        }
+
+        public static string GetLocalIPAddress()
+        {
+            var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            string result = "127.0.0.1";
+            
+            foreach (var ip in host.AddressList.Where(p => p.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork))
+            {
+                result += $", {ip.ToString()}";
+            }
+
+            return result;
         }
 
         private void WebServer_OnClientDisconnected(object sender, WSClient e)

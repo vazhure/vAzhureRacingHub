@@ -41,6 +41,7 @@ namespace vAzhureRacingHub
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.numPort = new System.Windows.Forms.NumericUpDown();
+            this.lblIP = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
             this.SuspendLayout();
             // 
@@ -109,7 +110,7 @@ namespace vAzhureRacingHub
             "192.168.1.5"});
             this.listClients.Location = new System.Drawing.Point(16, 92);
             this.listClients.Name = "listClients";
-            this.listClients.Size = new System.Drawing.Size(474, 183);
+            this.listClients.Size = new System.Drawing.Size(474, 174);
             this.listClients.TabIndex = 9;
             // 
             // label1
@@ -155,6 +156,16 @@ namespace vAzhureRacingHub
             0});
             this.numPort.ValueChanged += new System.EventHandler(this.NumPort_ValueChanged);
             // 
+            // lblIP
+            // 
+            this.lblIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblIP.AutoSize = true;
+            this.lblIP.Location = new System.Drawing.Point(3, 273);
+            this.lblIP.Name = "lblIP";
+            this.lblIP.Size = new System.Drawing.Size(20, 13);
+            this.lblIP.TabIndex = 4;
+            this.lblIP.Text = "IP:";
+            // 
             // WebServerSettingsControl
             // 
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(56)))));
@@ -164,6 +175,7 @@ namespace vAzhureRacingHub
             this.Controls.Add(this.btnSelectFolder);
             this.Controls.Add(this.labelPath);
             this.Controls.Add(this.label2);
+            this.Controls.Add(this.lblIP);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.labelFolder);
             this.ForeColor = System.Drawing.Color.White;
@@ -171,6 +183,7 @@ namespace vAzhureRacingHub
             this.Size = new System.Drawing.Size(508, 291);
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -184,5 +197,6 @@ namespace vAzhureRacingHub
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown numPort;
+        private System.Windows.Forms.Label lblIP;
     }
 }
