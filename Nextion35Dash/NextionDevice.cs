@@ -18,7 +18,7 @@ namespace Nextion35Dash
         private Thread worker = null;
         private volatile bool _dataArrived = false;
 
-        readonly char[] gears = new char[] { 'R', 'N', '1', '2', '3', '4', '5', '6', '7', '8' };
+        readonly char[] gears = new char[] { 'R', 'N', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
         public string DeviceName => "Nextion";
 
@@ -440,6 +440,16 @@ namespace Nextion35Dash
                             new RGB8 { R = 255, G = 0, B = 0 },
                     }
                 };
+
+                bool bBlinkLeft = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Left);
+                bool bBlinkRight = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Right);
+
+                if (bBlinkLeft || bBlinkRight)
+                {
+                    data.lim_mask = (byte)((bBlinkLeft ? 0x03 : 0) | (bBlinkRight ? 0xc0 : 0));
+                    data.flags = 0x01;
+                }
+
                 raw = GetBytes(data);
             }
             else

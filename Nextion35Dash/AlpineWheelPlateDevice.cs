@@ -449,6 +449,32 @@ namespace Nextion35Dash
                             new RGBW8 { R = (byte)(ledstate > 0.925 ? 255: 0), G = 0, B = 0 },
                     }
                 };
+
+                bool bBlinkLeft = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Left);
+                bool bBlinkRight = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Right);
+
+                if (bBlinkLeft || bBlinkRight)
+                {
+                    data.flags = (byte)LED_FLAGS_A.LED_LIM;
+                    data.color = new RGBW8[] {
+                            new RGBW8 { R = 0, G = 0, B = bBlinkLeft ? (byte)255: (byte)0 },
+                            new RGBW8 { R = 0, G = 0, B = bBlinkLeft ? (byte)128: (byte)0 },
+                            new RGBW8 { R = 0, G = 0, B = bBlinkLeft ? (byte)64 : (byte)0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = 0 },
+                            new RGBW8 { R = 0, G = 0, B = bBlinkRight ? (byte)255: (byte)0 },
+                            new RGBW8 { R = 0, G = 0, B = bBlinkRight ? (byte)128: (byte)0 },
+                            new RGBW8 { R = 0, G = 0, B = bBlinkRight ? (byte)64 : (byte)0 },
+                    };
+                }
+
                 raw = GetBytes(data);
             }
             else
