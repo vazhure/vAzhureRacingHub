@@ -65,18 +65,18 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Plugin\x64\telemetry_mem.exp" />
+    <None Include="Plugin\x64\telemetry_mem.lib" />
     <None Include="Resources\amtrucks.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\eurotrucks2.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Plugin\x64\ets2-telemetry-server.dll">
+    <Content Include="Plugin\x64\telemetry_mem.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Plugin\x86\ets2-telemetry-server.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Plugin\x64\telemetry_mem.pdb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

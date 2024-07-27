@@ -13,7 +13,7 @@ namespace TrucksPlugin
 
         readonly GameID m_game;
         readonly ProcessMonitor monitor;
-        private readonly byte[] viewData = new byte[Marshal.SizeOf(typeof(ETS2_Struct))];
+        private readonly byte[] viewData = new byte[Marshal.SizeOf(typeof(ETS2_minimal))];
         readonly TelemetryDataSet telemetryDataSet;
 
         public TruckGame(GameID gameID)
@@ -97,8 +97,7 @@ namespace TrucksPlugin
             }
         }
 
-        private const string DefaultSharedMemoryMap = "Local\\Ets2TelemetryServer";
-
+        private const string DefaultSharedMemoryMap = "Local\\ETS2";
         public override void UserFunc()
         {
             try
@@ -108,57 +107,56 @@ namespace TrucksPlugin
                 {
                     reader.ReadAsync(viewData, 0, viewData.Length);
 
-                    var data = Marshalizable<ETS2_Struct>.FromBytes(viewData);
-                    var car = telemetryDataSet.CarData;
-                    var motion = telemetryDataSet.CarData.MotionData;
-                    var session = telemetryDataSet.SessionInfo;
+                    var data = Marshalizable<ETS2_minimal>.FromBytes(viewData);
 
-                    car.Gear = (short)(data.displayedGear < 0 ? 0 : data.displayedGear + 1);
-                    car.Speed = Math.Abs(data.speed * 3.6);
-                    car.RPM = data.engineRpm;
-                    car.MaxRPM = data.engineRpmMax;
-                    car.Throttle = data.userThrottle;
-                    car.Steering = data.userSteer;
-                    car.Brake = data.userBrake;
-                    car.Clutch = data.userClutch;
-                    car.FuelLevel = data.fuel;
-                    car.FuelCapacity = data.fuelCapacity;
-                    car.FuelConsumptionPerLap = data.fuelAvgConsumption;
-                    car.OilPressure = data.oilPressure;
-                    car.OilTemp = data.oilTemperature;
-                    car.WaterTemp = data.waterTemperature;
-                    motion.Position = new double[] { data.coordinateX, data.coordinateY, data.coordinateZ };
+                    if (data.running)
+                    {
+                        var car = telemetryDataSet.CarData;
+                        var motion = telemetryDataSet.CarData.MotionData;
+                        var session = telemetryDataSet.SessionInfo;
 
-                    // TODO: 
-                    motion.Pitch = -data.Pitch / 0.25f;
-                    motion.Roll = -data.Roll / 0.5f;
-                    motion.Yaw = data.Heading * 2f - 1f;
+                        car.Gear = (short)(data.displayedGear < 0 ? 0 : data.displayedGear + 1);
+                        car.Speed = Math.Abs(data.speedometer_speed * 3.6);
+                        car.RPM = data.rpm;
+                        car.MaxRPM = data.rpmMax;
+                        car.Throttle = data.throttle;
+                        car.Steering = data.steering;
+                        car.Brake = data.brake;
+                        car.Clutch = data.clutch;
+                        car.FuelLevel = data.fuel;
+                        car.FuelCapacity = data.fuelCapacity;
 
-                    car.Tires[0].Pressure = 175;
-                    car.Tires[1].Pressure = 175;
-                    car.Tires[2].Pressure = 175;
-                    car.Tires[3].Pressure = 175;
+                        session.SessionState = "Race";
+                        session.Flag = "Green";
+                        motion.Position = data.ws_truck_placement.position;
 
-                    motion.Surge = -data.accelerationZ / 9.81f;
-                    motion.Sway = -data.accelerationX / 9.81f;
-                    motion.Heave = data.accelerationY / 9.81f;
+                        motion.Pitch = -data.ws_truck_placement.orientation.pitch / 0.25f;
+                        motion.Roll = -data.ws_truck_placement.orientation.roll / 0.5f;
+                        motion.Yaw = data.ws_truck_placement.orientation.heading * 2f - 1f;
 
-                    // Not sending data?
-                    if (data.lightsBeamLow || data.lightsBeamHigh)
-                        car.Electronics |= CarElectronics.Headlight;
-                    else
-                        car.Electronics &= ~CarElectronics.Headlight;
+                        car.Tires[0].Pressure = 175;
+                        car.Tires[1].Pressure = 175;
+                        car.Tires[2].Pressure = 175;
+                        car.Tires[3].Pressure = 175;
 
-                    if (data.wipers)
-                        car.Electronics |= CarElectronics.WipersOn;
-                    else
-                        car.Electronics &= ~CarElectronics.WipersOn;
+                        motion.Surge = -data.linear_acceleration.z / 9.81f;
+                        motion.Sway = -data.linear_acceleration.x / 9.81f;
+                        motion.Heave = data.linear_acceleration.y / 9.81f;
 
-                    car.DirectionsLight = (data.lightsParking ? DirectionsLight.Booth : DirectionsLight.None) |
-                        (data.blinkerLeftActive ? DirectionsLight.Left : DirectionsLight.None) |
-                        (data.blinkerRightActive ? DirectionsLight.Right : DirectionsLight.None);
+                        motion.LocalVelocity = data.linear_velocity;
 
-                    OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
+                        ///Console.WriteLine($"Surge {motion.Surge:N4}, Sway {motion.Sway:N4}, Heave {motion.Heave:N4}, Pitch {motion.Pitch:N4}, Roll {motion.Roll:N4}, Yaw {motion.Yaw:N4}");
+
+                        if (data.lowBeamLight || data.hiBeamLight)
+                            car.Electronics |= CarElectronics.Headlight;
+                        else
+                            car.Electronics &= ~CarElectronics.Headlight;
+
+                        car.DirectionsLight = (data.lblinker ? DirectionsLight.Left : DirectionsLight.None) |
+                            (data.rblinker ? DirectionsLight.Right : DirectionsLight.None);
+
+                        OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
+                    }
                 }
             }
             catch { }
