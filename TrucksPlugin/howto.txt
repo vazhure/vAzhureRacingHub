@@ -1,0 +1,9 @@
+copy telemetry_mem.dll file from Plugin folder to game folder
+
+for example:
+copy Plugin\x64\telemetry_mem.dll to
+SteamLibrary\steamapps\common\American Truck Simulator\bin\win_x64\Plugins\telemetry_mem.dll
+
+or
+copy Plugin\x86\telemetry_mem.dll to
+SteamLibrary\steamapps\common\American Truck Simulator\bin\win_x86\Plugins\telemetry_mem.dll

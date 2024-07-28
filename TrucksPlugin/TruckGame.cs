@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using vAzhureRacingAPI;
@@ -19,6 +21,8 @@ namespace TrucksPlugin
         public TruckGame(GameID gameID)
         {
             m_game = gameID;
+
+            LoadSettings();
 
             telemetryDataSet = new TelemetryDataSet(this);
 
@@ -60,11 +64,48 @@ namespace TrucksPlugin
             }
         }
 
-        string m_iconPath = "";
-        string m_exePath = "";
+        private GameSettings settings = new GameSettings();
 
-        public string UserIconPath { get => m_iconPath; set => m_iconPath = value; }
-        public string UserExecutablePath { get => m_exePath; set => m_exePath = value; }
+        private void LoadSettings()
+        {
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            if (File.Exists(path))
+            {
+                try
+                {
+                    string json = File.ReadAllText(path);
+
+                    settings = ObjectSerializeHelper.DeserializeJson<GameSettings>(json);
+                }
+                catch { }
+            }
+        }
+
+        private void SaveSettings()
+        {
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string json = "";
+            if (File.Exists(path))
+            {
+                try
+                {
+                    json = File.ReadAllText(path);
+                }
+                catch { }
+            }
+            string jsonNew = settings.GetJson();
+            if (json != jsonNew)
+            {
+                try
+                {
+                    File.WriteAllText(path, jsonNew);
+                }
+                catch { }
+            }
+        }
+
+        public string UserIconPath { get => settings.ExecutableIcon; set => settings.ExecutableIcon = value; }
+        public string UserExecutablePath { get => settings.ExecutableLink; set => settings.ExecutableLink = value; }
 
         bool bIsRunning = false;
 
@@ -84,20 +125,34 @@ namespace TrucksPlugin
             }
         }
 
+        readonly string assemblyPath = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+
         public void ShowSettings(IVAzhureRacingApp app)
         {
-
+            {
+                try
+                {
+                    string args = string.Format($"/root, \"{assemblyPath}\"");
+                    System.Diagnostics.Process.Start("explorer.exe", args);
+                }
+                catch { }
+            }
         }
 
         public void Start(IVAzhureRacingApp app)
         {
-            if (!Utils.RunSteamGame(SteamGameID))
+            if (settings.ExecutableLink != string.Empty)
+                Utils.ExecuteCmd(settings.ExecutableLink);
+            else
             {
-                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+                if (!Utils.RunSteamGame(SteamGameID))
+                {
+                    app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+                }
             }
         }
 
-        private const string DefaultSharedMemoryMap = "Local\\ETS2";
+        private const string DefaultSharedMemoryMap = @"Local\ETS2";
         public override void UserFunc()
         {
             try
@@ -167,6 +222,14 @@ namespace TrucksPlugin
         {
             StopTrhead();
             monitor.Stop();
+            SaveSettings();
+        }
+
+        public class GameSettings
+        {
+            public string ExecutableLink { get; set; } = string.Empty;
+            public string ExecutableIcon { get; set; } = string.Empty;
+            public string ProcessName { get; set; } = string.Empty;
         }
     }
 }

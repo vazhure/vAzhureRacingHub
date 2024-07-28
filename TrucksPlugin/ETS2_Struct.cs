@@ -13,20 +13,62 @@ namespace TrucksPlugin
         /// Is the telemetry running or it is paused?
         /// </summary>
         [MarshalAs(UnmanagedType.U1)] public bool running;
+        /// <summary>
+        /// Left blinker is on?
+        /// </summary>
         [MarshalAs(UnmanagedType.U1)] public bool lblinker;
+        /// <summary>
+        /// Right blinker is on?
+        /// </summary>
         [MarshalAs(UnmanagedType.U1)] public bool rblinker;
+        /// <summary>
+        /// Low Beam is on?
+        /// </summary>
         [MarshalAs(UnmanagedType.U1)] public bool lowBeamLight;
+        /// <summary>
+        /// Hi Beam is on?
+        /// </summary>
         [MarshalAs(UnmanagedType.U1)] public bool hiBeamLight;
+        /// <summary>
+        /// Parking lights is on?
+        /// </summary>
         [MarshalAs(UnmanagedType.U1)] public bool parkingLights;
 
+        /// <summary>
+        /// Speed in meters per second 
+        /// </summary>
         public float speedometer_speed;
+        /// <summary>
+        /// RPM
+        /// </summary>
         public float rpm;
+        /// <summary>
+        /// limitation RPM
+        /// </summary>
         public float rpmMax;
+        /// <summary>
+        /// Fuel, liters
+        /// </summary>
         public float fuel;
+        /// <summary>
+        /// Fuel capacity, liters
+        /// </summary>
         public float fuelCapacity;
+        /// <summary>
+        /// Steering [-1..1]
+        /// </summary>
         public float steering;
+        /// <summary>
+        /// Steering Input [0..1]
+        /// </summary>
         public float throttle;
+        /// <summary>
+        /// Brake Input [0..1]
+        /// </summary>
         public float brake;
+        /// <summary>
+        /// Clutch Input [0..1]
+        /// </summary>
         public float clutch;
         /// <summary>
         /// The value of truck's navigation eta (in second).

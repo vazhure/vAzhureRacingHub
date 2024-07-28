@@ -73,6 +73,9 @@
     <None Include="Resources\eurotrucks2.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="howto.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Plugin\x64\telemetry_mem.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
