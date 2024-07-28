@@ -18,7 +18,7 @@ namespace Nextion35Dash
         private Thread worker = null;
         private volatile bool _dataArrived = false;
 
-        readonly char[] gears = new char[] { 'R', 'N', '1', '2', '3', '4', '5', '6', '7', '8' };
+        readonly char[] gears = new char[] { 'R', 'N', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
         public string DeviceName => "Alpine Wheel Plate";
 
@@ -411,7 +411,7 @@ namespace Nextion35Dash
                             new RGBW8 { R = 0, G = 0, B = 128 },
                             new RGBW8 { R = 0, G = 0, B = 255 },
                     } :
-                    ledstate >= 0.95?
+                    ledstate >= 0.95 ?
                     new RGBW8[] {
                             new RGBW8 { R = 255, G = 0, B = 0 },
                             new RGBW8 { R = 255, G = 0, B = 0 },
@@ -433,19 +433,19 @@ namespace Nextion35Dash
                             new RGBW8 { R = 0, G = (byte)(ledstate > 0.6 ? 255: 0), B = 0 },
                             new RGBW8 { R = 0, G = (byte)(ledstate > 0.625 ? 255: 0), B = 0 },
                             new RGBW8 { R = 0, G = (byte)(ledstate > 0.65 ? 255: 0), B = 0 },
-                            new RGBW8 { R = 0, G = (byte)(ledstate > 0.675 ? 255: 0), B = 0 },                              
+                            new RGBW8 { R = 0, G = (byte)(ledstate > 0.675 ? 255: 0), B = 0 },
                             new RGBW8 { R = 0, G = (byte)(ledstate > 0.675 ? 255: 0), B = 0 },
 
                             new RGBW8 { R = (byte)(ledstate > 0.7 ? 255: 0), G = (byte)(ledstate > 0.7 ? 255: 0), B = 0 },
-                            new RGBW8 { R = (byte)(ledstate > 0.725 ? 255: 0), G = (byte)(ledstate > 0.725 ? 255: 0), B = 0 },                              
-                            new RGBW8 { R = (byte)(ledstate > 0.75 ? 255: 0), G = (byte)(ledstate > 0.75 ? 255: 0), B = 0 },                              
-                            new RGBW8 { R = (byte)(ledstate > 0.775 ? 255: 0), G = (byte)(ledstate > 0.775 ? 255: 0), B = 0 },                              
-                            new RGBW8 { R = (byte)(ledstate > 0.8 ? 255: 0), G = (byte)(ledstate > 0.8 ? 255: 0), B = 0 },    
-                            
-                            new RGBW8 { R = (byte)(ledstate > 0.825 ? 255: 0), G = 0, B = 0 },                              
-                            new RGBW8 { R = (byte)(ledstate > 0.85 ? 255: 0), G = 0, B = 0 },                              
-                            new RGBW8 { R = (byte)(ledstate > 0.875 ? 255: 0), G = 0, B = 0 },                              
-                            new RGBW8 { R = (byte)(ledstate > 0.9 ? 255: 0), G = 0, B = 0 },                              
+                            new RGBW8 { R = (byte)(ledstate > 0.725 ? 255: 0), G = (byte)(ledstate > 0.725 ? 255: 0), B = 0 },
+                            new RGBW8 { R = (byte)(ledstate > 0.75 ? 255: 0), G = (byte)(ledstate > 0.75 ? 255: 0), B = 0 },
+                            new RGBW8 { R = (byte)(ledstate > 0.775 ? 255: 0), G = (byte)(ledstate > 0.775 ? 255: 0), B = 0 },
+                            new RGBW8 { R = (byte)(ledstate > 0.8 ? 255: 0), G = (byte)(ledstate > 0.8 ? 255: 0), B = 0 },
+
+                            new RGBW8 { R = (byte)(ledstate > 0.825 ? 255: 0), G = 0, B = 0 },
+                            new RGBW8 { R = (byte)(ledstate > 0.85 ? 255: 0), G = 0, B = 0 },
+                            new RGBW8 { R = (byte)(ledstate > 0.875 ? 255: 0), G = 0, B = 0 },
+                            new RGBW8 { R = (byte)(ledstate > 0.9 ? 255: 0), G = 0, B = 0 },
                             new RGBW8 { R = (byte)(ledstate > 0.925 ? 255: 0), G = 0, B = 0 },
                     }
                 };
@@ -457,9 +457,9 @@ namespace Nextion35Dash
                 {
                     data.flags = (byte)LED_FLAGS_A.LED_LIM;
                     data.color = new RGBW8[] {
-                            new RGBW8 { R = 0, G = 0, B = bBlinkLeft ? (byte)255: (byte)0 },
-                            new RGBW8 { R = 0, G = 0, B = bBlinkLeft ? (byte)128: (byte)0 },
-                            new RGBW8 { R = 0, G = 0, B = bBlinkLeft ? (byte)64 : (byte)0 },
+                            bBlinkLeft ? new RGBW8 { R = 255, G = 255, B = 0 }: new RGBW8 { R = 0, G = 0, B = 0 },
+                            bBlinkLeft ? new RGBW8 { R = 255, G = 255, B = 0 }: new RGBW8 { R = 0, G = 0, B = 0 },
+                            bBlinkLeft ? new RGBW8 { R = 255, G = 255, B = 0 }: new RGBW8 { R = 0, G = 0, B = 0 },
                             new RGBW8 { R = 0, G = 0, B = 0 },
                             new RGBW8 { R = 0, G = 0, B = 0 },
                             new RGBW8 { R = 0, G = 0, B = 0 },
@@ -469,9 +469,9 @@ namespace Nextion35Dash
                             new RGBW8 { R = 0, G = 0, B = 0 },
                             new RGBW8 { R = 0, G = 0, B = 0 },
                             new RGBW8 { R = 0, G = 0, B = 0 },
-                            new RGBW8 { R = 0, G = 0, B = bBlinkRight ? (byte)255: (byte)0 },
-                            new RGBW8 { R = 0, G = 0, B = bBlinkRight ? (byte)128: (byte)0 },
-                            new RGBW8 { R = 0, G = 0, B = bBlinkRight ? (byte)64 : (byte)0 },
+                            bBlinkRight ? new RGBW8 { R = 255, G = 255, B = 0 }: new RGBW8 { R = 0, G = 0, B = 0 },
+                            bBlinkRight ? new RGBW8 { R = 255, G = 255, B = 0 }: new RGBW8 { R = 0, G = 0, B = 0 },
+                            bBlinkRight ? new RGBW8 { R = 255, G = 255, B = 0 }: new RGBW8 { R = 0, G = 0, B = 0 },
                     };
                 }
 
