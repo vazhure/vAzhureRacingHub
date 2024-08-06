@@ -218,7 +218,6 @@ namespace MotionPlatform3
             }
         }
 
-
         internal void SetAcceleration(int acc)
         {
             if (!IsConnected)
@@ -494,14 +493,17 @@ namespace MotionPlatform3
 
         internal void ResetActiveGameData()
         {
-            string name = tds?.GamePlugin?.Name;
-            if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
-                gd.Reset();
-            else
+            if (App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault() is IGamePlugin activeGame)
             {
-                gd = new GameData(name);
-                gd.Reset();
-                settings.gamesData.Add(gd);
+                string name = activeGame.Name;
+                if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
+                    gd.Reset();
+                else
+                {
+                    gd = new GameData(name);
+                    gd.Reset();
+                    settings.gamesData.Add(gd);
+                }
             }
         }
 
@@ -509,15 +511,19 @@ namespace MotionPlatform3
         {
             get
             {
-                string name = tds?.GamePlugin?.Name;
-                if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
-                    return gd;
-                else
+                if (App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault() is IGamePlugin activeGame)
                 {
-                    gd = new GameData(name);
-                    settings.gamesData.Add(gd);
-                    return gd;
-                }                
+                    string name = activeGame.Name;
+                    if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
+                        return gd;
+                    else
+                    {
+                        gd = new GameData(name);
+                        settings.gamesData.Add(gd);
+                        return gd;
+                    }
+                }
+                return new GameData();
             }
         }
 
