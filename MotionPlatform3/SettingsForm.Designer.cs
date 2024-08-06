@@ -90,7 +90,7 @@ namespace MotionPlatform3
             this.lblSmooth = new System.Windows.Forms.Label();
             this.comboComPort = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.btnResetData = new System.Windows.Forms.Button();
+            this.btnTune = new System.Windows.Forms.Button();
             this.sliderLinearity = new vAzhureRacingAPI.VAzhureSliderControl();
             this.label9 = new System.Windows.Forms.Label();
             this.lblLinearity = new System.Windows.Forms.Label();
@@ -884,18 +884,18 @@ namespace MotionPlatform3
             this.label7.TabIndex = 3;
             this.label7.Text = "COM Port";
             // 
-            // btnResetData
+            // btnTune
             // 
-            this.btnResetData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnResetData.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnResetData.Location = new System.Drawing.Point(594, 458);
-            this.btnResetData.Name = "btnResetData";
-            this.btnResetData.Size = new System.Drawing.Size(92, 27);
-            this.btnResetData.TabIndex = 45;
-            this.btnResetData.Text = "RESET";
-            this.toolTips.SetToolTip(this.btnResetData, "Reset collected game telemetry data to defaults");
-            this.btnResetData.UseVisualStyleBackColor = true;
-            this.btnResetData.Click += new System.EventHandler(this.BtnResetData_Click);
+            this.btnTune.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTune.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTune.Location = new System.Drawing.Point(594, 458);
+            this.btnTune.Name = "btnTune";
+            this.btnTune.Size = new System.Drawing.Size(92, 27);
+            this.btnTune.TabIndex = 45;
+            this.btnTune.Text = "Tune...";
+            this.toolTips.SetToolTip(this.btnTune, "Reset collected game telemetry data to defaults");
+            this.btnTune.UseVisualStyleBackColor = true;
+            this.btnTune.Click += new System.EventHandler(this.BtnTune_Click);
             // 
             // sliderLinearity
             // 
@@ -1043,7 +1043,7 @@ namespace MotionPlatform3
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.btnTestSpeed);
-            this.Controls.Add(this.btnResetData);
+            this.Controls.Add(this.btnTune);
             this.Controls.Add(this.btnAlarmReset);
             this.Controls.Add(this.btnPark);
             this.Controls.Add(this.btnHome);
@@ -1124,7 +1124,7 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label lblSmooth;
         private System.Windows.Forms.ComboBox comboComPort;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button btnResetData;
+        private System.Windows.Forms.Button btnTune;
         private vAzhureRacingAPI.VAzhureSliderControl sliderLinearity;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label lblLinearity;

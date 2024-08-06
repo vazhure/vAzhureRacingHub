@@ -51,7 +51,7 @@ namespace MotionPlatform3
                 BeginInvoke((Action)delegate
                 {
                     lblGame.Text = "No active game";
-                    chkCollect.Enabled = btnResetData.Enabled = false;
+                    chkCollect.Enabled = btnTune.Enabled = false;
                     Invalidate();
                 });
             }
@@ -64,7 +64,7 @@ namespace MotionPlatform3
                 BeginInvoke((Action)delegate
                 {
                     lblGame.Text = game.Name;
-                    chkCollect.Enabled = btnResetData.Enabled = true;
+                    chkCollect.Enabled = btnTune.Enabled = true;
                     Invalidate();
                 });
             }
@@ -195,7 +195,7 @@ namespace MotionPlatform3
 
             IGamePlugin activeGame = _plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault();
             lblGame.Text = activeGame == null ? "No active game" : activeGame.Name;
-            chkCollect.Enabled = btnResetData.Enabled = activeGame != null;            
+            chkCollect.Enabled = btnTune.Enabled = activeGame != null;            
 
             InitComPorts();
 
@@ -395,9 +395,12 @@ namespace MotionPlatform3
             }
         }
 
-        private void BtnResetData_Click(object sender, EventArgs e)
+        private void BtnTune_Click(object sender, EventArgs e)
         {
-            _plugin.RestoreActiveGameData();
+            using (GameTuneDlg dlg = new GameTuneDlg(_plugin.ActiveGameData))
+            {
+                dlg.ShowDialog(this);
+            }
         }
 
         private void ChkEnabled_OnSwitch(object sender, EventArgs e)

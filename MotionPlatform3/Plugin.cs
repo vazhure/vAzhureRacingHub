@@ -505,6 +505,22 @@ namespace MotionPlatform3
             }
         }
 
+        internal GameData ActiveGameData
+        {
+            get
+            {
+                string name = tds?.GamePlugin?.Name;
+                if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
+                    return gd;
+                else
+                {
+                    gd = new GameData(name);
+                    settings.gamesData.Add(gd);
+                    return gd;
+                }                
+            }
+        }
+
         internal void RestoreActiveGameData()
         {
             string name = tds?.GamePlugin?.Name;
@@ -609,11 +625,11 @@ namespace MotionPlatform3
                     float swayAmoun = settings.SwayCoefficient / 100.0f;
                     float surgeAmount = settings.SurgeCoefficient / 100.0f;
 
-                    float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch, -absPitch, absPitch, -1.0f, 1.0f, settings.ClipByRange);
-                    float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll, -absRoll, absRoll, -1.0f, 1.0f, settings.ClipByRange);
-                    float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave, -absHeave, absHeave, -1.0f, 1.0f, settings.ClipByRange);
-                    float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway, -absSway, absSway, -1.0f, 1.0f, settings.ClipByRange);
-                    float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge, -absSurge, absSurge, -1.0f, 1.0f, settings.ClipByRange);
+                    float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, settings.ClipByRange);
+                    float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, settings.ClipByRange);
+                    float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, settings.ClipByRange);
+                    float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, settings.ClipByRange);
+                    float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, settings.ClipByRange);
 
                     pitch = (float)((float)Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
                     roll = (float)((float)Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
@@ -824,6 +840,14 @@ namespace MotionPlatform3
         public float maxSway = float.MinValue;
         public float maxYaw = float.MinValue;
 
+        public float offsetHeave = 0;
+        public float offsetSurge = 0;
+        public float offsetSway = 0;
+
+        public float offsetPitch = 0;
+        public float offsetRoll = 0;
+        public float offsetYaw = 0;
+
         public GameData()
         {
             maxABSVibration = 1;
@@ -870,6 +894,14 @@ namespace MotionPlatform3
             minSurge = 0;
             minSway = 0;
             minYaw = 0;
+
+            offsetHeave = 0;
+            offsetSurge = 0;
+            offsetSway = 0;
+
+            offsetPitch = 0;
+            offsetRoll = 0;
+            offsetYaw = 0;
         }
 
         public void Update(AMMotionData data)
