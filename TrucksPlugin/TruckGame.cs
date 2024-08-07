@@ -58,8 +58,8 @@ namespace TrucksPlugin
                 switch (m_game)
                 {
                     default:
-                    case GameID.ETS2: return new string[] { "eurotrucks2" }; break;
-                    case GameID.ATS: return new string[] { "amtrucks" }; break;
+                    case GameID.ETS2: return new string[] { "eurotrucks2" };
+                    case GameID.ATS: return new string[] { "amtrucks" };
                 }
             }
         }
@@ -120,8 +120,8 @@ namespace TrucksPlugin
             switch (m_game)
             {
                 default:
-                case GameID.ETS2: return Properties.Resources.eurotrucks2; break;
-                case GameID.ATS: return Properties.Resources.amtrucks; break;
+                case GameID.ETS2: return Properties.Resources.eurotrucks2;
+                case GameID.ATS: return Properties.Resources.amtrucks;
             }
         }
 
@@ -185,7 +185,7 @@ namespace TrucksPlugin
                         session.Flag = "Green";
                         motion.Position = data.ws_truck_placement.position;
 
-                        motion.Pitch = -data.ws_truck_placement.orientation.pitch / 0.25f;
+                        motion.Pitch = data.ws_truck_placement.orientation.pitch / 0.25f;
                         motion.Roll = -data.ws_truck_placement.orientation.roll / 0.5f;
                         motion.Yaw = data.ws_truck_placement.orientation.heading * 2f - 1f;
 
