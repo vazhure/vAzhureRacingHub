@@ -351,7 +351,7 @@ namespace MotionPlatform3
             internal set => tds = value;
         }
 
-        public void OnTelemetry(IVAzhureRacingApp app, TelemetryDataSet data)
+        public void OnTelemetry(IVAzhureRacingApp _, TelemetryDataSet data)
         {
             tds = data;
 
@@ -376,7 +376,7 @@ namespace MotionPlatform3
             }
         }
 
-        public void Quit(IVAzhureRacingApp app)
+        public void Quit(IVAzhureRacingApp _)
         {
             settings?.SaveSettings(Path.Combine(AssemblyPath, "settings.json"));
 

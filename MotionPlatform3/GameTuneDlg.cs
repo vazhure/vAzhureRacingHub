@@ -21,9 +21,9 @@ namespace MotionPlatform3
             numHeaveMax.Value = (decimal)Math.Abs(Math.Max(_gd.minHeave, _gd.maxHeave));
             numSurgeMax.Value = (decimal)Math.Abs(Math.Max(_gd.minSurge, _gd.maxSurge));
             numSwayMax.Value = (decimal)Math.Abs(Math.Max(_gd.minSway, _gd.maxSway));
-            numPitchMax.Value = (decimal)Math.Abs(Math.Max(_gd.minPitch, _gd.maxPitch));
-            numRollMax.Value = (decimal)Math.Abs(Math.Max(_gd.minRoll, _gd.maxRoll));
-            numYawMax.Value = (decimal)Math.Abs(Math.Max(_gd.minYaw, _gd.maxYaw));
+            numPitchMax.Value = 180m * (decimal)Math.Abs(Math.Max(_gd.minPitch, _gd.maxPitch));
+            numRollMax.Value = 180m * (decimal)Math.Abs(Math.Max(_gd.minRoll, _gd.maxRoll));
+            numYawMax.Value = 180m * (decimal)Math.Abs(Math.Max(_gd.minYaw, _gd.maxYaw));
 
             numHeaveOffset.Value = (decimal)_gd.offsetHeave;
             numSurgeOffset.Value = (decimal)_gd.offsetSurge;
@@ -48,12 +48,12 @@ namespace MotionPlatform3
             _gd.maxSurge = (float)numSurgeMax.Value;
             _gd.minSway = -(float)numSwayMax.Value;
             _gd.maxSway = (float)numSwayMax.Value;
-            _gd.minPitch = -(float)numPitchMax.Value;
-            _gd.maxPitch = (float)numPitchMax.Value;
-            _gd.minRoll = -(float)numRollMax.Value;
-            _gd.maxRoll = (float)numRollMax.Value;
-            _gd.minYaw = -(float)numYawMax.Value;
-            _gd.maxYaw = (float)numYawMax.Value;
+            _gd.minPitch = -(float)numPitchMax.Value / 180.0f;
+            _gd.maxPitch = (float)numPitchMax.Value / 180.0f;
+            _gd.minRoll = -(float)numRollMax.Value / 180.0f;
+            _gd.maxRoll = (float)numRollMax.Value / 180.0f;
+            _gd.minYaw = -(float)numYawMax.Value / 180.0f;
+            _gd.maxYaw = (float)numYawMax.Value / 180.0f;
         }
 
         private void BtnClose_Click(object sender, EventArgs e)
@@ -61,7 +61,7 @@ namespace MotionPlatform3
             Close();
         }
 
-        private void Button6_Click(object sender, EventArgs e)
+        private void Defaults_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is string cmd)
             {
@@ -69,7 +69,7 @@ namespace MotionPlatform3
                 {
                     case "All":
                         {
-                            string[] names = { "Pitch", "Roll", "Yaw", "Sway", "Surge", "Heave" };
+                            string[] names = { "Sway", "Surge", "Heave" };
                             foreach (string name in names)
                             {
                                 if (Controls.Find($"num{name}Max", false).FirstOrDefault() is NumericUpDown numMax)
@@ -77,6 +77,24 @@ namespace MotionPlatform3
                                 if (Controls.Find($"num{name}Offset", false).FirstOrDefault() is NumericUpDown numOffset)
                                     numOffset.Value = 0;
                             }
+                            string[] names2 = { "Pitch", "Roll", "Yaw" };
+                            foreach (string name in names2)
+                            {
+                                if (Controls.Find($"num{name}Max", false).FirstOrDefault() is NumericUpDown numMax)
+                                    numMax.Value = 180;
+                                if (Controls.Find($"num{name}Offset", false).FirstOrDefault() is NumericUpDown numOffset)
+                                    numOffset.Value = 0;
+                            }
+                        }
+                        break;
+                    case "Pitch":
+                    case "Roll":
+                    case "Yaw":
+                        {
+                            if (Controls.Find($"num{cmd}Max", false).FirstOrDefault() is NumericUpDown numMax)
+                                numMax.Value = 180;
+                            if (Controls.Find($"num{cmd}Offset", false).FirstOrDefault() is NumericUpDown numOffset)
+                                numOffset.Value = 0;
                         }
                         break;
                     default:
@@ -88,6 +106,17 @@ namespace MotionPlatform3
                         }
                         break;
                 }
+            }
+        }
+
+        private void Num_Enter(object sender, EventArgs e)
+        {
+            if (sender is NumericUpDown num)
+            {
+                BeginInvoke((Action)delegate
+                {
+                    num.Select(0, num.Text.Length);
+                });
             }
         }
     }
