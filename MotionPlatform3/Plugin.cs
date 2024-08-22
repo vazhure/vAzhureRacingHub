@@ -438,7 +438,7 @@ namespace MotionPlatform3
                                     }
                                     else
                                         plugin.Telemetry = null;
-                                }                                   
+                                }
                             }
                         }
                     }
@@ -468,7 +468,7 @@ namespace MotionPlatform3
             int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) :
                 (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
             int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
-            int posRR =  (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
+            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
             int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
 
             if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
@@ -769,7 +769,8 @@ namespace MotionPlatform3
                                     devMap[addr] = true;
                                 OnAxisStateChanged?.Invoke(this, new AxisStateChanged(addr, state));
                             }
-                            catch {
+                            catch
+                            {
                                 //Console.WriteLine(ex.Message);
                             }
                     }
@@ -857,23 +858,23 @@ namespace MotionPlatform3
         public GameData()
         {
             maxABSVibration = 1;
-            maxPitch = 1;
-            maxRoll = 1;
+            maxPitch = 30f / 180f;
+            maxRoll = 30f / 180f;
             maxHeave = 1;
             maxSurge = 1;
             maxSway = 1;
             maxYaw = 1;
 
             minABSVibration = -1;
-            minPitch = -1;
-            minRoll = -1;
+            minPitch = -30f / 180f;
+            minRoll = -30f / 180f;
             minHeave = -1;
             minSurge = -1;
             minSway = -1;
             minYaw = -1;
         }
 
-        public GameData(string gameName): this()
+        public GameData(string gameName) : this()
         {
             GameName = gameName;
         }
@@ -885,21 +886,21 @@ namespace MotionPlatform3
 
         public void Reset()
         {
-            maxABSVibration = 0;
-            maxPitch = 0;
-            maxRoll = 0;
-            maxHeave = 0;
-            maxSurge = 0;
-            maxSway = 0;
-            maxYaw = 0;
+            maxABSVibration = float.MinValue;
+            maxPitch = float.MinValue;
+            maxRoll = float.MinValue;
+            maxHeave = float.MinValue;
+            maxSurge = float.MinValue;
+            maxSway = float.MinValue;
+            maxYaw = float.MinValue;
 
-            minABSVibration = 0;
-            minPitch = 0;
-            minRoll = 0;
-            minHeave = 0;
-            minSurge = 0;
-            minSway = 0;
-            minYaw = 0;
+            minABSVibration = float.MaxValue;
+            minPitch = float.MaxValue;
+            minRoll = float.MaxValue;
+            minHeave = float.MaxValue;
+            minSurge = float.MaxValue;
+            minSway = float.MaxValue;
+            minYaw = float.MaxValue;
 
             offsetHeave = 0;
             offsetSurge = 0;
