@@ -57,6 +57,8 @@ void log_line(const scs_log_type_t type, const char* const text, ...)
 
 const size_t MAX_SUPPORTED_WHEEL_COUNT = 8;
 
+#define SCS_STR_LEN 64
+
 #pragma pack(push)
 #pragma pack(1)
 
@@ -96,6 +98,47 @@ struct telemetry_state_t
 	scs_value_fvector_t		cabin_angular_acceleration;	// SCS_TELEMETRY_TRUCK_CHANNEL_cabin_angular_acceleration
 
 	scs_value_dplacement_t	ws_truck_placement;			// SCS_TELEMETRY_TRUCK_CHANNEL_world_placement
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// extra data
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	char			shifterType[SCS_STR_LEN];			// SCS_TELEMETRY_CONFIG_ATTRIBUTE_shifter_type
+	char			cargo[SCS_STR_LEN];					// SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo
+	char			destinationCity[SCS_STR_LEN];		// SCS_TELEMETRY_CONFIG_ATTRIBUTE_destination_city
+	char			destinationCompany[SCS_STR_LEN];	// SCS_TELEMETRY_CONFIG_ATTRIBUTE_destination_company
+	char			sourceCity[SCS_STR_LEN];			// SCS_TELEMETRY_CONFIG_ATTRIBUTE_source_city
+	char			sourceCompany[SCS_STR_LEN];			// SCS_TELEMETRY_CONFIG_ATTRIBUTE_source_company
+
+	scs_u32_t		selectorCount;						// SCS_TELEMETRY_CONFIG_ATTRIBUTE_selector_count
+	scs_u32_t		planned_distanceKM;					// SCS_TELEMETRY_CONFIG_ATTRIBUTE_planned_distance_km
+	scs_u32_t		multiplayerTimeOffset;				// SCS_TELEMETRY_CHANNEL_multiplayer_time_offset
+	scs_u32_t		restStop;							// SCS_TELEMETRY_CHANNEL_next_rest_stop
+
+	scs_float_t		localScale;							// SCS_TELEMETRY_CHANNEL_local_scale
+	scs_float_t		adBlueFuelCapacity;					// SCS_TELEMETRY_CONFIG_ATTRIBUTE_adblue_capacity
+
+	scs_float_t		truckAdblueFuelLevelLiters;			// SCS_TELEMETRY_TRUCK_CHANNEL_adblue
+	scs_float_t		truckFuelConsumptionAverageLiters;	// SCS_TELEMETRY_TRUCK_CHANNEL_fuel_average_consumption
+	scs_float_t		truckCruise_controlSpeedMS;			// SCS_TELEMETRY_TRUCK_CHANNEL_cruise_control
+	scs_float_t		truckFuelRangeKm;					// SCS_TELEMETRY_TRUCK_CHANNEL_fuel_range
+	scs_float_t		truckBatteryVoltage;				// SCS_TELEMETRY_TRUCK_CHANNEL_battery_voltage
+	scs_float_t		truckOdometerKM;					// SCS_TELEMETRY_TRUCK_CHANNEL_odometer
+	scs_float_t		truckNavigationDistanceMeters;		// SCS_TELEMETRY_TRUCK_CHANNEL_navigation_distance
+	scs_float_t		truckNavigationTimeSeconds;			// SCS_TELEMETRY_TRUCK_CHANNEL_navigation_time
+	scs_float_t		truckNavigationSpeedLimitMS;		// SCS_TELEMETRY_TRUCK_CHANNEL_navigation_speed_limit
+	scs_float_t		truckOilPressure;					// SCS_TELEMETRY_TRUCK_CHANNEL_oil_pressure
+	scs_float_t		truckOilTemperature;				// SCS_TELEMETRY_TRUCK_CHANNEL_oil_temperature
+	scs_float_t		truckWaterTemperature;				// SCS_TELEMETRY_TRUCK_CHANNEL_water_temperature
+
+	scs_u8_t		truckBrakeParking;					// SCS_TELEMETRY_TRUCK_CHANNEL_parking_brake
+	scs_u8_t		truckBrakeMotor;					// SCS_TELEMETRY_TRUCK_CHANNEL_motor_brake
+	scs_u8_t		truckFuelWarning;					// SCS_TELEMETRY_TRUCK_CHANNEL_fuel_warning
+	scs_u8_t		truckBatteryVoltageWarning;			// SCS_TELEMETRY_TRUCK_CHANNEL_battery_voltage_warning
+	scs_u8_t		truckElectricEnabled;				// SCS_TELEMETRY_TRUCK_CHANNEL_electric_enabled
+	scs_u8_t		truckEngineEnabled;					// SCS_TELEMETRY_TRUCK_CHANNEL_engine_enabled
+	scs_u8_t		truckHazardWarning;					// SCS_TELEMETRY_TRUCK_CHANNEL_hazard_warning
+	scs_u8_t		truckWipers;						// SCS_TELEMETRY_TRUCK_CHANNEL_wipers
 };
 
 #pragma pack(pop)
@@ -351,17 +394,44 @@ SCSAPI_VOID telemetry_pause(const scs_event_t event, const void* const UNUSED(ev
 SCSAPI_VOID telemetry_configuration(const scs_event_t event, const void* const event_info, const scs_context_t UNUSED(context))
 {
 	const struct scs_telemetry_configuration_t* const info = static_cast<const scs_telemetry_configuration_t*>(event_info);
-	if (strcmp(info->id, SCS_TELEMETRY_CONFIG_truck) != 0) {
-		return;
+	if (strcmp(info->id, SCS_TELEMETRY_CONFIG_truck) == 0) {
+
+		const scs_named_value_t* const rpmMax = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_rpm_limit, SCS_U32_NIL, SCS_VALUE_TYPE_float);
+		const scs_named_value_t* const fuelCapacity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_fuel_capacity, SCS_U32_NIL, SCS_VALUE_TYPE_float);
+		const scs_named_value_t* const adBluefuelCapacity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_adblue_capacity, SCS_U32_NIL, SCS_VALUE_TYPE_float);
+
+		const scs_named_value_t* const selectorCount = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_selector_count, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
+		const scs_named_value_t* const planned_distanceKM = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_planned_distance_km, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
+		const scs_named_value_t* const adBlueFuelCapacity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_adblue_capacity, SCS_U32_NIL, SCS_VALUE_TYPE_float);
+
+		shared_memory->rpmMax = rpmMax ? rpmMax->value.value_float.value : 0;
+		shared_memory->fuelCapacity = fuelCapacity ? fuelCapacity->value.value_float.value : 0;
+		shared_memory->adBlueFuelCapacity = fuelCapacity ? fuelCapacity->value.value_float.value : 0;
+
+		shared_memory->selectorCount = selectorCount ? selectorCount->value.value_u32.value : 0;
+		shared_memory->planned_distanceKM = planned_distanceKM ? planned_distanceKM->value.value_u32.value : 0;
+		shared_memory->adBlueFuelCapacity = adBlueFuelCapacity ? adBlueFuelCapacity->value.value_float.value : 0;
 	}
 
-	const scs_named_value_t* const rpmMax = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_rpm_limit, SCS_U32_NIL, SCS_VALUE_TYPE_float);
-	const scs_named_value_t* const fuelCapacity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_fuel_capacity, SCS_U32_NIL, SCS_VALUE_TYPE_float);
-	const scs_named_value_t* const deliveryTime = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_delivery_time, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
+	if (strcmp(info->id, SCS_TELEMETRY_CONFIG_controls) == 0) {
+		const scs_named_value_t* const shifterType = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_shifter_type, SCS_U32_NIL, SCS_VALUE_TYPE_string);
+		shifterType ? strcpy_s(shared_memory->shifterType, shifterType->value.value_string.value) : shared_memory->shifterType[0] = '\0';
+	}
 
-	shared_memory->rpmMax = rpmMax ? rpmMax->value.value_float.value : 0;
-	shared_memory->fuelCapacity = fuelCapacity ? fuelCapacity->value.value_float.value : 0;
-	shared_memory->deliveryTime = deliveryTime ? deliveryTime->value.value_u32.value : 0;
+	if (strcmp(info->id, SCS_TELEMETRY_CONFIG_job) == 0) {
+		const scs_named_value_t* const deliveryTime = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_delivery_time, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
+		shared_memory->deliveryTime = deliveryTime ? deliveryTime->value.value_u32.value : 0;
+		const scs_named_value_t* const cargo = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo, SCS_U32_NIL, SCS_VALUE_TYPE_string);
+		cargo ? strcpy_s(shared_memory->cargo, cargo->value.value_string.value) : shared_memory->cargo[0] = '\0';
+		const scs_named_value_t* const destinationCity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_destination_city, SCS_U32_NIL, SCS_VALUE_TYPE_string);
+		destinationCity ? strcpy_s(shared_memory->destinationCity, destinationCity->value.value_string.value) : shared_memory->destinationCity[0] = '\0';
+		const scs_named_value_t* const destinationCompany = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_destination_company, SCS_U32_NIL, SCS_VALUE_TYPE_string);
+		destinationCompany ? strcpy_s(shared_memory->destinationCompany, destinationCompany->value.value_string.value) : shared_memory->destinationCompany[0] = '\0';
+		const scs_named_value_t* const sourceCity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_source_city, SCS_U32_NIL, SCS_VALUE_TYPE_string);
+		sourceCity ? strcpy_s(shared_memory->sourceCity, sourceCity->value.value_string.value) : shared_memory->sourceCity[0] = '\0';
+		const scs_named_value_t* const sourceCompany = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_source_company, SCS_U32_NIL, SCS_VALUE_TYPE_string);
+		sourceCompany ? strcpy_s(shared_memory->sourceCompany, sourceCompany->value.value_string.value) : shared_memory->sourceCompany[0] = '\0';
+	}
 }
 
 /**
@@ -489,6 +559,35 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
 	register_channel(TRUCK_CHANNEL_local_angular_acceleration, SCS_U32_NIL, fvector, angular_acceleration);
 	register_channel(TRUCK_CHANNEL_cabin_angular_velocity, SCS_U32_NIL, fvector, cabin_angular_velocity);
 	register_channel(TRUCK_CHANNEL_cabin_angular_acceleration, SCS_U32_NIL, fvector, cabin_angular_acceleration);
+
+	// extra data
+
+	register_channel(CHANNEL_local_scale, SCS_U32_NIL, float, localScale);
+	register_channel(TRUCK_CHANNEL_adblue, SCS_U32_NIL, float, truckAdblueFuelLevelLiters);
+	register_channel(TRUCK_CHANNEL_fuel_average_consumption, SCS_U32_NIL, float, truckFuelConsumptionAverageLiters);
+	register_channel(TRUCK_CHANNEL_fuel_average_consumption, SCS_U32_NIL, float, truckFuelConsumptionAverageLiters);
+	register_channel(TRUCK_CHANNEL_cruise_control, SCS_U32_NIL, float, truckCruise_controlSpeedMS);
+	register_channel(TRUCK_CHANNEL_fuel_range, SCS_U32_NIL, float, truckFuelRangeKm);
+	register_channel(TRUCK_CHANNEL_battery_voltage, SCS_U32_NIL, float, truckBatteryVoltage);
+	register_channel(TRUCK_CHANNEL_odometer, SCS_U32_NIL, float, truckOdometerKM);
+	register_channel(TRUCK_CHANNEL_navigation_distance, SCS_U32_NIL, float, truckNavigationDistanceMeters);
+	register_channel(TRUCK_CHANNEL_navigation_time, SCS_U32_NIL, float, truckNavigationTimeSeconds);
+	register_channel(TRUCK_CHANNEL_navigation_speed_limit, SCS_U32_NIL, float, truckNavigationSpeedLimitMS);
+	register_channel(TRUCK_CHANNEL_oil_pressure, SCS_U32_NIL, float, truckOilPressure);
+	register_channel(TRUCK_CHANNEL_oil_temperature, SCS_U32_NIL, float, truckOilTemperature);
+	register_channel(TRUCK_CHANNEL_water_temperature, SCS_U32_NIL, float, truckWaterTemperature);
+
+	register_channel(CHANNEL_multiplayer_time_offset, SCS_U32_NIL, u32, multiplayerTimeOffset);
+	register_channel(CHANNEL_next_rest_stop, SCS_U32_NIL, u32, restStop);
+
+	register_channel(TRUCK_CHANNEL_parking_brake, SCS_U32_NIL, bool, truckBrakeParking);
+	register_channel(TRUCK_CHANNEL_motor_brake, SCS_U32_NIL, bool, truckBrakeMotor);
+	register_channel(TRUCK_CHANNEL_fuel_warning, SCS_U32_NIL, bool, truckFuelWarning);
+	register_channel(TRUCK_CHANNEL_battery_voltage_warning, SCS_U32_NIL, bool, truckBatteryVoltageWarning);
+	register_channel(TRUCK_CHANNEL_electric_enabled, SCS_U32_NIL, bool, truckElectricEnabled);
+	register_channel(TRUCK_CHANNEL_engine_enabled, SCS_U32_NIL, bool, truckEngineEnabled);
+	register_channel(TRUCK_CHANNEL_hazard_warning, SCS_U32_NIL, bool, truckHazardWarning);
+	register_channel(TRUCK_CHANNEL_wipers, SCS_U32_NIL, bool, truckWipers);
 
 #undef register_channel
 
