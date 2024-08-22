@@ -65,6 +65,8 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Plugin\Win32\telemetry_mem.exp" />
+    <None Include="Plugin\Win32\telemetry_mem.lib" />
     <None Include="Plugin\x64\telemetry_mem.exp" />
     <None Include="Plugin\x64\telemetry_mem.lib" />
     <None Include="Resources\amtrucks.ico" />
@@ -76,6 +78,8 @@
     <Content Include="howto.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Plugin\Win32\telemetry_mem.dll" />
+    <Content Include="Plugin\Win32\telemetry_mem.pdb" />
     <Content Include="Plugin\x64\telemetry_mem.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -181,7 +181,11 @@ namespace TrucksPlugin
                         car.FuelLevel = data.fuel;
                         car.FuelCapacity = data.fuelCapacity;
 
+                        session.TrackName = $"{data.sourceCity} - {data.destinationCity}";
+                        session.RemainingTime = (int)(data.deliveryTime - data.gameTime) * 1000;
+
                         session.SessionState = "Race";
+                        session.CurrentLapTime = (int)data.gameTime * 1000;
                         session.Flag = "Green";
                         motion.Position = data.ws_truck_placement.position;
 
@@ -193,6 +197,10 @@ namespace TrucksPlugin
                         car.Tires[1].Pressure = 175;
                         car.Tires[2].Pressure = 175;
                         car.Tires[3].Pressure = 175;
+
+                        car.OilPressure = data.truckOilPressure;
+                        car.OilTemp= data.truckOilTemperature;
+                        car.WaterTemp = data.truckWaterTemperature;
 
                         motion.Surge = -data.linear_acceleration.z / 9.81f;
                         motion.Sway = -data.linear_acceleration.x / 9.81f;
@@ -207,8 +215,24 @@ namespace TrucksPlugin
                         else
                             car.Electronics &= ~CarElectronics.Headlight;
 
+                        if (data.truckWipers)
+                            car.Electronics |= CarElectronics.WipersOn;
+                        else
+                            car.Electronics &= ~CarElectronics.WipersOn;
+
+                        if (data.truckEngineEnabled)
+                            car.Electronics |= CarElectronics.Ignition;
+                        else
+                            car.Electronics &= ~CarElectronics.Ignition;
+
+                        if (data.truckBrakeParking)
+                            car.Electronics |= CarElectronics.Handbrake;
+                        else
+                            car.Electronics &= ~CarElectronics.Handbrake;
+
                         car.DirectionsLight = (data.lblinker ? DirectionsLight.Left : DirectionsLight.None) |
-                            (data.rblinker ? DirectionsLight.Right : DirectionsLight.None);
+                            (data.rblinker ? DirectionsLight.Right : DirectionsLight.None) |
+                            (data.truckHazardWarning ? DirectionsLight.Booth: DirectionsLight.None);
 
                         OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
                     }

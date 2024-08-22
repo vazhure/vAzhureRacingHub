@@ -168,5 +168,44 @@ namespace TrucksPlugin
         }
 
         public Dplacement ws_truck_placement;
+
+        // Extra
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string shifterType;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string cargo;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string destinationCity;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string destinationCompany;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string sourceCity;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string sourceCompany;
+
+        public uint selectorCount;
+        public uint planned_distanceKM;
+        public uint multiplayerTimeOffset;
+        public uint restStop;
+
+        public float localScale;
+        public float adBlueFuelCapacity;
+
+        public float truckAdblueFuelLevelLiters;
+        public float truckFuelConsumptionAverageLiters;
+        public float truckCruise_controlSpeedMS;
+        public float truckFuelRangeKm;
+        public float truckBatteryVoltage;
+        public float truckOdometerKM;
+        public float truckNavigationDistanceMeters;
+        public float truckNavigationTimeSeconds;
+        public float truckNavigationSpeedLimitMS;
+        public float truckOilPressure;
+        public float truckOilTemperature;
+        public float truckWaterTemperature;
+
+        [MarshalAs(UnmanagedType.U1)] public bool truckBrakeParking;
+        [MarshalAs(UnmanagedType.U1)] public bool truckBrakeMotor;
+        [MarshalAs(UnmanagedType.U1)] public bool truckFuelWarning;
+        [MarshalAs(UnmanagedType.U1)] public bool truckBatteryVoltageWarning;
+        [MarshalAs(UnmanagedType.U1)] public bool truckElectricEnabled;
+        [MarshalAs(UnmanagedType.U1)] public bool truckEngineEnabled;
+        [MarshalAs(UnmanagedType.U1)] public bool truckHazardWarning;
+        [MarshalAs(UnmanagedType.U1)] public bool truckWipers;
     }
 }
