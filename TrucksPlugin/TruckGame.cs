@@ -180,17 +180,19 @@ namespace TrucksPlugin
                         car.Clutch = data.clutch;
                         car.FuelLevel = data.fuel;
                         car.FuelCapacity = data.fuelCapacity;
+                        car.FuelConsumptionPerLap = data.truckFuelConsumptionAverageLiters;
 
                         session.TrackName = $"{data.sourceCity} - {data.destinationCity}";
-                        session.RemainingTime = (int)(data.deliveryTime - data.gameTime) * 1000;
+                        session.TrackConfig = data.cargo;
+                        session.RemainingTime = (int)((data.deliveryTime - data.gameTime) % 1440) * 1000; // limited by 24 hours
 
                         session.SessionState = "Race";
-                        session.CurrentLapTime = (int)data.gameTime * 1000;
+                        session.CurrentLapTime = (int)(data.gameTime % 1440) * 1000; // limited by 24 hours
                         session.Flag = "Green";
                         motion.Position = data.ws_truck_placement.position;
 
-                        motion.Pitch = data.ws_truck_placement.orientation.pitch / 0.25f;
-                        motion.Roll = -data.ws_truck_placement.orientation.roll / 0.5f;
+                        motion.Pitch = 2f * data.ws_truck_placement.orientation.pitch / 0.25f; // [-180, 180]
+                        motion.Roll = -data.ws_truck_placement.orientation.roll / 0.5f; // [-180, 180]
                         motion.Yaw = data.ws_truck_placement.orientation.heading * 2f - 1f;
 
                         car.Tires[0].Pressure = 175;
@@ -199,7 +201,7 @@ namespace TrucksPlugin
                         car.Tires[3].Pressure = 175;
 
                         car.OilPressure = data.truckOilPressure;
-                        car.OilTemp= data.truckOilTemperature;
+                        car.OilTemp = data.truckOilTemperature;
                         car.WaterTemp = data.truckWaterTemperature;
 
                         motion.Surge = -data.linear_acceleration.z / 9.81f;
@@ -232,7 +234,7 @@ namespace TrucksPlugin
 
                         car.DirectionsLight = (data.lblinker ? DirectionsLight.Left : DirectionsLight.None) |
                             (data.rblinker ? DirectionsLight.Right : DirectionsLight.None) |
-                            (data.truckHazardWarning ? DirectionsLight.Booth: DirectionsLight.None);
+                            (data.truckHazardWarning ? DirectionsLight.Booth : DirectionsLight.None);
 
                         OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
                     }
