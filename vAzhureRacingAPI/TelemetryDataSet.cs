@@ -249,11 +249,17 @@ namespace vAzhureRacingAPI
         /// Oil Temperature, Celsius
         /// </summary>
         public double OilTemp { get; set; } = 0;
+        /// <summary>
+        /// Oil Pressure, PSI
+        /// </summary>
         public double OilPressure { get; set; } = 0;
         /// <summary>
         /// Water Temperature, Celsius
         /// </summary>
         public double WaterTemp { get; set; } = 0;
+        /// <summary>
+        /// Water Pressure, PSI
+        /// </summary>
         public double WaterPressure { get; set; } = 0;
         /// <summary>
         /// Steering wheel rotation angle
