@@ -400,17 +400,17 @@ SCSAPI_VOID telemetry_configuration(const scs_event_t event, const void* const e
 		const scs_named_value_t* const fuelCapacity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_fuel_capacity, SCS_U32_NIL, SCS_VALUE_TYPE_float);
 		const scs_named_value_t* const adBluefuelCapacity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_adblue_capacity, SCS_U32_NIL, SCS_VALUE_TYPE_float);
 
-		const scs_named_value_t* const selectorCount = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_selector_count, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
-		const scs_named_value_t* const planned_distanceKM = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_planned_distance_km, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
 		const scs_named_value_t* const adBlueFuelCapacity = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_adblue_capacity, SCS_U32_NIL, SCS_VALUE_TYPE_float);
 
 		shared_memory->rpmMax = rpmMax ? rpmMax->value.value_float.value : 0;
 		shared_memory->fuelCapacity = fuelCapacity ? fuelCapacity->value.value_float.value : 0;
 		shared_memory->adBlueFuelCapacity = fuelCapacity ? fuelCapacity->value.value_float.value : 0;
-
-		shared_memory->selectorCount = selectorCount ? selectorCount->value.value_u32.value : 0;
-		shared_memory->planned_distanceKM = planned_distanceKM ? planned_distanceKM->value.value_u32.value : 0;
 		shared_memory->adBlueFuelCapacity = adBlueFuelCapacity ? adBlueFuelCapacity->value.value_float.value : 0;
+	}
+
+	if (strcmp(info->id, SCS_TELEMETRY_CONFIG_hshifter) == 0) {
+		const scs_named_value_t* const selectorCount = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_selector_count, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
+		shared_memory->selectorCount = selectorCount ? selectorCount->value.value_u32.value : 0;
 	}
 
 	if (strcmp(info->id, SCS_TELEMETRY_CONFIG_controls) == 0) {
@@ -431,6 +431,8 @@ SCSAPI_VOID telemetry_configuration(const scs_event_t event, const void* const e
 		sourceCity ? strcpy_s(shared_memory->sourceCity, sourceCity->value.value_string.value) : shared_memory->sourceCity[0] = '\0';
 		const scs_named_value_t* const sourceCompany = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_source_company, SCS_U32_NIL, SCS_VALUE_TYPE_string);
 		sourceCompany ? strcpy_s(shared_memory->sourceCompany, sourceCompany->value.value_string.value) : shared_memory->sourceCompany[0] = '\0';
+		const scs_named_value_t* const planned_distanceKM = find_attribute(*info, SCS_TELEMETRY_CONFIG_ATTRIBUTE_planned_distance_km, SCS_U32_NIL, SCS_VALUE_TYPE_u32);
+		shared_memory->planned_distanceKM = planned_distanceKM ? planned_distanceKM->value.value_u32.value : 0;
 	}
 }
 
