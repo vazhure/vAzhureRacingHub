@@ -191,7 +191,7 @@ namespace TrucksPlugin
                         session.Flag = "Green";
                         motion.Position = data.ws_truck_placement.position;
 
-                        motion.Pitch = 2f * data.ws_truck_placement.orientation.pitch / 0.25f; // [-180, 180]
+                        motion.Pitch = data.ws_truck_placement.orientation.pitch / 0.5f; // [-180, 180]
                         motion.Roll = -data.ws_truck_placement.orientation.roll / 0.5f; // [-180, 180]
                         motion.Yaw = data.ws_truck_placement.orientation.heading * 2f - 1f;
 
