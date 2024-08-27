@@ -18,7 +18,7 @@ namespace Nextion35Dash
         private Thread worker = null;
         private volatile bool _dataArrived = false;
 
-        readonly char[] gears = new char[] { 'R', 'N', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        readonly string[] gears = new string[] { "R", "N", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19" };
 
         public string DeviceName => "Nextion";
 
@@ -444,7 +444,7 @@ namespace Nextion35Dash
                 bool bBlinkLeft = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Left);
                 bool bBlinkRight = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Right);
 
-                if (bBlinkLeft || bBlinkRight)
+                if (Settings.DefaultPage != "truck" && (bBlinkLeft || bBlinkRight))
                 {
                     data.lim_mask = (byte)((bBlinkLeft ? 0x03 : 0) | (bBlinkRight ? 0xc0 : 0));
                     data.limitator = new RGB8[] { new RGB8 { R = 255, G = 255, B = 0 } };
@@ -482,6 +482,8 @@ namespace Nextion35Dash
 
         bool _oldLedState = false;
 
+        readonly string[] days = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
+
         /// <summary>
         /// Основной цикл процесса
         /// </summary>
@@ -514,6 +516,7 @@ namespace Nextion35Dash
                     AMSessionInfo sessionInfo = m_dataSet.SessionInfo;
                     AMCarData carData = m_dataSet.CarData;
                     AMWeatherData weatherData = m_dataSet.WeatherData;
+                    var userData = m_dataSet.UserData;
 
                     if ((Nextion35Plugin.sPlugin.GetPrimaryDevice() == this) && _dataArrived)
                     {
@@ -524,16 +527,92 @@ namespace Nextion35Dash
                         {
                             ClearCommandsCash();
                             oldPage = Settings.DefaultPage;
+
                         }
 
-                        SendData("page", $"page {settings.DefaultPage}");
+                        /*bool bPageChanged = */SendData("page", $"page {settings.DefaultPage}");
+
+                        TimeSpan current = TimeSpan.FromMilliseconds(sessionInfo.CurrentLapTime > 0 ? sessionInfo.CurrentLapTime : 0);
+
+                        if (settings.DefaultPage == "truck")
+                        {
+                            int zS = (int)(337 + Math2.Mapd(carData.Speed, 0, 128.747537, 0, 228, true)) % 360;
+                            int zR = (int)(343 + Math2.Mapd(carData.RPM, 0, 3000, 0, 217, true)) % 360;
+                            int zF = (int)(343 + Math2.Mapd(carData.FuelLevel, 0, carData.FuelCapacity, 0, 213, true)) % 360;
+                            int zW = (int)(343 + Math2.Mapd((carData.WaterTemp * 1.8) + 32, 100, 300, 0, 213, true)) % 360; // Fahrenheit
+                            int zO = (int)(343 + Math2.Mapd(carData.OilPressure, 0, 100, 0, 213, true)) % 360; // PSI
+                            
+                            bool bBlinkLeft = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Left);
+                            bool bBlinkRight = m_dataSet.CarData.DirectionsLight.HasFlag(DirectionsLight.Right);
+                            bool bEngine = carData.Electronics.HasFlag(CarElectronics.Ignition);
+                            int va0 = (bBlinkLeft ? 1 : 0) | (bBlinkRight ? 2 : 0);
+
+                            SendData("va0", FormattableString.Invariant($"va0.val={va0}"));
+                            SendData("zS", FormattableString.Invariant($"zS.val={zS}"));
+                            SendData("zR", FormattableString.Invariant($"zR.val={zR}"));
+                            SendData("zW", FormattableString.Invariant($"zW.val={zW}"));
+                            SendData("zF", FormattableString.Invariant($"zF.val={zF}"));
+                            SendData("zO", FormattableString.Invariant($"zO.val={zO}"));
+                            SendData("pB", bEngine ? "vis pB,0" : "vis pB,1");
+
+                            if (userData.ContainsKey("bool.truckBrakeParking") && userData["bool.truckBrakeParking"] is bool bParkingBrake)
+                                SendData("pB", bParkingBrake ? "vis pP,1" : "vis pP,0");
+                            else
+                                SendData("pB", "vis pP,0");
+
+                            if (userData.ContainsKey("float.truckCruise_controlSpeedMS") && userData["float.truckCruise_controlSpeedMS"] is float fCruiseControl)
+                                SendData("pC", fCruiseControl > 0 ? "vis pC,1" : "vis pC,0");
+                            else
+                                SendData("pC", "vis pC,0");
+
+                            if (userData.ContainsKey("float.adBlueFuelCapacity") && userData.ContainsKey("float.truckAdblueFuelLevelLiters") &&
+                                userData["float.adBlueFuelCapacity"] is float capacity && userData["float.truckAdblueFuelLevelLiters"] is float level)
+                            {
+                                int zF1 = (int)(343 + Math2.Mapd(level, 0, capacity, 0, 213, true)) % 360;
+                                SendData("z0", FormattableString.Invariant($"z0.val={zF1}"));
+                            }
+
+                            if (userData.ContainsKey("uint.gameTime") && userData["uint.gameTime"] is uint gameTime)
+                            {
+                                var tm = TimeSpan.FromMinutes(gameTime);
+                                int day = tm.Days % 7;
+                                SendData("curlap", $"cur.txt=\"{days[day]} {tm.ToString("hh':'mm")}\"");
+                            }
+                            else
+                            {
+                                SendData("curlap", $"cur.txt=\"\"");
+                            }
+
+                            if (sessionInfo.PitSpeedLimit > 0)
+                                SendData("spd.bco", carData.Speed >= sessionInfo.PitSpeedLimit + 5 ? "spd.bco=" + cRed565.ToString() : "spd.bco=" + cBlack565.ToString());
+                            else
+                                SendData("spd.bco", "spd.bco=" + cBlack565.ToString());
+
+                            userData.TryGetValue("bool.parkingLights", out object bParkingLights);
+                            userData.TryGetValue("bool.lowBeamLight", out object bLowBeamLight);
+                            userData.TryGetValue("bool.hiBeamLight", out object bHiBeamLight);
+
+                            if (bHiBeamLight is bool lightHi && lightHi)
+                                SendData("Headlight", "hl.pic=11");
+                            else if (bLowBeamLight is bool lightLo && lightLo)
+                                SendData("Headlight", "hl.pic=3");
+                            else if (bParkingLights is bool lightPark && lightPark)
+                                SendData("Headlight", "hl.pic=12");
+                            else
+                                SendData("Headlight", "hl.pic=4");
+                        }
+                        else
+                        {
+                            string curlap = current.TotalMilliseconds > 0 ? current.ToString("mm':'ss':'fff") : "--:--:--";
+                            SendData("curlap", $"cur.txt=\"{curlap}\"");
+                            SendData("Headlight", "hl.pic=" + (carData.Electronics.HasFlag(CarElectronics.Headlight) ? 3 : 4));
+                        }
 
                         string gear = (carData.Gear >= 0 && carData.Gear < gears.Length) ? gears[carData.Gear].ToString() : " ";
 
                         int bar = carData.MaxRPM > 0 ? (int)(100.0f * ((float)carData.RPM / (float)carData.MaxRPM)) : 0;
 
                         TimeSpan best = TimeSpan.FromMilliseconds(sessionInfo.BestLapTime > 0 ? sessionInfo.BestLapTime : 0);
-                        TimeSpan current = TimeSpan.FromMilliseconds(sessionInfo.CurrentLapTime > 0 ? sessionInfo.CurrentLapTime : 0);
                         TimeSpan diff = TimeSpan.FromMilliseconds(Math.Abs(sessionInfo.CurrentDelta));
                         char diffSign = sessionInfo.CurrentDelta >= 0 ? '+' : '-';
 
@@ -565,10 +644,8 @@ namespace Nextion35Dash
                         SendData("fuel", FormattableString.Invariant($"fuel.txt=\"{carData.FuelLevel:N2}\""));
                         SendData("brake bias", FormattableString.Invariant($"bias.txt=\"{carData.BrakeBias:N1}\""));
 
-                        string curlap = current.TotalMilliseconds > 0 ? current.ToString("mm':'ss':'fff") : "--:--:--";
                         string bestlap = best.TotalMilliseconds > 0 ? best.ToString("mm':'ss':'fff") : "--:--:--";
 
-                        SendData("curlap", $"cur.txt=\"{curlap}\"");
                         SendData("bestlap", $"best.txt=\"{bestlap}\"");
                         string delta = "--.--";
 
@@ -607,7 +684,6 @@ namespace Nextion35Dash
 
                         SendData("ABS", "abs.pco=" + (carData.Electronics.HasFlag(CarElectronics.ABS) ? cYellow565.ToString() : cWhite565.ToString()));
                         SendData("TCS", "tc.pco=" + (carData.Electronics.HasFlag(CarElectronics.TCS) ? cBlue3420.ToString() : cWhite565.ToString()));
-                        SendData("Headlight", "hl.pic=" + (carData.Electronics.HasFlag(CarElectronics.Headlight) ? 3 : 4));
 
                         SendData("TC level", carData.TcLevel >= 0 ? $"tc.txt=\"{carData.TcLevel}\"" : "tc.txt=\"\"");
                         SendData("TC level color", carData.Electronics.HasFlag(CarElectronics.TCS) ? $"drs.pco={cBlue565}" : $"drs.pco={cBlack565}");
