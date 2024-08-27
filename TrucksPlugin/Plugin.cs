@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Ignore Spelling: app
 using vAzhureRacingAPI;
 
 namespace TrucksPlugin
@@ -18,7 +14,7 @@ namespace TrucksPlugin
         readonly TruckGame ets2 = new TruckGame(TruckGame.GameID.ETS2);
         readonly TruckGame ats = new TruckGame(TruckGame.GameID.ATS);
 
-        public bool CanClose(IVAzhureRacingApp app)
+        public bool CanClose(IVAzhureRacingApp _)
         {
             return true;
         }
@@ -31,7 +27,7 @@ namespace TrucksPlugin
             return true;
         }
 
-        public void Quit(IVAzhureRacingApp app)
+        public void Quit(IVAzhureRacingApp _)
         {
             ats.Dispose();
             ets2.Dispose();

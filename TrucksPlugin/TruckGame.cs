@@ -169,6 +169,7 @@ namespace TrucksPlugin
                         var car = telemetryDataSet.CarData;
                         var motion = telemetryDataSet.CarData.MotionData;
                         var session = telemetryDataSet.SessionInfo;
+                        var userData = telemetryDataSet.UserData;
 
                         car.Gear = (short)(data.displayedGear < 0 ? 0 : data.displayedGear + 1);
                         car.Speed = Math.Abs(data.speedometer_speed * 3.6);
@@ -182,6 +183,29 @@ namespace TrucksPlugin
                         car.FuelCapacity = data.fuelCapacity;
                         car.FuelConsumptionPerLap = data.truckFuelConsumptionAverageLiters;
 
+                        userData["uint.gameTime"] = data.gameTime;
+                        userData["uint.restStop"] = data.restStop;
+                        userData["uint.deliveryTime"] = data.deliveryTime;
+                        userData["uint.navigationTime"] = data.navigationTime;
+                        userData["string.destinationCity"] = data.destinationCity;
+                        userData["string.sourceCity"] = data.sourceCity;
+                        userData["string.cargo"] = data.cargo;
+                        userData["float.truckFuelConsumptionAverageLiters"] = data.truckFuelConsumptionAverageLiters;
+                        userData["bool.truckElectricEnabled"] = data.truckElectricEnabled;
+                        userData["bool.truckEngineEnabled"] = data.truckEngineEnabled;
+                        userData["bool.parkingLights"] = data.parkingLights;
+                        userData["bool.lowBeamLight"] = data.lowBeamLight;
+                        userData["bool.hiBeamLight"] = data.hiBeamLight;
+                        userData["bool.truckBrakeParking"] = data.truckBrakeParking;
+                        userData["float.truckFuelRangeKm"] = data.truckFuelRangeKm;
+                        userData["float.adBlueFuelCapacity"] = data.adBlueFuelCapacity;
+                        userData["float.truckAdblueFuelLevelLiters"] = data.truckAdblueFuelLevelLiters;
+                        userData["float.truckBatteryVoltage"] = data.truckBatteryVoltage;
+                        userData["float.truckOdometerKM"] = data.truckOdometerKM;
+                        userData["float.truckNavigationDistanceMeters"] = data.truckNavigationDistanceMeters;
+                        userData["float.truckCruise_controlSpeedMS"] = data.truckCruise_controlSpeedMS;
+
+                        session.PitSpeedLimit = data.truckNavigationSpeedLimitMS * 3.6;
                         session.TrackName = $"{data.sourceCity} - {data.destinationCity}";
                         session.TrackConfig = data.cargo;
                         session.RemainingTime = (int)((data.deliveryTime - data.gameTime) % 1440) * 1000; // limited by 24 hours
@@ -212,7 +236,7 @@ namespace TrucksPlugin
 
                         ///Console.WriteLine($"Surge {motion.Surge:N4}, Sway {motion.Sway:N4}, Heave {motion.Heave:N4}, Pitch {motion.Pitch:N4}, Roll {motion.Roll:N4}, Yaw {motion.Yaw:N4}");
 
-                        if (data.lowBeamLight || data.hiBeamLight)
+                        if (data.lowBeamLight)
                             car.Electronics |= CarElectronics.Headlight;
                         else
                             car.Electronics &= ~CarElectronics.Headlight;
