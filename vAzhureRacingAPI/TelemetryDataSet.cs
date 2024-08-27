@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace vAzhureRacingAPI
 {
@@ -59,11 +60,25 @@ namespace vAzhureRacingAPI
             set => weatherData = value;
         }
 
+        private Dictionary<string, object> userData;
+        public Dictionary<string, object> UserData
+        {
+            get
+            {
+                if (userData == null)
+                    userData = new Dictionary<string, object>();
+
+                return userData;
+            }
+            set => userData = value;
+        }
+
         public void LoadDefaults()
         {
             sessionInfo = new AMSessionInfo();
             carData = new AMCarData();
             weatherData = new AMWeatherData();
+            userData = new Dictionary<string, object>();
         }
 
         public object Clone()
