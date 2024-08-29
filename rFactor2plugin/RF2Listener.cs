@@ -122,9 +122,9 @@ namespace rFactor2plugin
                             rF2Vec3 oriY = new rF2Vec3() { x = vt.mOri[1].x, y = vt.mOri[1].y, z = vt.mOri[1].z };
                             rF2Vec3 oriZ = new rF2Vec3() { x = vt.mOri[2].x, y = vt.mOri[2].y, z = vt.mOri[2].z };
 
-                            motionData.Yaw = (float)Math.Atan2(oriZ.x, oriZ.z);
-                            motionData.Pitch = (float)Math.Atan2(-oriY.z, Math.Sqrt(oriX.z * oriX.z + oriZ.z * oriZ.z));
-                            motionData.Roll = (float)Math.Atan2(oriY.x, Math.Sqrt(oriX.x * oriX.x + oriZ.x * oriZ.x));
+                            motionData.Yaw = (float)Math.Atan2(oriZ.x, oriZ.z) / 3.1415f;
+                            motionData.Pitch = (float)Math.Atan2(-oriY.z, Math.Sqrt(oriX.z * oriX.z + oriZ.z * oriZ.z)) / 3.1415f;
+                            motionData.Roll = (float)Math.Atan2(oriY.x, Math.Sqrt(oriX.x * oriX.x + oriZ.x * oriZ.x)) / 3.1415f;
 
                             motionData.Sway = vt.Sway / (float)Math.PI;
                             motionData.Surge = -vt.Surge / (float)Math.PI;

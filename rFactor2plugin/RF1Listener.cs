@@ -128,9 +128,9 @@ namespace rFactor2plugin
                             RFactor1.RfVec3 oriY = new RFactor1.RfVec3() { x = rfShared.oriY.x, y = rfShared.oriY.y, z = rfShared.oriY.z };
                             RFactor1.RfVec3 oriZ = new RFactor1.RfVec3() { x = rfShared.oriZ.x, y = rfShared.oriZ.y, z = rfShared.oriZ.z };
 
-                            motionData.Yaw = (float)Math.Atan2(oriZ.x, oriZ.z);
-                            motionData.Pitch = (float)Math.Atan2(-oriY.z, Math.Sqrt(oriX.z * oriX.z + oriZ.z * oriZ.z));
-                            motionData.Roll = (float)Math.Atan2(oriY.x, Math.Sqrt(oriX.x * oriX.x + oriZ.x * oriZ.x));
+                            motionData.Yaw = (float)Math.Atan2(oriZ.x, oriZ.z) / 3.1415f;
+                            motionData.Pitch = (float)Math.Atan2(-oriY.z, Math.Sqrt(oriX.z * oriX.z + oriZ.z * oriZ.z)) / 3.1415f;
+                            motionData.Roll = (float)Math.Atan2(oriY.x, Math.Sqrt(oriX.x * oriX.x + oriZ.x * oriZ.x)) / 3.1415f;
 
                             motionData.Sway = 0.3f * rfShared.localAccel.x / 9.81f;
                             motionData.Surge = 0.3f * -rfShared.localAccel.z / 9.81f;
