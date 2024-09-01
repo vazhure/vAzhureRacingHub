@@ -291,7 +291,7 @@ namespace KunosPlugin
                             MotionData.LocalVelocity = physics.localVelocity;
 
                             MotionData.Pitch = physics.pitch / (float) Math.PI;
-                            MotionData.Roll = physics.roll / (float)Math.PI;
+                            MotionData.Roll = -physics.roll / (float)Math.PI;
                             MotionData.Yaw = physics.heading / (float)Math.PI;
 
                             MotionData.ABSVibration = physics.absVibrations;
