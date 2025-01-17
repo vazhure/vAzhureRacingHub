@@ -464,18 +464,6 @@ namespace Kunos.Structs
         public String dryTyresName;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 33)]
         public String wetTyresName;
-
-        public static SPageFileStatic FromBytes(byte[] bytes)
-        {
-            try
-            {
-                GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-                SPageFileStatic stuff = (SPageFileStatic)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(SPageFileStatic));
-                handle.Free();
-                return stuff;
-            }
-            catch { return new SPageFileStatic(); }
-        }
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Unicode)]
@@ -647,18 +635,6 @@ namespace Kunos.Structs
         /// Distance in ms to car behind
         /// </summary>
         public int gapBehind;
-
-        public static SPageFileGraphics FromBytes(byte[] bytes)
-        {
-            try
-            {
-                GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-                SPageFileGraphics stuff = (SPageFileGraphics)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(SPageFileGraphics));
-                handle.Free();
-                return stuff;
-            }
-            catch { return new SPageFileGraphics(); }
-        }
     }
 
     #region UDP Data

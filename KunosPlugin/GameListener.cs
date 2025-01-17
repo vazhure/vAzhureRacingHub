@@ -142,7 +142,7 @@ namespace KunosPlugin
                                 currentSector[2] = graphics.currentSectorIndex == 2 ? graphics.iCurrentTime - currentSector[0] - currentSector[1] : currentSector[2];
                             }
 
-                            if (runningGame.gameID == GameID.ACC)
+                            if (runningGame.gameID != GameID.AC)
                             {
                                 CarData.TcLevel = (short)graphics.TC;
                                 CarData.TcLevel2 = (short)graphics.TCCut;

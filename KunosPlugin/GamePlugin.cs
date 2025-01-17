@@ -6,7 +6,7 @@ namespace KunosPlugin
 {
     internal class GamePlugin : IGamePlugin
     {
-        public enum GameID { AC, ACC };
+        public enum GameID { AC, ACC, ACEVO };
         public readonly GameID gameID = GameID.ACC;
 
         public TelemetryDataSet DataSet { get; private set; }
@@ -22,11 +22,47 @@ namespace KunosPlugin
             OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(DataSet));
         }
 
-        public string Name => gameID == GameID.AC ? "Assetto Corsa" : "Assetto Corsa Competizione";
+        public string Name {
+            get 
+            { 
+                switch (gameID)
+                {
+                    default:
+                    case GameID.AC: return "Assetto Corsa";
+                    case GameID.ACEVO: return "Assetto Corsa EVO";
+                    case GameID.ACC: return "Assetto Corsa Competizione";
+                }
+           }
+        }
 
-        public uint SteamGameID => gameID == GameID.AC ? 244210U : 805550U;
+        //
+        public uint SteamGameID
+        {
+            get
+            {
+                switch (gameID)
+                {
+                    default:
+                    case GameID.AC: return 244210U;
+                    case GameID.ACEVO: return 3058630U;
+                    case GameID.ACC: return 805550U;
+                }
+            }
+        }
 
-        public string[] ExecutableProcessName => gameID == GameID.AC ? new string[] { "acs", "acs_x86.exe" } : new string[] { "acc", "AC2-Win64-Shipping" };
+        public string[] ExecutableProcessName
+        {
+            get
+            {
+                switch (gameID)
+                {
+                    default:
+                    case GameID.AC: return new string[] { "acs", "acs_x86" };
+                    case GameID.ACEVO: return new string[] { "AssettoCorsaEVO" };
+                    case GameID.ACC: return new string[] { "acc", "AC2-Win64-Shipping"};
+                }
+            }
+        }
 
         string sUserIconPath = "";
         string sUserExecutablePath = "";
@@ -70,7 +106,13 @@ namespace KunosPlugin
 
         public Icon GetIcon()
         {
-            return gameID == GameID.AC ? Properties.Resources.AssettoCorsa : Properties.Resources.acc;
+            switch (gameID)
+            {
+                default:
+                case GameID.AC: return Properties.Resources.AssettoCorsa;
+                case GameID.ACEVO: return Properties.Resources.evo;
+                case GameID.ACC: return Properties.Resources.acc;
+            }
         }
 
         public void ShowSettings(IVAzhureRacingApp app)
