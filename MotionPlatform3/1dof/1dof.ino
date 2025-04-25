@@ -7,10 +7,12 @@
 // Upload: SWD
 #include <Wire.h>  // https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
 #include <stdio.h>
+#define I2C_SDA PB7
+#define I2C_SCL PB6
 
 // Uncomment this line to flash MASTER device
 // Comment this line to flash SLAVE devices
-//#define I2CMASTER
+#define I2CMASTER
 
 // Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
@@ -92,11 +94,15 @@ const int RAW_DATA_LEN = sizeof(PCCMD);
 
 #ifdef I2CMASTER  // MASTER CODE below
 
-#define ALARM_PIN A4
-#define SIGNAL_PIN A5
+#define ALARM_PIN PA4
+#define SIGNAL_PIN PA5
 
 // Device states
 STATE st[MAX_LINEAR_ACTUATORS];
+bool arr_slaves[MAX_LINEAR_ACTUATORS];
+
+#define SET_SLAVE_STATE(idx, x) arr_slaves[idx] = x
+#define HAS_SLAVE(idx) arr_slaves[idx]
 
 volatile bool bAlarm = false;
 
@@ -112,15 +118,25 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
 
   attachInterrupt(ALARM_PIN, OnAlarm, RISING);
-  Serial.begin(SERIAL_BAUD_RATE);
-  delay(1000);
   Wire.begin();
+  delay(1000);
+  int nFound = 0;
+  // scanning slave devices
+  for (int addr = SLAVE_FIRST; addr <= SLAVE_LAST; addr++) {
+    Wire.beginTransmission(addr);
+    uint8_t err = Wire.endTransmission();
+    SET_SLAVE_STATE(addr - SLAVE_FIRST, err == 0);
+    if (err == 0) nFound++;
+  }
+  digitalWrite(LED_PIN, nFound == 0 ? HIGH : LOW);
+
+  Serial.begin(SERIAL_BAUD_RATE);
+  while(!Serial); // whait connected
 
 #ifdef DEBUG
 #define RETRY_CNT 3
   // I2C Devices scan
   Serial.println("Seeking slave devices");
-
   for (int addr = SLAVE_FIRST; addr <= SLAVE_LAST; addr++)
     for (int t = 0; t < RETRY_CNT; t++) {
       Wire.beginTransmission(addr);
@@ -171,17 +187,20 @@ void serialEvent() {
 }
 
 bool RequestSlaveState(uint8_t addr, uint8_t* ptr, uint8_t len) {
-  if (Wire.requestFrom(addr, len) == len && Wire.readBytes(ptr, len) == len) {
+  if (HAS_SLAVE(addr - SLAVE_FIRST) && Wire.requestFrom(addr, len) == len && Wire.readBytes(ptr, len) == len) {
     return true;
   }
   return false;
 }
 
 bool TransmitCMD(uint8_t addr, uint8_t cmd, uint32_t data) {
-  Wire.beginTransmission(addr);
-  Wire.write(cmd);
-  Wire.write((uint8_t*)&data, sizeof(uint32_t));
-  return Wire.endTransmission() == 0;
+  if (HAS_SLAVE(addr - SLAVE_FIRST)) {
+    Wire.beginTransmission(addr);
+    Wire.write(cmd);
+    Wire.write((uint8_t*)&data, sizeof(uint32_t));
+    return Wire.endTransmission() == 0;
+  }
+  return false;
 }
 
 void loop() {
@@ -268,6 +287,15 @@ const uint8_t HOME_DIRECTION = HIGH;
 #define MIN_SPEED_MM_SEC 10
 #define SLOW_SPEED_MM_SEC 20
 #define DEFAULT_SPEED_MM_SEC 90
+
+#ifndef MAX
+#define MAX(a, b) (a > b ? a : b)
+#endif
+
+#ifndef MIN
+#define MIN(a, b) (a < b ? a : b)
+#endif
+
 
 const int HOMEING_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(MIN_SPEED_MM_SEC) - MIN_PULSE_DELAY);     // us
 const int FAST_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(DEFAULT_SPEED_MM_SEC) - MIN_PULSE_DELAY);    // us
