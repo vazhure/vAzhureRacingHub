@@ -1,0 +1,116 @@
+{
+  "Output": {
+    "Comments": null,
+    "CustomName": "vAzhureRacing 3DOF",
+    "Settings": {
+      "RtsEnable": true,
+      "DtrEnable": true,
+      "LockSettings": false,
+      "SerialPort": "COM9",
+      "DataBits": 8,
+      "SerialStopBits": 1,
+      "SerialParity": 0,
+      "BaudRate": 115200,
+      "AfterOpenDelay": 0,
+      "GenericProtocolDefinition": {
+        "SettingsBuilder": {
+          "Settings": [],
+          "IsEditMode": false
+        },
+        "ShowWaitForResponse": true,
+        "AxisResolution": 16,
+        "AxisFormat": 1,
+        "StartCommands": [
+          {
+            "MustWaitForMessage": false,
+            "WaitForMessage": null,
+            "WaitForDelay": 5000,
+            "Command": "<0x00><0x14><0x02><0x00><0x64><0x00><0x00><0x00><0x64><0x00><0x00><0x00><0x64><0x00><0x00><0x00><0x64><0x00><0x00><0x00>",
+            "CommandDelay": 100
+          },
+          {
+            "MustWaitForMessage": false,
+            "WaitForMessage": null,
+            "WaitForDelay": 5000,
+            "Command": "<0x00><0x14><0x09><0x00><0x0a><0x00><0x00><0x00><0x0a><0x00><0x00><0x00><0x0a><0x00><0x00><0x00><0x0a><0x00><0x00><0x00>",
+            "CommandDelay": 100
+          },
+          {
+            "MustWaitForMessage": false,
+            "WaitForMessage": null,
+            "WaitForDelay": 5000,
+            "Command": "<0x00><0x14><0x0a><0x00><0xf4><0x01><0x00><0x00><0xf4><0x01><0x00><0x00><0xf4><0x01><0x00><0x00><0xf4><0x01><0x00><0x00>",
+            "CommandDelay": 100
+          },
+          {
+            "MustWaitForMessage": false,
+            "WaitForMessage": null,
+            "WaitForDelay": 5000,
+            "Command": "<0x00><0x14><0x00><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00>",
+            "CommandDelay": 3000
+          },
+          {
+            "MustWaitForMessage": false,
+            "WaitForMessage": null,
+            "WaitForDelay": 5000,
+            "Command": "<0x00><0x14><0x05><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00>",
+            "CommandDelay": 100
+          }
+        ],
+        "UpdateCommands": [
+          {
+            "Command": "<0x00><0x14><0x0B><0x00><Axis1><Axis2><Axis3><Axis4><0x00><0x00><0x00><0x00><0x00><0x00><0x00><0x00>",
+            "CommandDelay": 10
+          }
+        ],
+        "StopCommands": [
+          {
+            "MustWaitForMessage": false,
+            "WaitForMessage": null,
+            "WaitForDelay": 5000,
+            "Command": "<0x00><0x14><0x07><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00><0x01><0x00><0x00><0x00>",
+            "CommandDelay": 1
+          }
+        ]
+      },
+      "SecurityAcknowledgementAccepted": true,
+      "ActuatorOrderingSettings": {
+        "MaxActuatorsEx": 4,
+        "ConfigurationDone": true,
+        "UseParkPosition": false,
+        "ParkDuration": 5516,
+        "UseParkPositionEx": false,
+        "Roles": [
+          {
+            "RangeLimit": 100.0,
+            "ParkPosition": 50.0,
+            "Role": 1,
+            "ReverseDirection": false
+          },
+          {
+            "RangeLimit": 100.0,
+            "ParkPosition": 50.0,
+            "Role": 3,
+            "ReverseDirection": false
+          },
+          {
+            "RangeLimit": 100.0,
+            "ParkPosition": 50.0,
+            "Role": 4,
+            "ReverseDirection": false
+          },
+          {
+            "RangeLimit": 100.0,
+            "ParkPosition": 50.0,
+            "Role": 2,
+            "ReverseDirection": false
+          }
+        ]
+      },
+      "OutputId": "d55bc933-4451-49f5-8111-4b56e12f285b",
+      "AllowIdling": true
+    },
+    "OutputId": "9ccfc266-9843-4b74-a38c-cb3b298943cd",
+    "TypeName": "GenericSerialOutputV2"
+  }
+}

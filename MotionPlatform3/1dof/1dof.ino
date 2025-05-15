@@ -1,14 +1,18 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2024-02-24
+// version from 2025-04-27
+// stm32duino version
+
+// NOTE: select fake STM32F103C8
+// https://www.stm32duino.com/
 
 //#define DEBUG
-// Board: STM32F103C8T6 4 pcs (master + 3 slave)
+// Board: STM32F103C8T6 5 pcs (master + 4 slave)
 // Upload: SWD
-#include <Wire.h>  // https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
-#include <stdio.h>
 #define I2C_SDA PB7
 #define I2C_SCL PB6
+#include <Wire_slave.h>
+#include <stdio.h>
 
 // Uncomment this line to flash MASTER device
 // Comment this line to flash SLAVE devices
@@ -27,12 +31,32 @@
 #define SLAVE_FIRST SLAVE_ADDR_FL
 #define SLAVE_LAST (SLAVE_FIRST + LINEAR_ACTUATORS - 1)
 
+inline int WireRead(uint8_t* ptr, uint8_t len) {
+  int cnt = Wire.available();
+  len = len > cnt ? cnt : len;
+  for (int t = 0; t < len; t++) {
+    ptr[t] = Wire.read();
+  }
+  return len;
+}
+
+template<class T>
+const T& clamp(const T& x, const T& a, const T& b) {
+  if (x < a) {
+    return a;
+  } else if (b < x) {
+    return b;
+  } else
+    return x;
+}
+
 #ifndef I2CMASTER
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Uncomment a single line with desired Address to flash SLAVE device
-//#define SLAVE_ADDR SLAVE_ADDR_FL
+#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-#define SLAVE_ADDR SLAVE_ADDR_FR
+//#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -62,7 +86,8 @@ enum COMMAND : uint8_t { CMD_HOME,
                          CMD_PARK,
                          SET_ALARM,
                          CMD_SET_SLOW_SPEED,
-                         CMD_SET_ACCEL
+                         CMD_SET_ACCEL,
+                         CMD_MOVE_SH
 };
 
 enum FLAGS : uint8_t { NONE = 0,
@@ -89,6 +114,16 @@ struct PCCMD {
   uint8_t reserved;
   int32_t data[MAX_LINEAR_ACTUATORS];
 } pccmd;
+
+// FOR SimHub
+struct PCCMD_SH {
+  uint8_t header = 0;
+  uint8_t len;  // len
+  COMMAND cmd;
+  uint8_t reserved;
+  uint16_t data[MAX_LINEAR_ACTUATORS];
+  uint16_t data2[MAX_LINEAR_ACTUATORS];  // EMPTY
+} pccmd_sh;
 
 const int RAW_DATA_LEN = sizeof(PCCMD);
 
@@ -131,7 +166,8 @@ void setup() {
   digitalWrite(LED_PIN, nFound == 0 ? HIGH : LOW);
 
   Serial.begin(SERIAL_BAUD_RATE);
-  while(!Serial); // whait connected
+  while (!Serial)
+    ;  // whait connected
 
 #ifdef DEBUG
 #define RETRY_CNT 3
@@ -187,7 +223,7 @@ void serialEvent() {
 }
 
 bool RequestSlaveState(uint8_t addr, uint8_t* ptr, uint8_t len) {
-  if (HAS_SLAVE(addr - SLAVE_FIRST) && Wire.requestFrom(addr, len) == len && Wire.readBytes(ptr, len) == len) {
+  if (HAS_SLAVE(addr - SLAVE_FIRST) && Wire.requestFrom(addr, len) == len && WireRead(ptr, len) == len) {
     return true;
   }
   return false;
@@ -227,6 +263,17 @@ void loop() {
           }
         }
         break;
+      case COMMAND::CMD_MOVE_SH:
+        {
+          memcpy(&pccmd_sh, &pccmd, RAW_DATA_LEN);
+          for (int t = 0; t < LINEAR_ACTUATORS; t++) {
+            uint16_t val = pccmd_sh.data[t];
+            val = (val >> 8) | (val << 8);
+            pccmd.data[t] = map(val, 0, 65535, st[t].min, st[t].max);
+            TransmitCMD(SLAVE_FIRST + t, COMMAND::CMD_MOVE, pccmd.data[t]);
+          }
+        }
+        break;
       case COMMAND::CMD_PARK:
       case COMMAND::CMD_MOVE:
       case COMMAND::CMD_SET_SPEED:
@@ -259,8 +306,8 @@ void loop() {
 
 volatile MODE mode;
 
-const uint32_t dirPin = PA5;
-const uint32_t stepPin = PA4;
+const uint32_t dirPin = PA4;
+const uint32_t stepPin = PA5;
 const uint32_t limiterPinNO = PA6;
 const uint8_t limiterPinNC = PA7;
 
@@ -361,7 +408,7 @@ void receiveEvent(int size) {
         break;
       case COMMAND::CMD_MOVE:
         if (mode == MODE::READY)
-          targetPos = data;
+          targetPos = clamp(data, (uint32_t)MIN_POS, (uint32_t)MAX_POS);
         break;
       case COMMAND::CMD_CLEAR_ALARM:
       case COMMAND::CMD_ENABLE:
@@ -377,7 +424,7 @@ void receiveEvent(int size) {
         mode = MODE::DISABLED;
         break;
       case COMMAND::CMD_SET_SPEED:
-        iFastPulseDelayMM = data = std::clamp((int)data, MIN_SPEED_MM_SEC, MAX_SPEED_MM_SEC);
+        iFastPulseDelayMM = data = clamp((int)data, MIN_SPEED_MM_SEC, MAX_SPEED_MM_SEC);
         iFastPulseDelay = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(data) - MIN_PULSE_DELAY);  // us
         break;
       case COMMAND::CMD_SET_SLOW_SPEED:
