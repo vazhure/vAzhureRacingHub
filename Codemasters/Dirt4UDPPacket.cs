@@ -146,6 +146,14 @@ namespace Codemasters.Structs
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
         public float[] velocity;
+
+        //VehicleRightDirectionX float32 // World space right direction
+        //VehicleRightDirectionY float32 // World space right direction
+        //VehicleRightDirectionZ float32 // World space right direction
+        //VehicleForwardDirectionX float32 // World space forward direction
+        //VehicleForwardDirectionY float32 // World space forward direction
+        //VehicleForwardDirectionZ float32 // World space forward direction
+
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
         public float[] roll; //left_dir
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]

@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -142,7 +143,10 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_PARK, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
             }
         }
 
@@ -162,7 +166,10 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_MOVE, fl, rl, rr, fr);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
             }
         }
 
@@ -177,7 +184,10 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_HOME, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
             }
         }
 
@@ -192,7 +202,10 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_CLEAR_ALARM, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
             }
         }
 
@@ -212,9 +225,13 @@ namespace MotionPlatform3
                 {
                     speed = Math2.Clamp(speed, settings.MinSpeed, settings.MaxSpeed);
                     byte[] data = GenerateCommand(bLow ? COMMAND.CMD_SET_LOW_SPEED : COMMAND.CMD_SET_SPEED, speed, speed, speed, speed);
+
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
             }
         }
 
@@ -229,7 +246,10 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_SET_ACCEL, acc, acc, acc, acc);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
             }
         }
 
@@ -278,6 +298,8 @@ namespace MotionPlatform3
                 {
                     serialPort.PortName = $"COM{settings.ComPort}";
                     serialPort.BaudRate = settings.BaudRate;
+                    serialPort.WriteTimeout = 500;
+                    serialPort.ReadTimeout = 500;
                     serialPort.Open();
                     serialPort.DiscardInBuffer();
                     serialPort.DiscardOutBuffer();
@@ -339,7 +361,10 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_GET_STATE, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
             }
         }
 
@@ -417,7 +442,7 @@ namespace MotionPlatform3
                             if (plugin.bDataArrived)
                             {
                                 plugin.bDataArrived = false;
-                                plugin.ProcessTelemetry();
+                                plugin.ProcessTelemetry2();
                                 _tm = DateTime.Now;
                             }
                             else
@@ -433,7 +458,7 @@ namespace MotionPlatform3
                                         }
                                         else
                                         {
-                                            plugin.ProcessTelemetry();
+                                            plugin.ProcessTelemetry2();
                                         }
                                     }
                                     else
@@ -556,13 +581,9 @@ namespace MotionPlatform3
             float surge = 0;
             float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
 
-            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max) :
-                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
-            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
-            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
-            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) : (FrontAxisState.min + FrontAxisState.max) / 2;
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, roll, -heave);
 
-            Move(posFront, posRL, posRR, posFR);
+            Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
         internal void DoRoll(float delta)
@@ -571,17 +592,11 @@ namespace MotionPlatform3
                 return;
             float pitch = 0;
             float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
-            float sway = 0;
-            float surge = 0;
             float heave = 0;
 
-            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max) :
-                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
-            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
-            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
-            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, roll, -heave);
 
-            Move(posFront, posRL, posRR, posFR);
+            Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
         internal void DoPitch(float delta)
@@ -590,17 +605,144 @@ namespace MotionPlatform3
                 return;
             float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
             float roll = 0;
-            float sway = 0;
-            float surge = 0;
             float heave = 0;
 
-            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max) :
-                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max);
-            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max);
-            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max);
-            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, roll, -heave);
 
-            Move(posFront, posRL, posRR, posFR);
+            Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
+        }
+
+        (float, float, float, float) CalculateLegPos(float pitch, float roll, float heave)
+        {
+            float kX, kY;
+
+            if (settings.DistanceFrontRearMM < 1 || settings.DistanceLeftRightMM < 1)
+                kX = kY = 1;
+            else
+            {
+                if (settings.DistanceFrontRearMM > settings.DistanceFrontRearMM)
+                {
+                    kX = 1;
+                    kY = settings.DistanceLeftRightMM / settings.DistanceFrontRearMM;
+                }
+                else
+                {
+                    kX = settings.DistanceFrontRearMM / settings.DistanceLeftRightMM;
+                    kY = 1;
+                }
+            }
+
+            float x = 0.5f * kX;
+            float y = 0.5f * kY;
+
+            Vector3[] corners = {
+                    new Vector3(-x, y, 0.5f + heave/2f),  // FL
+                    new Vector3(x, y, 0.5f + heave/2f),   // FR
+                    new Vector3(-x, -y, 0.5f + heave/2f), // RL
+                    new Vector3(x, -y, 0.5f + heave/2f),  // RR
+                };
+
+            Vector3[] cornersZero = {
+                    new Vector3(-x, y, 0),  // FL
+                    new Vector3(x, y, 0),   // FR
+                    new Vector3(-x, -y,0),  // RL
+                    new Vector3(x, -y, 0),  // RR
+            };
+
+            if (ConnectedLinearAxes < 4) // 1 FRONT and 2 REAR, or 2 REAR
+            {
+                corners[0] = corners[1] = new Vector3(0f, y, 0.5f + heave / 2f);
+                cornersZero[0] = cornersZero[1] = new Vector3(0f, y, 0);
+            }
+
+            Matrix4x4 m = Matrix4x4.CreateRotationX(pitch) * Matrix4x4.CreateRotationY(roll);
+
+            float[] Lengths = { 0, 0, 0, 0 };
+
+            for (int t = 0; t < corners.Length; t++)
+            {
+                corners[t] = Vector3.Transform(corners[t], m);
+                Lengths[t] = (corners[t] - cornersZero[t]).Length();
+            }
+
+            int posFL = (int)Math2.Mapf(Lengths[0], 0, 1, FrontAxisState.min, FrontAxisState.max);
+            int posFR = (int)Math2.Mapf(Lengths[1], 0, 1, FrontRightAxisState.min, FrontRightAxisState.max);
+            int posRL = (int)Math2.Mapf(Lengths[2], 0, 1, RearLeftAxisState.min, RearLeftAxisState.max);
+            int posRR = (int)Math2.Mapf(Lengths[3], 0, 1, RearRightAxisState.min, RearRightAxisState.max);
+
+            return (posFL, posFR, posRL, posRR);
+        }
+
+        private void ProcessTelemetry2()
+        {
+            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
+                return;
+
+            string name = tds?.GamePlugin?.Name;
+            GameData gd = settings.gamesData.FirstOrDefault(o => o.GameName == name) ?? new GameData(Name);
+            {
+                float absPitch = Math.Max(Math.Abs(gd.minPitch), Math.Abs(gd.maxPitch));
+                float absRoll = Math.Max(Math.Abs(gd.minRoll), Math.Abs(gd.maxRoll));
+                float absHeave = Math.Max(Math.Abs(gd.minHeave), Math.Abs(gd.maxHeave));
+                float absSway = Math.Max(Math.Abs(gd.minSway), Math.Abs(gd.maxSway));
+                float absSurge = Math.Max(Math.Abs(gd.minSurge), Math.Abs(gd.maxSurge));
+
+                absPitch = absPitch <= float.Epsilon ? 1 : absPitch;
+                absRoll = absRoll <= float.Epsilon ? 1 : absRoll;
+                absHeave = absHeave <= float.Epsilon ? 1 : absHeave;
+                absSway = absSway <= float.Epsilon ? 1 : absSway;
+                absSurge = absSurge <= float.Epsilon ? 1 : absSurge;
+
+                float overal = settings.OveralCoefficient / 100.0f;
+                float pitchAmount = settings.PitchCoefficient / 100.0f;
+                float rollAmount = settings.RollCoefficient / 100.0f;
+                float heavAmount = settings.HeaveCoefficient / 100.0f;
+                float swayAmoun = settings.SwayCoefficient / 100.0f;
+                float surgeAmount = settings.SurgeCoefficient / 100.0f;
+
+                float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, settings.ClipByRange);
+                float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, settings.ClipByRange);
+                float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, settings.ClipByRange);
+                float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, settings.ClipByRange);
+                float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, settings.ClipByRange);
+
+                pitch = (float)(Math.PI * Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
+                roll = (float)(Math.PI * Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
+                heave = (float)(Math.PI * Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
+                sway = (float)(Math.PI * Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
+                surge = (float)(Math.PI * Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
+
+                float coeff = settings.SmoothCoefficient / 100.0f;
+
+                pitch = Math2.Mapf(coeff, 0.0f, 1.0f, pitch, pitchFilter.Filter(pitch));
+                roll = Math2.Mapf(coeff, 0.0f, 1.0f, roll, rollFilter.Filter(roll));
+                heave = Math2.Mapf(coeff, 0.0f, 1.0f, heave, heaveFilter.Filter(heave));
+                sway = Math2.Mapf(coeff, 0.0f, 1.0f, sway, swayFilter.Filter(sway));
+                surge = Math2.Mapf(coeff, 0.0f, 1.0f, surge, surgeFilter.Filter(surge));
+
+                (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
+
+                Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
+
+                if (_lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
+                {
+                    byte[] data = GenerateCommand(COMMAND.CMD_MOVE, (int)posFL, (int)posRL, (int)posRR, (int)posFR);
+
+                    lock (serialPort)
+                    {
+                        try
+                        {
+                            serialPort.Write(data, 0, PCCMD_SIZE);
+                        }
+                        catch { }
+                    }
+
+                    _lastPosFront = (int)posFL;
+                    _lastPosRL = (int)posRL;
+                    _lastPosRR = (int)posRR;
+                    _lastPosFR = (int)posFR;
+                }
+            }
         }
 
         private void ProcessTelemetry()
@@ -702,7 +844,7 @@ namespace MotionPlatform3
             catch { }
         }
 
-        public const int cMaxAxesCount = 4;
+        public const int cMaxAxesCount = 4; // Change for more axis
 
         // ACTUAL STATES
         private readonly AXIS_STATE[] states = new AXIS_STATE[cMaxAxesCount];
@@ -746,7 +888,7 @@ namespace MotionPlatform3
         private readonly byte[] data = new byte[20];
 
         const int cFirstAddr = 10;
-        const int cLastAddr = 13;
+        const int cLastAddr = 13; // 15 if 6 axis
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -965,11 +1107,11 @@ namespace MotionPlatform3
         /// </summary>
         public int BaudRate { get; set; } = 115200;
         public Parity Parity { get; set; } = Parity.None;
-        public int DataBits { get; internal set; } = 8;
-        public StopBits StopBits { get; internal set; } = StopBits.One;
-        public Handshake Handshake { get; internal set; } = Handshake.None;
-        public bool RtsEnable { get; internal set; } = true;
-        public bool DtrEnable { get; internal set; } = true;
+        public int DataBits { get; set; } = 8;
+        public StopBits StopBits { get; set; } = StopBits.One;
+        public Handshake Handshake { get; set; } = Handshake.None;
+        public bool RtsEnable { get; set; } = true;
+        public bool DtrEnable { get; set; } = true;
 
         /// <summary>
         /// Статус разрешения
@@ -991,6 +1133,9 @@ namespace MotionPlatform3
         public bool ClipByRange { get; set; } = false;
         public float Linearity { get; set; } = 1.0f;
         public int SmoothCoefficient { get; set; } = 80;
+
+        public int DistanceFrontRearMM { get; set; } = 500;
+        public int DistanceLeftRightMM { get; set; } = 500;
 
         public FilterSettings FilterSettings { get; set; } = new FilterSettings();
         public float StepsPerMM { get; set; } = 200;

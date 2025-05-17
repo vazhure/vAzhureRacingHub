@@ -72,7 +72,7 @@ namespace KunosPlugin
                             CarData.DriverName = runningGame.gameID == GameID.AC ? $"{pageFileStatic.PlayerName}" : $"{pageFileStatic.PlayerName} {pageFileStatic.PlayerSurname}";
                             CarData.CarName = Plugin.sVechicleInfo.GetVehicleName(carModel);
                             CarData.FuelCapacity = pageFileStatic.MaxFuel;
-                            CarData.MaxRPM = (uint)Plugin.sVechicleInfo.GetMaxRPM(carModel, pageFileStatic.MaxRpm);
+                            CarData.MaxRPM = (uint)Plugin.sVechicleInfo.GetMaxRPM(carModel, pageFileStatic.MaxRpm > 0 ? pageFileStatic.MaxRpm : 8000);
 
                             brakebiasOffset = Plugin.sVechicleInfo.GetBiasOffset(carModel);
 
@@ -291,7 +291,8 @@ namespace KunosPlugin
                             MotionData.LocalVelocity = physics.localVelocity;
 
                             MotionData.Pitch = physics.pitch / (float) Math.PI;
-                            MotionData.Roll = -physics.roll / (float)Math.PI;
+                            MotionData.Roll = (runningGame.gameID == GameID.ACC ? -1 : 1) * physics.roll / (float)Math.PI;
+//                            MotionData.Roll = physics.roll / (float)Math.PI;
                             MotionData.Yaw = physics.heading / (float)Math.PI;
 
                             MotionData.ABSVibration = physics.absVibrations;

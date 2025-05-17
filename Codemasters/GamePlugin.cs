@@ -13,7 +13,7 @@ namespace Codemasters
         readonly CodemastersGame _game;
         readonly UDPClient _client;
         readonly ProcessMonitor monitor;
-        public int Port { get => settings.Port; set => settings.Port = value; } 
+        public int Port { get => settings.Port; set => settings.Port = value; }
 
         public class GameSettings
         {

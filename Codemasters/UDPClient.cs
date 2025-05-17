@@ -85,24 +85,11 @@ namespace Codemasters
                     double x = data.vehicle_acceleration_x * data.vehicle_roll_z - data.vehicle_acceleration_z * data.vehicle_roll_x;
                     double y = data.vehicle_acceleration_x * data.vehicle_roll_x + data.vehicle_acceleration_z * data.vehicle_roll_z;
 
-                    //Vector3 fwd = new Vector3(data.vehicle_pitch_x, data.vehicle_pitch_y, data.vehicle_pitch_z);
-                    //Vector3 rht = new Vector3(data.vehicle_roll_x, data.vehicle_roll_y, data.vehicle_roll_z);
-                    //Vector3 up = Vector3.Cross(fwd, rht);
-                    //Vector3 pos = new Vector3(data.vehicle_position_x, data.vehicle_position_y, data.vehicle_position_z);
-
-                    //Matrix4x4 transform = new Matrix4x4(rht.X, rht.Y, rht.Z, 0.0f,
-                    //                        up.X, up.Y, up.Z, 0.0f,
-                    //                        fwd.X, fwd.Y, fwd.Z, 0.0f,
-                    //                        pos.X, pos.Y, pos.Z, 1.0f);
-
-                    //// TODO:
-                    //Vector3 acc = Vector3.Transform(new Vector3(data.vehicle_acceleration_x, data.vehicle_acceleration_y, data.vehicle_acceleration_z), transform);
-
                     aMMotionData.Sway = (float)(y / 20.0);
                     aMMotionData.Surge = -(float)(x / 20.0);
 
-                    aMMotionData.Pitch = data.vehicle_pitch_y;
-                    aMMotionData.Roll = data.vehicle_roll_y;
+                    aMMotionData.Pitch = data.vehicle_pitch_y / 2f;
+                    aMMotionData.Roll = data.vehicle_roll_y / 2f;
 
                     carData.Throttle = data.vehicle_throttle;
                     carData.Brake = data.vehicle_brake;
@@ -220,29 +207,34 @@ namespace Codemasters
 
                     if (gameid == GamePlugin.CodemastersGame.WRCG)
                     {
-                        //Vector3 fwd = -new Vector3(data.pitch[0], data.pitch[1], data.pitch[2]);
-                        //Vector3 rht = -new Vector3(data.roll[0], data.roll[1], data.roll[2]);
-                        //Vector3 up = Vector3.Cross(rht, fwd);
-                        //Vector3 pos = new Vector3(data.position[0], data.position[1], data.position[2]);
-
-                        //Matrix4x4 transform = new Matrix4x4(rht.X, rht.Z, rht.Y, 0.0f,
-                        //                        up.X, up.Z, up.Y, 0.0f,
-                        //                        fwd.X, fwd.Z, fwd.Y, 0.0f,
-                        //                        pos.X, pos.Z, pos.Y, 1.0f);
-
                         accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[2] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[2];
 
-                        aMMotionData.Pitch = -data.pitch[2];
-                        aMMotionData.Roll = data.roll[2];
+                        aMMotionData.Pitch = -data.pitch[2] / 2f;
+                        aMMotionData.Roll = data.roll[2] / 2f;
                     }
                     else
                     {
                         accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[1] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[1];
 
-                        aMMotionData.Pitch = data.pitch[1];
-                        aMMotionData.Roll = -data.roll[1];
+                        Vector3D right = new Vector3D(data.roll[0], data.roll[2], data.roll[1]);
+                        Vector3D forward = new Vector3D(data.pitch[0], data.pitch[2], data.pitch[1]);
+                        Vector3D up = Vector3D.Cross(forward, right);
+
+                        float pitch, roll, yaw;
+
+                        pitch = (float)(Math.Asin(up.Y));
+                        roll = (float)(Math.Asin(up.X));
+
+                        double x = roll * data.roll[2] - pitch * data.roll[0];
+                        double y = roll * data.roll[0] + pitch * data.roll[2];
+
+                        yaw = (float) (Math.Atan2(forward.X, forward.Z) / Math.PI);
+
+                        aMMotionData.Pitch = -(float)(x / Math.PI);
+                        aMMotionData.Roll = (float)(y / Math.PI);
+                        aMMotionData.Yaw = yaw;
                     }
 
                     _acc = accZ;
@@ -275,9 +267,9 @@ namespace Codemasters
                             break;
                         case GamePlugin.CodemastersGame.WRCG:
                             {
-                                aMMotionData.Heave = accZ / (9.81f * (float)Math.PI);
-                                aMMotionData.Sway = -data.gforce_lateral / (9.81f * (float)Math.PI);
-                                aMMotionData.Surge = -data.gforce_longitudinal / (9.81f * (float)Math.PI);
+                                aMMotionData.Heave = accZ / 30f;
+                                aMMotionData.Sway = -data.gforce_lateral / 30f;
+                                aMMotionData.Surge = -data.gforce_longitudinal / 30f;
                                 if (_last_laptime != data.lap_time)
                                 {
                                     _last_laptime = data.lap_time;

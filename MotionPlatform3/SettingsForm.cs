@@ -193,6 +193,9 @@ namespace MotionPlatform3
             chkParkOnIdle.Checked = _plugin.settings.ParkOnIdle;
             chkParkOnQuit.Checked = _plugin.settings.ParkOnQuit;
 
+            numFrontRearMM.Value = _plugin.settings.DistanceFrontRearMM;
+            numLeftRightMM.Value = _plugin.settings.DistanceLeftRightMM;
+
             IGamePlugin activeGame = _plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault();
             lblGame.Text = activeGame == null ? "No active game" : activeGame.Name;
             chkCollect.Enabled = btnTune.Enabled = activeGame != null;            
@@ -357,6 +360,9 @@ namespace MotionPlatform3
             _plugin.settings.ParkOnQuit = chkParkOnQuit.Checked;
 
             _plugin.settings.Linearity = Math2.Mapf(sliderLinearity.Value, 100, 0, 1, 2);
+
+            _plugin.settings.DistanceFrontRearMM = (int)numFrontRearMM.Value;
+            _plugin.settings.DistanceLeftRightMM = (int)numLeftRightMM.Value;
 
             if (comboComPort.SelectedItem is string port)
             {
