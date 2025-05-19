@@ -119,12 +119,12 @@ namespace iRacingPlugin
             AMWeatherData weatherData = dataSet.WeatherData;
             AMMotionData motionData = carData.MotionData;
 
-            motionData.Pitch = wrapper.Data.GetFloat("Pitch") / (float)Math.PI;
+            motionData.Pitch = -wrapper.Data.GetFloat("Pitch") / (float)Math.PI;
             motionData.Roll = wrapper.Data.GetFloat("Roll") / (float)Math.PI;
             motionData.Yaw = wrapper.Data.GetFloat("Yaw") / (float)Math.PI;
-            motionData.Surge = wrapper.Data.GetFloat("LongAccel") / (9.81f * (float)Math.PI);
-            motionData.Heave = wrapper.Data.GetFloat("VertAccel") / (9.81f * (float)Math.PI);
-            motionData.Sway = wrapper.Data.GetFloat("LatAccel") / (9.81f * (float)Math.PI);
+            motionData.Surge = wrapper.Data.GetFloat("LongAccel") / 30f;
+            motionData.Heave = wrapper.Data.GetFloat("VertAccel") / 30f;
+            motionData.Sway = wrapper.Data.GetFloat("LatAccel") / 30f;
 
             EngineWarnings ew = (EngineWarnings)wrapper.Data.GetBitField("EngineWarnings");
 
