@@ -635,12 +635,8 @@ namespace MotionPlatform3
             float x = 0.5f * kX;
             float y = 0.5f * kY;
 
-            Vector3[] corners = {
-                    new Vector3(-x, y, 0.5f + heave/2f),  // FL
-                    new Vector3(x, y, 0.5f + heave/2f),   // FR
-                    new Vector3(-x, -y, 0.5f + heave/2f), // RL
-                    new Vector3(x, -y, 0.5f + heave/2f),  // RR
-                };
+            Vector3 vHeave = new Vector3(0, 0, 0.5f + heave);
+            Vector3 rigCoeff = new Vector3(x, y, 1);
 
             Vector3[] cornersZero = {
                     new Vector3(-x, y, 0),  // FL
@@ -651,18 +647,21 @@ namespace MotionPlatform3
 
             if (ConnectedLinearAxes < 4) // 1 FRONT and 2 REAR, or 2 REAR
             {
-                corners[0] = corners[1] = new Vector3(0f, y, 0.5f + heave / 2f);
                 cornersZero[0] = cornersZero[1] = new Vector3(0f, y, 0);
             }
 
             Matrix4x4 m = Matrix4x4.CreateRotationX(pitch) * Matrix4x4.CreateRotationY(roll);
 
+            // Transform heave along roll/pitch direction 
+            // Rig geometry corrected
+            vHeave = Vector3.Transform(vHeave, m) * rigCoeff;
+
             float[] Lengths = { 0, 0, 0, 0 };
 
-            for (int t = 0; t < corners.Length; t++)
+            for (int t = 0; t < cornersZero.Length; t++)
             {
-                corners[t] = Vector3.Transform(corners[t], m);
-                Lengths[t] = (corners[t] - cornersZero[t]).Length();
+                var v = Vector3.Transform(cornersZero[t], m) + vHeave;
+                Lengths[t] = (v - cornersZero[t]).Length();
             }
 
             int posFL = (int)Math2.Mapf(Lengths[0], 0, 1, FrontAxisState.min, FrontAxisState.max);
