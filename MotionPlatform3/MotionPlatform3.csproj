@@ -56,6 +56,12 @@
     <Compile Include="GameTuneDlg.Designer.cs">
       <DependentUpon>GameTuneDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="ManualControlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManualControlForm.Designer.cs">
+      <DependentUpon>ManualControlForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="NoiseFilter.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +80,9 @@
   <ItemGroup>
     <EmbeddedResource Include="GameTuneDlg.resx">
       <DependentUpon>GameTuneDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManualControlForm.resx">
+      <DependentUpon>ManualControlForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

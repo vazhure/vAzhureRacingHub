@@ -195,6 +195,7 @@ namespace MotionPlatform3
 
             numFrontRearMM.Value = _plugin.settings.DistanceFrontRearMM;
             numLeftRightMM.Value = _plugin.settings.DistanceLeftRightMM;
+            numActuatorTravelMM.Value = _plugin.settings.ActuatorTravelMM;
 
             IGamePlugin activeGame = _plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault();
             lblGame.Text = activeGame == null ? "No active game" : activeGame.Name;
@@ -364,6 +365,8 @@ namespace MotionPlatform3
             _plugin.settings.DistanceFrontRearMM = (int)numFrontRearMM.Value;
             _plugin.settings.DistanceLeftRightMM = (int)numLeftRightMM.Value;
 
+            _plugin.settings.ActuatorTravelMM = (int)numActuatorTravelMM.Value;
+
             if (comboComPort.SelectedItem is string port)
             {
                 try
@@ -431,14 +434,19 @@ namespace MotionPlatform3
 
         private void BtnTestSpeed_Click(object sender, EventArgs e)
         {
-            if (testWorker.IsBusy)
-                testWorker.CancelAsync();
-            else
+            using (ManualControlForm form = new ManualControlForm(_plugin))
             {
-                oldMode = _plugin.settings.mode;
-                _plugin.settings.mode = MODE.Test;
-                testWorker.RunWorkerAsync();
-            }
+                form.ShowDialog(this);
+            }    
+
+            //if (testWorker.IsBusy)
+            //    testWorker.CancelAsync();
+            //else
+            //{
+            //    oldMode = _plugin.settings.mode;
+            //    _plugin.settings.mode = MODE.Test;
+            //    testWorker.RunWorkerAsync();
+            //}
         }
 
         Label mouseControl = null;

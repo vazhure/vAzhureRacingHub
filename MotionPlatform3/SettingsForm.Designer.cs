@@ -103,6 +103,8 @@ namespace MotionPlatform3
             this.label2 = new System.Windows.Forms.Label();
             this.numFrontRearMM = new System.Windows.Forms.NumericUpDown();
             this.numLeftRightMM = new System.Windows.Forms.NumericUpDown();
+            this.label3 = new System.Windows.Forms.Label();
+            this.numActuatorTravelMM = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
@@ -110,6 +112,7 @@ namespace MotionPlatform3
             ((System.ComponentModel.ISupportInitialize)(this.pbFRR)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).BeginInit();
             this.SuspendLayout();
             // 
             // pbRL
@@ -1035,7 +1038,7 @@ namespace MotionPlatform3
             0,
             0});
             this.numFrontRearMM.Minimum = new decimal(new int[] {
-            100,
+            1,
             0,
             0,
             0});
@@ -1065,7 +1068,7 @@ namespace MotionPlatform3
             0,
             0});
             this.numLeftRightMM.Minimum = new decimal(new int[] {
-            100,
+            1,
             0,
             0,
             0});
@@ -1079,6 +1082,46 @@ namespace MotionPlatform3
             0,
             0});
             // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(531, 577);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(141, 13);
+            this.label3.TabIndex = 46;
+            this.label3.Text = "Actuator travel distance, mm";
+            // 
+            // numActuatorTravelMM
+            // 
+            this.numActuatorTravelMM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.numActuatorTravelMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numActuatorTravelMM.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numActuatorTravelMM.Location = new System.Drawing.Point(724, 575);
+            this.numActuatorTravelMM.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.numActuatorTravelMM.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numActuatorTravelMM.Name = "numActuatorTravelMM";
+            this.numActuatorTravelMM.Size = new System.Drawing.Size(89, 20);
+            this.numActuatorTravelMM.TabIndex = 47;
+            this.numActuatorTravelMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.numActuatorTravelMM.Value = new decimal(new int[] {
+            80,
+            0,
+            0,
+            0});
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1087,6 +1130,7 @@ namespace MotionPlatform3
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.ClientSize = new System.Drawing.Size(984, 644);
             this.ControlBox = false;
+            this.Controls.Add(this.numActuatorTravelMM);
             this.Controls.Add(this.numLeftRightMM);
             this.Controls.Add(this.numFrontRearMM);
             this.Controls.Add(this.lblGame);
@@ -1113,6 +1157,7 @@ namespace MotionPlatform3
             this.Controls.Add(this.lblLinearity);
             this.Controls.Add(this.lblSmooth);
             this.Controls.Add(this.lblSpeed);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -1155,6 +1200,7 @@ namespace MotionPlatform3
             ((System.ComponentModel.ISupportInitialize)(this.pbFRR)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1234,5 +1280,7 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown numFrontRearMM;
         private System.Windows.Forms.NumericUpDown numLeftRightMM;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.NumericUpDown numActuatorTravelMM;
     }
 }

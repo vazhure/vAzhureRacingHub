@@ -91,7 +91,10 @@ namespace MotionPlatform3
         {
             vAzhureRacingApp = app;
 
+
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
+
+            CalculateLegPos(1.0f, 0, 0);
 
             app.RegisterDevice(this);
             app.OnDeviceArrival += delegate (object sender, DeviceChangeEventsArgs e)
@@ -612,31 +615,25 @@ namespace MotionPlatform3
             Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
-        (float, float, float, float) CalculateLegPos(float pitch, float roll, float heave)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pitch">[-1..1]</param>
+        /// <param name="roll"> [-1..1]</param>
+        /// <param name="heave">[-1..1]</param>
+        /// <returns></returns>
+        internal (float, float, float, float) CalculateLegPos(float pitch, float roll, float heave)
         {
-            float kX, kY;
+            float y = 0.5f * settings.DistanceFrontRearMM;
+            float x = 0.5f * settings.DistanceLeftRightMM;
+            float z = settings.ActuatorTravelMM;
 
-            if (settings.DistanceFrontRearMM < 1 || settings.DistanceLeftRightMM < 1)
-                kX = kY = 1;
-            else
-            {
-                if (settings.DistanceFrontRearMM > settings.DistanceFrontRearMM)
-                {
-                    kX = 1;
-                    kY = settings.DistanceLeftRightMM / settings.DistanceFrontRearMM;
-                }
-                else
-                {
-                    kX = settings.DistanceFrontRearMM / settings.DistanceLeftRightMM;
-                    kY = 1;
-                }
-            }
+            // Maximum calculated rig angle forward
+            float maxAngleX = (float)Math.Atan2(z, settings.DistanceFrontRearMM);
+            // Maximum calculated rig angle sideway
+            float maxAngleY = (float)Math.Atan2(z, settings.DistanceLeftRightMM);
 
-            float x = 0.5f * kX;
-            float y = 0.5f * kY;
-
-            Vector3 vHeave = new Vector3(0, 0, 0.5f + heave);
-            Vector3 rigCoeff = new Vector3(x, y, 1);
+            Vector3 vHeave = new Vector3(0, 0, z * (0.5f + heave * 0.5f));
 
             Vector3[] cornersZero = {
                     new Vector3(-x, y, 0),  // FL
@@ -650,24 +647,34 @@ namespace MotionPlatform3
                 cornersZero[0] = cornersZero[1] = new Vector3(0f, y, 0);
             }
 
-            Matrix4x4 m = Matrix4x4.CreateRotationX(pitch) * Matrix4x4.CreateRotationY(roll);
-
-            // Transform heave along roll/pitch direction 
-            // Rig geometry corrected
-            vHeave = Vector3.Transform(vHeave, m) * rigCoeff;
+            Matrix4x4 m = Matrix4x4.CreateRotationX(pitch * maxAngleX) * Matrix4x4.CreateRotationY(roll * maxAngleY);
 
             float[] Lengths = { 0, 0, 0, 0 };
 
             for (int t = 0; t < cornersZero.Length; t++)
             {
                 var v = Vector3.Transform(cornersZero[t], m) + vHeave;
-                Lengths[t] = (v - cornersZero[t]).Length();
+                Lengths[t] = (v - cornersZero[t]).Length() / z; // length without heave
             }
 
-            int posFL = (int)Math2.Mapf(Lengths[0], 0, 1, FrontAxisState.min, FrontAxisState.max);
-            int posFR = (int)Math2.Mapf(Lengths[1], 0, 1, FrontRightAxisState.min, FrontRightAxisState.max);
-            int posRL = (int)Math2.Mapf(Lengths[2], 0, 1, RearLeftAxisState.min, RearLeftAxisState.max);
-            int posRR = (int)Math2.Mapf(Lengths[3], 0, 1, RearRightAxisState.min, RearRightAxisState.max);
+            var max = Lengths.Max();
+
+            if (max > 1) // out of limits
+            {
+                float k = 1 / max;
+                for (int t = 0; t < Lengths.Length; t++)
+                    Lengths[t] *= k;
+            }
+
+            int clipFL = (int)((FrontAxisState.max - FrontAxisState.min) * (100 - settings.TravelLimit) / 200.0);
+            int clipFR = (int)((FrontRightAxisState.max - FrontRightAxisState.min) * (100 - settings.TravelLimit) / 200.0);
+            int clipRL = (int)((RearLeftAxisState.max - RearLeftAxisState.min) * (100 - settings.TravelLimit) / 200.0);
+            int clipRR = (int)((RearRightAxisState.max - RearRightAxisState.min) * (100 - settings.TravelLimit) / 200.0);
+
+            int posFL = (int)Math2.Mapf(Lengths[0], 0, 1, FrontAxisState.min + clipFL, FrontAxisState.max - clipFL);
+            int posFR = (int)Math2.Mapf(Lengths[1], 0, 1, FrontRightAxisState.min + clipFR, FrontRightAxisState.max - clipFR);
+            int posRL = (int)Math2.Mapf(Lengths[2], 0, 1, RearLeftAxisState.min + clipRL, RearLeftAxisState.max - clipRL);
+            int posRR = (int)Math2.Mapf(Lengths[3], 0, 1, RearRightAxisState.min + clipRR, RearRightAxisState.max - clipRR);
 
             return (posFL, posFR, posRL, posRR);
         }
@@ -705,11 +712,11 @@ namespace MotionPlatform3
                 float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, settings.ClipByRange);
                 float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, settings.ClipByRange);
 
-                pitch = (float)(Math.PI * Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
-                roll = (float)(Math.PI * Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
-                heave = (float)(Math.PI * Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
-                sway = (float)(Math.PI * Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
-                surge = (float)(Math.PI * Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
+                pitch = (float)(Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
+                roll = (float) (Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
+                heave = (float)(Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
+                sway = (float) (Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
+                surge = (float)(Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
 
                 float coeff = settings.SmoothCoefficient / 100.0f;
 
@@ -742,105 +749,6 @@ namespace MotionPlatform3
                     _lastPosFR = (int)posFR;
                 }
             }
-        }
-
-        private void ProcessTelemetry()
-        {
-            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
-                return;
-            try
-            {
-                string name = tds?.GamePlugin?.Name;
-                GameData gd = settings.gamesData.FirstOrDefault(o => o.GameName == name) ?? new GameData(Name);
-                {
-                    float absPitch = Math.Max(Math.Abs(gd.minPitch), Math.Abs(gd.maxPitch));
-                    float absRoll = Math.Max(Math.Abs(gd.minRoll), Math.Abs(gd.maxRoll));
-                    float absHeave = Math.Max(Math.Abs(gd.minHeave), Math.Abs(gd.maxHeave));
-                    float absSway = Math.Max(Math.Abs(gd.minSway), Math.Abs(gd.maxSway));
-                    float absSurge = Math.Max(Math.Abs(gd.minSurge), Math.Abs(gd.maxSurge));
-
-                    absPitch = absPitch <= float.Epsilon ? 1 : absPitch;
-                    absRoll = absRoll <= float.Epsilon ? 1 : absRoll;
-                    absHeave = absHeave <= float.Epsilon ? 1 : absHeave;
-                    absSway = absSway <= float.Epsilon ? 1 : absSway;
-                    absSurge = absSurge <= float.Epsilon ? 1 : absSurge;
-
-                    float overal = settings.OveralCoefficient / 100.0f;
-                    float pitchAmount = settings.PitchCoefficient / 100.0f;
-                    float rollAmount = settings.RollCoefficient / 100.0f;
-                    float heavAmount = settings.HeaveCoefficient / 100.0f;
-                    float swayAmoun = settings.SwayCoefficient / 100.0f;
-                    float surgeAmount = settings.SurgeCoefficient / 100.0f;
-
-                    float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, settings.ClipByRange);
-                    float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, settings.ClipByRange);
-                    float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, settings.ClipByRange);
-                    float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, settings.ClipByRange);
-                    float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, settings.ClipByRange);
-
-                    pitch = (float)((float)Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
-                    roll = (float)((float)Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
-                    heave = (float)((float)Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
-                    sway = (float)((float)Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
-                    surge = (float)((float)Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
-
-                    float coeff = settings.SmoothCoefficient / 100.0f;
-
-                    pitch = Math2.Mapf(coeff, 0.0f, 1.0f, pitch, pitchFilter.Filter(pitch));
-                    roll = Math2.Mapf(coeff, 0.0f, 1.0f, roll, rollFilter.Filter(roll));
-                    heave = Math2.Mapf(coeff, 0.0f, 1.0f, heave, heaveFilter.Filter(heave));
-                    sway = Math2.Mapf(coeff, 0.0f, 1.0f, sway, swayFilter.Filter(sway));
-                    surge = Math2.Mapf(coeff, 0.0f, 1.0f, surge, surgeFilter.Filter(surge));
-
-                    int posFront;
-                    int posRL;
-                    int posRR;
-                    int posFR;
-
-                    if (settings.ClipByRange)
-                    {
-                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge + roll + sway, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) :
-                            (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge, -overal, overal), -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
-                        posRL = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge + roll + sway, -overal, overal), -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
-                        posRR = (int)Math2.Mapf(Math2.Clamp(-heave - pitch - surge - roll - sway, -overal, overal), -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
-                        posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(Math2.Clamp(-heave + pitch + surge - roll - sway, -overal, overal), -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
-                    }
-                    else
-                    {
-                        pitch *= overal;
-                        roll *= overal;
-                        heave *= -1 * overal;
-                        sway *= overal;
-                        surge *= overal;
-
-                        posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) :
-                            (int)Math2.Mapf(heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
-                        posRL = (int)Math2.Mapf(heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
-                        posRR = (int)Math2.Mapf(heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
-                        posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
-                    }
-
-                    if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
-                    {
-                        byte[] data = GenerateCommand(COMMAND.CMD_MOVE, posFront, posRL, posRR, posFR);
-
-                        lock (serialPort)
-                        {
-                            try
-                            {
-                                serialPort.Write(data, 0, PCCMD_SIZE);
-                            }
-                            catch { }
-                        }
-
-                        _lastPosFront = posFront;
-                        _lastPosRL = posRL;
-                        _lastPosRR = posRR;
-                        _lastPosFR = posFR;
-                    }
-                }
-            }
-            catch { }
         }
 
         public const int cMaxAxesCount = 4; // Change for more axis
@@ -1135,6 +1043,11 @@ namespace MotionPlatform3
 
         public int DistanceFrontRearMM { get; set; } = 500;
         public int DistanceLeftRightMM { get; set; } = 500;
+        public int ActuatorTravelMM { get; set; } = 85;
+        /// <summary>
+        /// Travel limit in percent
+        /// </summary>
+        public int TravelLimit { get; set; } = 95;
 
         public FilterSettings FilterSettings { get; set; } = new FilterSettings();
         public float StepsPerMM { get; set; } = 200;
