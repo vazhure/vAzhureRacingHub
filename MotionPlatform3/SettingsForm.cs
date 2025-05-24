@@ -196,6 +196,7 @@ namespace MotionPlatform3
             numFrontRearMM.Value = _plugin.settings.DistanceFrontRearMM;
             numLeftRightMM.Value = _plugin.settings.DistanceLeftRightMM;
             numActuatorTravelMM.Value = _plugin.settings.ActuatorTravelMM;
+            numSeatOffsetMM.Value = _plugin.settings.SeatOffsetMM;
 
             IGamePlugin activeGame = _plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault();
             lblGame.Text = activeGame == null ? "No active game" : activeGame.Name;
@@ -366,6 +367,7 @@ namespace MotionPlatform3
             _plugin.settings.DistanceLeftRightMM = (int)numLeftRightMM.Value;
 
             _plugin.settings.ActuatorTravelMM = (int)numActuatorTravelMM.Value;
+            _plugin.settings.SeatOffsetMM = (int) numSeatOffsetMM.Value;
 
             if (comboComPort.SelectedItem is string port)
             {

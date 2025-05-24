@@ -94,7 +94,7 @@ namespace MotionPlatform3
 
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
 
-            CalculateLegPos(1.0f, 0, 0);
+            CalculateLegPos(1f, 1f, 0f);
 
             app.RegisterDevice(this);
             app.OnDeviceArrival += delegate (object sender, DeviceChangeEventsArgs e)
@@ -580,8 +580,6 @@ namespace MotionPlatform3
                 return;
             float pitch = 0;
             float roll = 0;
-            float sway = 0;
-            float surge = 0;
             float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
 
             (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, roll, -heave);
@@ -627,13 +625,21 @@ namespace MotionPlatform3
             float y = 0.5f * settings.DistanceFrontRearMM;
             float x = 0.5f * settings.DistanceLeftRightMM;
             float z = settings.ActuatorTravelMM;
+            float heaveMM = z * 0.5f * Math.Abs(heave);
+            //z = heaveMM; // reducing z for max angle math
 
-            // Maximum calculated rig angle forward
-            float maxAngleX = (float)Math.Atan2(z, settings.DistanceFrontRearMM);
-            // Maximum calculated rig angle sideway
-            float maxAngleY = (float)Math.Atan2(z, settings.DistanceLeftRightMM);
+            pitch = Math2.Clamp(pitch, -1, 1);
+            roll = Math2.Clamp(roll, -1, 1);
 
             Vector3 vHeave = new Vector3(0, 0, z * (0.5f + heave * 0.5f));
+
+            // Calculating combined pitch/roll lengths and angles
+            float fpitch = new Vector3(settings.DistanceFrontRearMM, settings.DistanceLeftRightMM * roll, 0).Length();
+            float froll = new Vector3(settings.DistanceFrontRearMM * pitch, settings.DistanceLeftRightMM, 0).Length();
+            // Max calculated pitch angle, radians
+            float pitchAngle = (float)Math.Atan2(z - heaveMM * 2f, fpitch);
+            // Max calculated roll angle, radians
+            float rollAngle = (float)Math.Atan2(z - heaveMM * 2f, froll);
 
             Vector3[] cornersZero = {
                     new Vector3(-x, y, 0),  // FL
@@ -647,34 +653,27 @@ namespace MotionPlatform3
                 cornersZero[0] = cornersZero[1] = new Vector3(0f, y, 0);
             }
 
-            Matrix4x4 m = Matrix4x4.CreateRotationX(pitch * maxAngleX) * Matrix4x4.CreateRotationY(roll * maxAngleY);
+            Matrix4x4 m = Matrix4x4.CreateRotationX(pitch * pitchAngle) * Matrix4x4.CreateRotationY(roll * rollAngle);
 
             float[] Lengths = { 0, 0, 0, 0 };
 
             for (int t = 0; t < cornersZero.Length; t++)
             {
                 var v = Vector3.Transform(cornersZero[t], m) + vHeave;
-                Lengths[t] = (v - cornersZero[t]).Length() / z; // length without heave
+                Lengths[t] = (v - cornersZero[t]).Length() / z;
             }
 
-            var max = Lengths.Max();
+            //var max = Lengths.Max();
 
-            if (max > 1) // out of limits
-            {
-                float k = 1 / max;
-                for (int t = 0; t < Lengths.Length; t++)
-                    Lengths[t] *= k;
-            }
+            //if (max > 1) // out of limits
+            //{
+            //    Console.WriteLine("Math error");
+            //}
 
-            int clipFL = (int)((FrontAxisState.max - FrontAxisState.min) * (100 - settings.TravelLimit) / 200.0);
-            int clipFR = (int)((FrontRightAxisState.max - FrontRightAxisState.min) * (100 - settings.TravelLimit) / 200.0);
-            int clipRL = (int)((RearLeftAxisState.max - RearLeftAxisState.min) * (100 - settings.TravelLimit) / 200.0);
-            int clipRR = (int)((RearRightAxisState.max - RearRightAxisState.min) * (100 - settings.TravelLimit) / 200.0);
-
-            int posFL = (int)Math2.Mapf(Lengths[0], 0, 1, FrontAxisState.min + clipFL, FrontAxisState.max - clipFL);
-            int posFR = (int)Math2.Mapf(Lengths[1], 0, 1, FrontRightAxisState.min + clipFR, FrontRightAxisState.max - clipFR);
-            int posRL = (int)Math2.Mapf(Lengths[2], 0, 1, RearLeftAxisState.min + clipRL, RearLeftAxisState.max - clipRL);
-            int posRR = (int)Math2.Mapf(Lengths[3], 0, 1, RearRightAxisState.min + clipRR, RearRightAxisState.max - clipRR);
+            int posFL = (int)Math2.Mapf(Math2.Clamp(Lengths[0], 0, 1), 0, 1, FrontAxisState.min, FrontAxisState.max);
+            int posFR = (int)Math2.Mapf(Math2.Clamp(Lengths[1], 0, 1), 0, 1, FrontRightAxisState.min, FrontRightAxisState.max);
+            int posRL = (int)Math2.Mapf(Math2.Clamp(Lengths[2], 0, 1), 0, 1, RearLeftAxisState.min, RearLeftAxisState.max);
+            int posRR = (int)Math2.Mapf(Math2.Clamp(Lengths[3], 0, 1), 0, 1, RearRightAxisState.min, RearRightAxisState.max);
 
             return (posFL, posFR, posRL, posRR);
         }
@@ -1044,10 +1043,23 @@ namespace MotionPlatform3
         public int DistanceFrontRearMM { get; set; } = 500;
         public int DistanceLeftRightMM { get; set; } = 500;
         public int ActuatorTravelMM { get; set; } = 85;
+        public int SeatOffsetMM { get; set; } = 400;
+
         /// <summary>
-        /// Travel limit in percent
+        /// Returns max angle for Pitch, radians
         /// </summary>
-        public int TravelLimit { get; set; } = 95;
+        public float MaxPitchAngle
+        {
+            get { return (float)Math.Atan2(ActuatorTravelMM, DistanceFrontRearMM); }
+        }
+
+        /// <summary>
+        /// Returns max angle for Roll, radians
+        /// </summary>
+        public float MaxRollAngle
+        {
+            get { return (float)Math.Atan2(ActuatorTravelMM, DistanceLeftRightMM); }
+        }
 
         public FilterSettings FilterSettings { get; set; } = new FilterSettings();
         public float StepsPerMM { get; set; } = 200;

@@ -105,6 +105,8 @@ namespace MotionPlatform3
             this.numLeftRightMM = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
             this.numActuatorTravelMM = new System.Windows.Forms.NumericUpDown();
+            this.label5 = new System.Windows.Forms.Label();
+            this.numSeatOffsetMM = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
@@ -113,6 +115,7 @@ namespace MotionPlatform3
             ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numSeatOffsetMM)).BeginInit();
             this.SuspendLayout();
             // 
             // pbRL
@@ -1122,6 +1125,46 @@ namespace MotionPlatform3
             0,
             0});
             // 
+            // label5
+            // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(531, 607);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(133, 13);
+            this.label5.TabIndex = 46;
+            this.label5.Text = "Seat offset (from front), mm";
+            // 
+            // numSeatOffsetMM
+            // 
+            this.numSeatOffsetMM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.numSeatOffsetMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numSeatOffsetMM.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numSeatOffsetMM.Location = new System.Drawing.Point(724, 605);
+            this.numSeatOffsetMM.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.numSeatOffsetMM.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numSeatOffsetMM.Name = "numSeatOffsetMM";
+            this.numSeatOffsetMM.Size = new System.Drawing.Size(89, 20);
+            this.numSeatOffsetMM.TabIndex = 47;
+            this.numSeatOffsetMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.numSeatOffsetMM.Value = new decimal(new int[] {
+            400,
+            0,
+            0,
+            0});
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1130,6 +1173,7 @@ namespace MotionPlatform3
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.ClientSize = new System.Drawing.Size(984, 644);
             this.ControlBox = false;
+            this.Controls.Add(this.numSeatOffsetMM);
             this.Controls.Add(this.numActuatorTravelMM);
             this.Controls.Add(this.numLeftRightMM);
             this.Controls.Add(this.numFrontRearMM);
@@ -1156,6 +1200,7 @@ namespace MotionPlatform3
             this.Controls.Add(this.sliderPitch);
             this.Controls.Add(this.lblLinearity);
             this.Controls.Add(this.lblSmooth);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.lblSpeed);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label9);
@@ -1201,6 +1246,7 @@ namespace MotionPlatform3
             ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numSeatOffsetMM)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1282,5 +1328,7 @@ namespace MotionPlatform3
         private System.Windows.Forms.NumericUpDown numLeftRightMM;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.NumericUpDown numActuatorTravelMM;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.NumericUpDown numSeatOffsetMM;
     }
 }

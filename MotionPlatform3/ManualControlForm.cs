@@ -22,20 +22,16 @@ namespace MotionPlatform3
             sliderHeave.Minimum = -(int)_heaveUnits;
             sliderHeave.Maximum = (int)_heaveUnits;
 
-            float x = _plugin.settings.DistanceLeftRightMM;
-            float y = _plugin.settings.DistanceFrontRearMM;
-            float z = _plugin.settings.ActuatorTravelMM;
-
             // Maximum calculated rig angle forward
-            float maxAngleY = (float)Math.Atan2(z, y) * 57.3f;
+            float maxAngleY = _plugin.settings.MaxPitchAngle * 57.3f;
             // Maximum calculated rig angle sideway
-            float maxAngleX = (float)Math.Atan2(z, x) * 57.3f;
+            float maxAngleX = _plugin.settings.MaxRollAngle * 57.3f;
 
-            sliderPitch.Minimum = (int)(-maxAngleY*100f);
+            sliderPitch.Minimum = (int)(-maxAngleY * 100f);
             sliderPitch.Maximum = (int)(maxAngleY * 100f);
 
             sliderRoll.Minimum = (int)(-maxAngleX * 100f);
-            sliderRoll.Maximum= (int)(maxAngleX * 100f);
+            sliderRoll.Maximum = (int)(maxAngleX * 100f);
 
             _stepsPerMM = _plugin.settings.StepsPerMM;
             UpdateLabels();
