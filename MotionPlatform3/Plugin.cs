@@ -710,13 +710,17 @@ namespace MotionPlatform3
                 float swayAmoun = settings.SwayCoefficient / 100.0f;
                 float surgeAmount = settings.SurgeCoefficient / 100.0f;
 
-                if (_oldGear != tds.CarData.Gear)
+                // Gear 0 - R, 1 - N
+                if (_oldGear != tds.CarData.Gear && tds.CarData.Clutch < 0.99) // Clutch should be released
                 {
                     if (Math.Abs(tds.CarData.Speed) > settings.GearChangeMinSpeed)
                         _gearSwitched = DateTime.Now;
-                    _gearSign = tds.CarData.Gear > _oldGear ? -1 : 1;
+
+                    _gearSign = tds.CarData.Gear == 1 ? 0 : -1; // Switching to Neutral = no effect
                     _oldGear = tds.CarData.Gear;
                 }
+
+                gearEffect *= (float)(1 - tds.CarData.Clutch);
 
                 float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, settings.ClipByRange);
                 float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, settings.ClipByRange);
