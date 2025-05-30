@@ -678,6 +678,10 @@ namespace MotionPlatform3
             return (posFL, posFR, posRL, posRR);
         }
 
+        int _oldGear = int.MinValue;
+        float _gearSign = 1;
+        DateTime _gearSwitched = DateTime.Now;
+
         private void ProcessTelemetry2()
         {
             if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
@@ -698,6 +702,7 @@ namespace MotionPlatform3
                 absSway = absSway <= float.Epsilon ? 1 : absSway;
                 absSurge = absSurge <= float.Epsilon ? 1 : absSurge;
 
+                float gearEffect = settings.GearChangeEffect / 100.0f;
                 float overal = settings.OveralCoefficient / 100.0f;
                 float pitchAmount = settings.PitchCoefficient / 100.0f;
                 float rollAmount = settings.RollCoefficient / 100.0f;
@@ -705,17 +710,37 @@ namespace MotionPlatform3
                 float swayAmoun = settings.SwayCoefficient / 100.0f;
                 float surgeAmount = settings.SurgeCoefficient / 100.0f;
 
+                if (_oldGear != tds.CarData.Gear)
+                {
+                    if (Math.Abs(tds.CarData.Speed) > settings.GearChangeMinSpeed)
+                        _gearSwitched = DateTime.Now;
+                    _gearSign = tds.CarData.Gear > _oldGear ? -1 : 1;
+                    _oldGear = tds.CarData.Gear;
+                }
+
                 float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, settings.ClipByRange);
                 float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, settings.ClipByRange);
                 float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, settings.ClipByRange);
                 float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, settings.ClipByRange);
                 float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, settings.ClipByRange);
 
-                pitch = (float)(Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
-                roll = (float) (Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
-                heave = (float)(Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
-                sway = (float) (Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
-                surge = (float)(Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
+                // Gear switch effect routine
+                float gearTS = (float)(DateTime.Now - _gearSwitched).TotalMilliseconds;
+                if (gearTS < (settings.GearChangeRampUp + settings.GearChangeRampDown + settings.GearChangePulse))
+                {
+                    float up = settings.GearChangeRampUp + settings.GearChangePulse;
+                    if (gearTS <= up)
+                        pitch += _gearSign * Math2.Mapf(gearTS, 0f, settings.GearChangeRampUp, 0, gearEffect, true);
+                    else
+                        pitch += _gearSign * Math2.Mapf(gearTS, up, up + settings.GearChangeRampDown, gearEffect, 0f, true);
+                }
+
+                // Deprecated
+                //pitch = (float)(Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
+                //roll = (float) (Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
+                //heave = (float)(Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
+                //sway = (float) (Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
+                //surge = (float)(Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
 
                 float coeff = settings.SmoothCoefficient / 100.0f;
 
@@ -1037,13 +1062,19 @@ namespace MotionPlatform3
         public int SwayCoefficient { get; set; } = 100;
         public int OveralCoefficient { get; set; } = 100;
         public bool ClipByRange { get; set; } = false;
-        public float Linearity { get; set; } = 1.0f;
+        public float Linearity { get; set; } = 1.0f; // not used since 2025-05-30
         public int SmoothCoefficient { get; set; } = 80;
 
         public int DistanceFrontRearMM { get; set; } = 500;
         public int DistanceLeftRightMM { get; set; } = 500;
         public int ActuatorTravelMM { get; set; } = 85;
         public int SeatOffsetMM { get; set; } = 400;
+
+        public int GearChangeEffect { get; set; } = 30;
+        public int GearChangeMinSpeed { get; set; } = 5;
+        public int GearChangeRampUp { get; set; } = 150;
+        public int GearChangePulse { get; set; } = 10;
+        public int GearChangeRampDown { get; set; } = 150;
 
         /// <summary>
         /// Returns max angle for Pitch, radians

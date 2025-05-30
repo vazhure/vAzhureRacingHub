@@ -184,8 +184,6 @@ namespace MotionPlatform3
             sliderSpeed.Minimum = _plugin.settings.MinSpeed;
             sliderSpeed.Maximum = _plugin.settings.MaxSpeed;
 
-            sliderLinearity.Value = (int)Math.Ceiling(Math2.Mapf(_plugin.settings.Linearity, 1, 2, 100, 0));
-
             sliderSpeed.Value = _plugin.settings.SpeedOverride;
             lblSpeed.Text = $"{_plugin.settings.SpeedOverride} mm/sec";
 
@@ -211,6 +209,7 @@ namespace MotionPlatform3
                 sliderSway.Value = _plugin.settings.SwayCoefficient;
                 sliderPitch.Value = _plugin.settings.PitchCoefficient;
                 sliderRoll.Value = _plugin.settings.RollCoefficient;
+                sliderGearEffect.Value = _plugin.settings.GearChangeEffect;
             }
             catch { }
 
@@ -361,7 +360,7 @@ namespace MotionPlatform3
             _plugin.settings.ParkOnIdle = chkParkOnIdle.Checked;
             _plugin.settings.ParkOnQuit = chkParkOnQuit.Checked;
 
-            _plugin.settings.Linearity = Math2.Mapf(sliderLinearity.Value, 100, 0, 1, 2);
+            _plugin.settings.GearChangeEffect = sliderGearEffect.Value;
 
             _plugin.settings.DistanceFrontRearMM = (int)numFrontRearMM.Value;
             _plugin.settings.DistanceLeftRightMM = (int)numLeftRightMM.Value;
