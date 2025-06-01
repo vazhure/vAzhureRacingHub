@@ -492,16 +492,15 @@ namespace MotionPlatform3
             float heave = heaveFilter.Filter(0);
             float sway = swayFilter.Filter(0);
             float surge = surgeFilter.Filter(0);
+            float overal = settings.OveralCoefficient / 100.0f;
 
-            int posFront = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge + roll + sway, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true) :
-                (int)Math2.Mapf(-heave + pitch + surge, -1.0f, 1.0f, FrontAxisState.min, FrontAxisState.max, false, true);
-            int posRL = (int)Math2.Mapf(-heave - pitch - surge + roll + sway, -1.0f, 1.0f, RearLeftAxisState.min, RearLeftAxisState.max, false, true);
-            int posRR = (int)Math2.Mapf(-heave - pitch - surge - roll - sway, -1.0f, 1.0f, RearRightAxisState.min, RearRightAxisState.max, false, true);
-            int posFR = ConnectedLinearAxes > 3 ? (int)Math2.Mapf(-heave + pitch + surge - roll - sway, -1.0f, 1.0f, FrontRightAxisState.min, FrontRightAxisState.max, false, true) : (FrontRightAxisState.min + FrontRightAxisState.max) / 2;
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
 
-            if (_lastPosFront != posFront || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
+            Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
+
+            if (_lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
             {
-                byte[] data = GenerateCommand(COMMAND.CMD_MOVE, posFront, posRL, posRR, posFR);
+                byte[] data = GenerateCommand(COMMAND.CMD_MOVE, (int)posFL, (int)posRL, (int)posRR, (int)posFR);
 
                 lock (serialPort)
                 {
@@ -512,10 +511,10 @@ namespace MotionPlatform3
                     catch { }
                 }
 
-                _lastPosFront = posFront;
-                _lastPosRL = posRL;
-                _lastPosRR = posRR;
-                _lastPosFR = posFR;
+                _lastPosFront = (int)posFL;
+                _lastPosRL = (int)posRL;
+                _lastPosRR = (int)posRR;
+                _lastPosFR = (int)posFR;
             }
         }
 
