@@ -99,7 +99,6 @@ namespace MotionPlatform3
 
             cancellationToken.Cancel();
             stateWorker.Wait(100);
-            stateWorker.Dispose();
         }
 
         MODE oldMode = MODE.Run;
