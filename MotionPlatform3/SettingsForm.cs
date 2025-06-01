@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
 
@@ -13,8 +14,9 @@ namespace MotionPlatform3
     {
         readonly Plugin _plugin;
 
-        readonly BackgroundWorker testWorker;
-        readonly BackgroundWorker stateWorker;
+        readonly CancellationTokenSource cancellationToken = new CancellationTokenSource();
+        Task stateWorker;
+
         public SettingsForm(Plugin plugin)
         {
             _plugin = plugin;
@@ -23,25 +25,6 @@ namespace MotionPlatform3
 
             oldMode = plugin.settings.mode;
             InitializeComponent();
-
-            testWorker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
-            testWorker.DoWork += TestWorker_DoWork;
-            testWorker.RunWorkerCompleted += TestWorker_RunWorkerCompleted;
-
-            stateWorker = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
-            stateWorker.DoWork += delegate
-            {
-                while (!stateWorker.CancellationPending)
-                {
-                    try
-                    {
-                        if (_plugin.Status == DeviceStatus.Connected)
-                            _plugin.RequestState();
-                    }
-                    catch { }
-                    Thread.Sleep(100);
-                }
-            };
         }
 
         private void App_OnGameStopped(object sender, EventArgs e)
@@ -76,8 +59,6 @@ namespace MotionPlatform3
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(11, _plugin.RearLeftAxisState));
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(12, _plugin.RearRightAxisState));
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(13, _plugin.RearRightAxisState));
-            if (testWorker.IsBusy)
-                testWorker.CancelAsync();
             Close();
         }
 
@@ -116,51 +97,12 @@ namespace MotionPlatform3
             _plugin.App.OnGameStarted -= App_OnGameStarted;
             _plugin.App.OnGameStopped -= App_OnGameStopped;
 
-            testWorker?.CancelAsync();
-            stateWorker?.CancelAsync();
+            cancellationToken.Cancel();
+            stateWorker.Wait(100);
+            stateWorker.Dispose();
         }
 
         MODE oldMode = MODE.Run;
-
-        private void TestWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            BeginInvoke((Action)delegate
-            {
-                btnTestSpeed.Text = "TEST";
-                _plugin.settings.mode = oldMode;
-            });
-        }
-
-        private void TestWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            if (sender is BackgroundWorker worker)
-            {
-                BeginInvoke((Action)delegate
-                {
-                    btnTestSpeed.Text = "STOP";
-                });
-
-                DateTime dtStart = DateTime.Now;
-
-                while (!worker.CancellationPending)
-                {
-                    TimeSpan ts = DateTime.Now - dtStart;
-
-                    double amp = sliderOveralEffects.Value / 100.0;
-
-                    double heave = amp * Math.Sin(Math.PI * (ts.TotalMilliseconds / 2000));
-
-                    try
-                    {
-                        if (_plugin.ReadyToSend)
-                            _plugin.DoHeave((float)heave);
-                    }
-                    catch { worker.CancelAsync(); }
-
-                    Thread.Sleep(10);
-                }
-            }
-        }
 
         protected override void OnLoad(EventArgs e)
         {
@@ -198,7 +140,7 @@ namespace MotionPlatform3
 
             IGamePlugin activeGame = _plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault();
             lblGame.Text = activeGame == null ? "No active game" : activeGame.Name;
-            chkCollect.Enabled = btnTune.Enabled = activeGame != null;            
+            chkCollect.Enabled = btnTune.Enabled = activeGame != null;
 
             InitComPorts();
 
@@ -218,7 +160,20 @@ namespace MotionPlatform3
             _plugin.App.OnDeviceArrival += Application_OnDeviceArrival;
             _plugin.App.OnDeviceRemoveComplete += Application_OnDeviceRemoveComplete;
 
-            stateWorker.RunWorkerAsync();
+
+            stateWorker = Task.Run(() =>
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        if (_plugin.Status == DeviceStatus.Connected)
+                            _plugin.RequestState();
+                    }
+                    catch { }
+                    Thread.Sleep(100);
+                }
+            }, cancellationToken.Token);
         }
 
         private void InitComPorts()
@@ -366,7 +321,7 @@ namespace MotionPlatform3
             _plugin.settings.DistanceLeftRightMM = (int)numLeftRightMM.Value;
 
             _plugin.settings.ActuatorTravelMM = (int)numActuatorTravelMM.Value;
-            _plugin.settings.SeatOffsetMM = (int) numSeatOffsetMM.Value;
+            _plugin.settings.SeatOffsetMM = (int)numSeatOffsetMM.Value;
 
             if (comboComPort.SelectedItem is string port)
             {
@@ -419,7 +374,7 @@ namespace MotionPlatform3
         }
 
         private void ChkCollect_OnSwitch(object sender, EventArgs e)
-        {            
+        {
             if (chkCollect.Checked)
             {
                 if (_plugin.App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault() is IGamePlugin)
@@ -438,7 +393,7 @@ namespace MotionPlatform3
             using (ManualControlForm form = new ManualControlForm(_plugin))
             {
                 form.ShowDialog(this);
-            }    
+            }
 
             //if (testWorker.IsBusy)
             //    testWorker.CancelAsync();

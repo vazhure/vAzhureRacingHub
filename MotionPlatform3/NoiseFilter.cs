@@ -6,7 +6,7 @@ namespace NoiseFilters
     {
         private readonly float[] samples;
         private readonly int maxSampleCount;
-        private readonly float maxInputDelta = float.MaxValue; //maximum input delta between last and new sample.
+        private float maxInputDelta = float.MaxValue; //maximum input delta between last and new sample.
         private int liveSampleCount;
         private int currSample = 0;
         private float currPrediction = 0.0f;
@@ -17,6 +17,12 @@ namespace NoiseFilters
             maxSampleCount = Math.Max(1, _maxSampleCount);
             samples = new float[maxSampleCount];
             maxInputDelta = _maxInputDelta;
+        }
+
+        public float MaxInputDelta
+        {
+            get => maxInputDelta;
+            set => maxInputDelta = value;
         }
 
         public float Filter(float sample)

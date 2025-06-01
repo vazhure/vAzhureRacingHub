@@ -162,7 +162,7 @@ namespace MotionPlatform3
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnClose.Location = new System.Drawing.Point(465, 173);
+            this.btnClose.Location = new System.Drawing.Point(465, 150);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(147, 44);
             this.btnClose.TabIndex = 35;
@@ -224,14 +224,14 @@ namespace MotionPlatform3
             this.chkReducedSpeed.StateOn = ((System.Drawing.Image)(resources.GetObject("chkReducedSpeed.StateOn")));
             this.chkReducedSpeed.SwitchText = "Reduce speed";
             this.chkReducedSpeed.TabIndex = 37;
+            this.chkReducedSpeed.OnSwitch += new System.EventHandler(this.ChkReducedSpeed_OnSwitch);
             // 
             // ManualControlForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
-            this.ClientSize = new System.Drawing.Size(624, 229);
-            this.ControlBox = false;
+            this.ClientSize = new System.Drawing.Size(624, 206);
             this.Controls.Add(this.chkReducedSpeed);
             this.Controls.Add(this.btnResetHeave);
             this.Controls.Add(this.btnResetRoll);
@@ -247,11 +247,16 @@ namespace MotionPlatform3
             this.Controls.Add(this.sliderRoll);
             this.Controls.Add(this.sliderPitch);
             this.ForeColor = System.Drawing.Color.White;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(640, 245);
+            this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(640, 245);
             this.Name = "ManualControlForm";
+            this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Manual control";
             this.ResumeLayout(false);
             this.PerformLayout();
 
