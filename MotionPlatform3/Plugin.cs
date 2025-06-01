@@ -122,8 +122,8 @@ namespace MotionPlatform3
             swayFilter = new KalmanFilter(settings.FilterSettings.Sway[0], settings.FilterSettings.Sway[1], settings.FilterSettings.Sway[2], settings.FilterSettings.Sway[3], settings.FilterSettings.Sway[4], settings.FilterSettings.Sway[5]);
             surgeFilter = new KalmanFilter(settings.FilterSettings.Surge[0], settings.FilterSettings.Surge[1], settings.FilterSettings.Surge[2], settings.FilterSettings.Surge[3], settings.FilterSettings.Surge[4], settings.FilterSettings.Surge[5]);
             heaveFilter = new KalmanFilter(settings.FilterSettings.Heave[0], settings.FilterSettings.Heave[1], settings.FilterSettings.Heave[2], settings.FilterSettings.Heave[3], settings.FilterSettings.Heave[4], settings.FilterSettings.Heave[5]);
-            pitchFilter = new NoiseFilter(settings.FilterSettings.Pitch);
-            rollFilter = new NoiseFilter(settings.FilterSettings.Roll);
+            pitchFilter = new NoiseFilter(settings.FilterSettings.Pitch, settings.FilterSettings.MaxInputData);
+            rollFilter = new NoiseFilter(settings.FilterSettings.Roll, settings.FilterSettings.MaxInputData);
 
             serialPort.DataReceived += SerialPort_DataReceived;
             mainLoop = new Task(MainTread, this, tokenSource.Token);
@@ -1022,6 +1022,7 @@ namespace MotionPlatform3
         public float[] Heave { get; set; } = { 1, 1, 0.02f, 1, 0.02f, 0.0f };
         public int Pitch { get; set; } = 3;
         public int Roll { get; set; } = 3;
+        public float MaxInputData { get; set; } = 1f;
     }
 
     public enum MODE { Run, CollectingGameData, Test };

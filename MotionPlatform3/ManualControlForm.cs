@@ -81,7 +81,6 @@ namespace MotionPlatform3
         {
             cancellationToken.Cancel();
             task.Wait(100);
-            task.Dispose();
 
             base.OnClosed(e);
             DoMove(0, 0, 0);
@@ -133,9 +132,9 @@ namespace MotionPlatform3
         private void ChkReducedSpeed_OnSwitch(object sender, EventArgs e)
         {
             bool bReduced = chkReducedSpeed.Checked;
-            pitchFilter.MaxInputDelta = bReduced ? 0.01f : float.MaxValue;
-            rollFilter.MaxInputDelta = bReduced ? 0.01f : float.MaxValue;
-            heaveFilter.MaxInputDelta = bReduced ? 0.01f : float.MaxValue;
+            pitchFilter.MaxInputDelta = bReduced ? 0.01f : 1f;
+            rollFilter.MaxInputDelta = bReduced ? 0.01f : 1f;
+            heaveFilter.MaxInputDelta = bReduced ? 0.01f : 1f;
         }
     }
 }
