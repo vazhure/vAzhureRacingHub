@@ -150,6 +150,7 @@ namespace MotionPlatform3
                 sliderSway.Value = _plugin.settings.SwayCoefficient;
                 sliderPitch.Value = _plugin.settings.PitchCoefficient;
                 sliderRoll.Value = _plugin.settings.RollCoefficient;
+                sliderSmooth.Value = _plugin.settings.SmoothCoefficient;
                 sliderGearEffect.Value = _plugin.settings.GearChangeEffect;
             }
             catch { }
