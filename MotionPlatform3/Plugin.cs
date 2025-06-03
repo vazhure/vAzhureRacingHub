@@ -487,11 +487,19 @@ namespace MotionPlatform3
             if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
                 return;
 
-            float pitch = pitchFilter.Filter(0);
-            float roll = rollFilter.Filter(0);
-            float heave = heaveFilter.Filter(0);
-            float sway = swayFilter.Filter(0);
-            float surge = surgeFilter.Filter(0);
+            // getting current state
+            float pitch = pitchFilter;
+            float roll = rollFilter;
+            float heave = heaveFilter;
+            float sway = swayFilter;
+            float surge = surgeFilter;
+
+            pitchFilter.Filter(pitch - 0.05f * pitch);
+            rollFilter.Filter(roll - 0.05f * roll);
+            heaveFilter.Filter(heave - 0.05f * heave);
+            swayFilter.Filter(sway - 0.05f * sway);
+            surgeFilter.Filter(surge - 0.05f * surge);
+
             float overal = settings.OveralCoefficient / 100.0f;
 
             (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);

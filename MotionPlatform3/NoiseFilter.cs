@@ -10,6 +10,7 @@ namespace NoiseFilters
         private int liveSampleCount;
         private int currSample = 0;
         private float currPrediction = 0.0f;
+        private float currvalue = 0;
 
         //higher _maxSampleCount = more smoothing
         public NoiseFilter(int _maxSampleCount, float _maxInputDelta = float.MaxValue)
@@ -67,7 +68,12 @@ namespace NoiseFilters
             currPrediction = prediction = ((currPrediction + (prediction / sampleCounter)) * 0.5f) * 0.5f;
             float smoothedValue = total / liveSampleCount;
 
-            return smoothedValue + prediction;
+            return currvalue = smoothedValue + prediction;
+        }
+
+        public static implicit operator float(NoiseFilter value)
+        {
+            return value.currvalue;
         }
 
         public void Reset()
@@ -104,6 +110,11 @@ namespace NoiseFilters
             P = (1 - K * H) * P;
 
             return x;
+        }
+
+        public static implicit operator float(KalmanFilter value)
+        {
+            return value.x;
         }
     }
 
