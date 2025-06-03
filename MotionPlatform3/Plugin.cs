@@ -496,20 +496,9 @@ namespace MotionPlatform3
 
             (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
 
-            Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
-
             if (_lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
             {
-                byte[] data = GenerateCommand(COMMAND.CMD_MOVE, (int)posFL, (int)posRL, (int)posRR, (int)posFR);
-
-                lock (serialPort)
-                {
-                    try
-                    {
-                        serialPort.Write(data, 0, PCCMD_SIZE);
-                    }
-                    catch { }
-                }
+                Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
 
                 _lastPosFront = (int)posFL;
                 _lastPosRL = (int)posRL;
@@ -755,20 +744,9 @@ namespace MotionPlatform3
 
                 (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
 
-                Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
-
                 if (_lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
                 {
-                    byte[] data = GenerateCommand(COMMAND.CMD_MOVE, (int)posFL, (int)posRL, (int)posRR, (int)posFR);
-
-                    lock (serialPort)
-                    {
-                        try
-                        {
-                            serialPort.Write(data, 0, PCCMD_SIZE);
-                        }
-                        catch { }
-                    }
+                    Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
 
                     _lastPosFront = (int)posFL;
                     _lastPosRL = (int)posRL;
