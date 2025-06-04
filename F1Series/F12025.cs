@@ -1179,5 +1179,53 @@ namespace F1Series
             {193, "McLaren ‘24"},
             {194, "Sauber ‘24"},
         };
+
+        /// <summary>
+        /// string index == ID
+        /// </summary>
+        public static readonly string[] TrackID = new string[]
+        {
+            "Melbourne",
+            "",
+            "Shanghai",
+            "Sakhir (Bahrain)",
+            "Catalunya",
+            "Monaco",
+            "Montreal",
+            "Silverstone",
+            "",
+            "Hungaroring",
+            "Spa",
+            "Monza",
+            "Singapore",
+            "Suzuka",
+            "Abu Dhabi",
+            "Texas",
+            "Brazil",
+            "Austria",
+            "",
+            "Mexico",
+            "Baku (Azerbaijan)",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Zandvoort",
+            "Imola",
+            "Jeddah",
+            "Miami",
+            "Las Vegas",
+            "Losail",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Silverstone (Reverse)",
+            "Austria (Reverse)",
+            "Zandvoort (Reverse)",
+        };
     }
 }

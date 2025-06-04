@@ -293,8 +293,8 @@ namespace F1Series
                             case 13: sessionInfo.SessionState = "Time Trial"; break;
                         }
 
-                        if (data.m_trackId <= F12024.TrackID.Length)
-                            sessionInfo.TrackName = F12024.TrackID[data.m_trackId];
+                        if (data.m_trackId <= F12025.TrackID.Length)
+                            sessionInfo.TrackName = F12025.TrackID[data.m_trackId];
                         else
                             sessionInfo.TrackName = "Unknown Track Name";
 
