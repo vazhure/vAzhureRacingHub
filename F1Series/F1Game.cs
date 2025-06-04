@@ -311,10 +311,10 @@ namespace F1Series
                         var participant = data.m_participants[header.m_playerCarIndex];
                         var carData = mCarData.CarData;
 
-                        F12024.DriversID.TryGetValue(participant.m_driverId, out string name);
+                        F12025.DriversID.TryGetValue(participant.m_driverId, out string name);
                         carData.DriverName = name ?? participant.m_name;
                         carData.CarNumber = $"{participant.m_raceNumber}";
-                        F12024.TeamsID.TryGetValue(participant.m_driverId, out string team);
+                        F12025.TeamsID.TryGetValue(participant.m_driverId, out string team);
                         carData.CarName = team;
 
                         OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(mCarData));
