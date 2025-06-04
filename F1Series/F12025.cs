@@ -5,7 +5,7 @@ namespace F1Series
     public static class F12025
     {
         // Different packet types
-        public enum PacketId
+        public enum PacketId : byte
         {
             /// <summary>
             /// Contains all motion data for player’s car – only sent while player is in control
