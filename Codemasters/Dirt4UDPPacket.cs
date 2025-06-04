@@ -142,7 +142,7 @@ namespace Codemasters.Structs
         [MarshalAs(UnmanagedType.R4)]
         public float speed;
         /// <summary>
-        /// Velocity in world space (X, Y, Z)
+        /// Velocity in world space (X, Y, Z), WorldSpeed
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
         public float[] velocity;
@@ -153,11 +153,16 @@ namespace Codemasters.Structs
         //VehicleForwardDirectionX float32 // World space forward direction
         //VehicleForwardDirectionY float32 // World space forward direction
         //VehicleForwardDirectionZ float32 // World space forward direction
-
+        /// <summary>
+        /// //left_dir, XR, Roll, ZR
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
-        public float[] roll; //left_dir
+        public float[] roll; 
+        /// <summary>
+        /// forward_dir, XD, YD, ZD
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 3)]
-        public float[] pitch; //forward_dir
+        public float[] pitch; 
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 4)]
         public float[] suspension_position;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.R4, SizeConst = 4)]

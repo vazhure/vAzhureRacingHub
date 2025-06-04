@@ -218,23 +218,16 @@ namespace Codemasters
                         accZ = ts.TotalMilliseconds > 0 ? (data.speed > 10 ? 1000.0f * (data.velocity[1] - _vY) / (float)ts.TotalMilliseconds : 0) : _acc;
                         _vY = data.velocity[1];
 
-                        Vector3D right = new Vector3D(data.roll[0], data.roll[2], data.roll[1]);
-                        Vector3D forward = new Vector3D(data.pitch[0], data.pitch[2], data.pitch[1]);
-                        Vector3D up = Vector3D.Cross(forward, right);
-
                         float pitch, roll, yaw;
 
-                        pitch = (float)(Math.Asin(up.Y));
-                        roll = (float)(Math.Asin(up.X));
+                        pitch = (float) (data.pitch[1]/ Math.PI);// (float)(Math.Asin(up.Y));
+                        roll = (float) (Math.Asin(data.roll[1]) / Math.PI); //(float)(Math.Asin(up.X));
+                        yaw = (float) (Math.Atan2(data.roll[0], data.roll[2]) / Math.PI);
 
-                        double x = roll * data.roll[2] - pitch * data.roll[0];
-                        double y = roll * data.roll[0] + pitch * data.roll[2];
-
-                        yaw = (float) (Math.Atan2(forward.X, forward.Z) / Math.PI);
-
-                        aMMotionData.Pitch = -(float)(x / Math.PI);
-                        aMMotionData.Roll = (float)(y / Math.PI);
+                        aMMotionData.Pitch = pitch;
+                        aMMotionData.Roll = -roll;
                         aMMotionData.Yaw = yaw;
+
                     }
 
                     _acc = accZ;

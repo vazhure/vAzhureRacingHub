@@ -67,6 +67,8 @@ namespace RichardBurnsRally
             OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
         }
 
+        double rmpMax = 0;
+
         private void UDPClient_OnDataReceivedEvent(object sender, byte[] bytes)
         {
             if (bytes.Length == Marshal.SizeOf(typeof(TelemetryData)))
@@ -94,9 +96,12 @@ namespace RichardBurnsRally
                 aMMotionData.Heave = data.car.accelerations.heave / 9.81f;
                 aMMotionData.Position = new double[] { data.car.positionX, data.car.positionY, data.car.positionZ };
 
-                carData.RPM = data.car.engine.rpm;
-                carData.MaxRPM = Math.Max(carData.RPM, carData.MaxRPM);
+                carData.RPM = Math.Abs(data.car.engine.rpm);
+                rmpMax = Math.Max(carData.RPM, rmpMax);
+                carData.MaxRPM = rmpMax;
+                carData.ShiftUpRPM = rmpMax * 0.9;
                 carData.WaterTemp = data.car.engine.engineCoolantTemperature;
+                carData.OilTemp = data.car.engine.engineTemperature;
 
                 sessionInfo.SessionState = "Race";
                 sessionInfo.Flag = "Green";

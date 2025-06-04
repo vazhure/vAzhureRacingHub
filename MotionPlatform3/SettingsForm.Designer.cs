@@ -868,9 +868,9 @@ namespace MotionPlatform3
             this.lblSmooth.AutoSize = true;
             this.lblSmooth.Location = new System.Drawing.Point(786, 369);
             this.lblSmooth.Name = "lblSmooth";
-            this.lblSmooth.Size = new System.Drawing.Size(33, 13);
+            this.lblSmooth.Size = new System.Drawing.Size(27, 13);
             this.lblSmooth.TabIndex = 37;
-            this.lblSmooth.Text = "100%";
+            this.lblSmooth.Text = "90%";
             // 
             // comboComPort
             // 
@@ -945,9 +945,9 @@ namespace MotionPlatform3
             this.lblGearEffect.AutoSize = true;
             this.lblGearEffect.Location = new System.Drawing.Point(786, 404);
             this.lblGearEffect.Name = "lblGearEffect";
-            this.lblGearEffect.Size = new System.Drawing.Size(33, 13);
+            this.lblGearEffect.Size = new System.Drawing.Size(21, 13);
             this.lblGearEffect.TabIndex = 40;
-            this.lblGearEffect.Text = "100%";
+            this.lblGearEffect.Text = "0%";
             // 
             // btnTestSpeed
             // 
@@ -1172,7 +1172,7 @@ namespace MotionPlatform3
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(984, 681);
+            this.ClientSize = new System.Drawing.Size(984, 679);
             this.ControlBox = false;
             this.Controls.Add(this.numSeatOffsetMM);
             this.Controls.Add(this.numActuatorTravelMM);

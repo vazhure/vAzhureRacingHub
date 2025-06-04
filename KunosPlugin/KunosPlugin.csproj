@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ACEVO.cs" />
     <Compile Include="ACSharedFilePhisycs.cs" />
     <Compile Include="GameListener.cs" />
     <Compile Include="GamePlugin.cs" />
