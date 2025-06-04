@@ -20,6 +20,7 @@ namespace F1Series
         private readonly F1Game f12022Game = new F1Game(2022);
         private readonly F1Game f12023Game = new F1Game(2023);
         private readonly F1Game f12024Game = new F1Game(2024);
+        private readonly F1Game f12025Game = new F1Game(2025);
 
         public bool Initialize(IVAzhureRacingApp app)
         {
@@ -28,6 +29,7 @@ namespace F1Series
                 app.RegisterGame(f12022Game);
                 app.RegisterGame(f12023Game);
                 app.RegisterGame(f12024Game);
+                app.RegisterGame(f12025Game);
             }
             catch { return false; }
 
@@ -77,6 +79,24 @@ namespace F1Series
             //Console.WriteLine($"Packet size of PacketCarTelemetryData {Marshal.SizeOf(typeof(F12024.PacketCarTelemetryData))}");
             //Console.WriteLine($"Packet size of PacketEventData {Marshal.SizeOf(typeof(F12024.PacketEventData))}");
 
+
+
+            // F1 2025
+            //Console.WriteLine($"Packet size of PacketMotionData {Marshal.SizeOf(typeof(F12025.PacketMotionData))}"); //1349
+            //Console.WriteLine($"Packet size of PacketMotionExData {Marshal.SizeOf(typeof(F12025.PacketMotionExData))}"); //273
+            //Console.WriteLine($"Packet size of PacketLapData {Marshal.SizeOf(typeof(F12025.PacketLapData))}"); //1285
+            //Console.WriteLine($"Packet size of PacketLobbyInfoData {Marshal.SizeOf(typeof(F12025.PacketLobbyInfoData))}"); //954
+            //Console.WriteLine($"Packet size of PacketParticipantsData {Marshal.SizeOf(typeof(F12025.PacketParticipantsData))}"); //1284
+            //Console.WriteLine($"Packet size of PacketSessionData {Marshal.SizeOf(typeof(F12025.PacketSessionData))}"); //753
+            //Console.WriteLine($"Packet size of PacketSessionHistoryData {Marshal.SizeOf(typeof(F12025.PacketSessionHistoryData))}"); // 1460
+            //Console.WriteLine($"Packet size of PacketTimeTrialData {Marshal.SizeOf(typeof(F12025.PacketTimeTrialData))}"); // 101
+            //Console.WriteLine($"Packet size of PacketTyreSetsData {Marshal.SizeOf(typeof(F12025.PacketTyreSetsData))}"); // 231
+            //Console.WriteLine($"Packet size of PacketCarDamageData {Marshal.SizeOf(typeof(F12025.PacketCarDamageData))}"); // 1041
+            //Console.WriteLine($"Packet size of PacketCarSetupData {Marshal.SizeOf(typeof(F12025.PacketCarSetupData))}"); // 1133
+            //Console.WriteLine($"Packet size of PacketCarStatusData {Marshal.SizeOf(typeof(F12025.PacketCarStatusData))}"); //1239
+            //Console.WriteLine($"Packet size of PacketCarTelemetryData {Marshal.SizeOf(typeof(F12025.PacketCarTelemetryData))}"); // X
+            //Console.WriteLine($"Packet size of PacketEventData {Marshal.SizeOf(typeof(F12025.PacketEventData))}"); // 45
+
             return true;
         }
 
@@ -85,6 +105,7 @@ namespace F1Series
             f12022Game.Quit();
             f12023Game.Quit();
             f12024Game.Quit();
+            f12025Game.Quit();
         }
     }
 }
