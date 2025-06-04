@@ -23,6 +23,7 @@ Supported Game Titles:
 * F1 2022
 * F1 2023
 * F1 2024
+* F1 2025
 * GTR 2
 * Grid 2019
 * Grid Legends
