@@ -1,10 +1,12 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2025-04-27
+// version from 2025-06-07
 // stm32duino version
 
 // NOTE: select fake STM32F103C8
 // https://www.stm32duino.com/
+
+//#define INVERTED_DIR
 
 //#define DEBUG
 // Board: STM32F103C8T6 5 pcs (master + 4 slave)
@@ -14,9 +16,12 @@
 #include <Wire_slave.h>
 #include <stdio.h>
 
+// Uncomment this line if you using SF1610
+//#define SFU1610 // Used only in SLAVE devices
+
 // Uncomment this line to flash MASTER device
 // Comment this line to flash SLAVE devices
-#define I2CMASTER
+//#define I2CMASTER
 
 // Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
@@ -53,10 +58,10 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #ifndef I2CMASTER
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Uncomment a single line with desired Address to flash SLAVE device
-#define SLAVE_ADDR SLAVE_ADDR_FL
+//#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-//#define SLAVE_ADDR SLAVE_ADDR_FR
+#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -123,7 +128,9 @@ struct PCCMD_SH {
   uint8_t reserved;
   uint16_t data[MAX_LINEAR_ACTUATORS];
   uint16_t data2[MAX_LINEAR_ACTUATORS];  // EMPTY
-} pccmd_sh;
+};
+
+PCCMD_SH& pccmd_sh = *(PCCMD_SH*)&pccmd;
 
 const int RAW_DATA_LEN = sizeof(PCCMD);
 
@@ -147,6 +154,7 @@ void OnAlarm() {
 }
 
 void setup() {
+
   pinMode(LED_PIN, OUTPUT);
   pinMode(ALARM_PIN, INPUT_PULLDOWN);
   pinMode(SIGNAL_PIN, INPUT);
@@ -265,7 +273,7 @@ void loop() {
         break;
       case COMMAND::CMD_MOVE_SH:
         {
-          memcpy(&pccmd_sh, &pccmd, RAW_DATA_LEN);
+          //memcpy(&pccmd_sh, &pccmd, RAW_DATA_LEN);
           for (int t = 0; t < LINEAR_ACTUATORS; t++) {
             uint16_t val = pccmd_sh.data[t];
             val = (val >> 8) | (val << 8);
@@ -306,19 +314,34 @@ void loop() {
 
 volatile MODE mode;
 
+#ifdef INVERTED_DIR
+const uint32_t dirPin = PA5;
+const uint32_t stepPin = PA4;
+#else
 const uint32_t dirPin = PA4;
 const uint32_t stepPin = PA5;
+#endif
 const uint32_t limiterPinNO = PA6;
 const uint8_t limiterPinNC = PA7;
 
 #define ANALOG_INPUT_MAX 4095
 
-uint32_t accel = 900;
-const int32_t STEPS_PER_REVOLUTIONS = 1000;                                // Steps per revolution
+uint32_t accel = 5000;
+const int32_t STEPS_PER_REVOLUTIONS = 1000;                    // Steps per revolution
 #define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4  // Distance in steps
-const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;              // Safe traveling distance in steps
-const float MM_PER_REV = 5.0f;                                             // distance in mm per revolution
-const float MAX_REVOLUTIONS = 18;                                          // maximum revolutions
+
+#ifdef SFU1610
+const float MM_PER_REV = 10.0f;                                // distance in mm per revolution
+const float MAX_REVOLUTIONS = 9;                               // maximum revolutions
+const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 4;  // Safe traveling distance in steps
+#define MAX_SPEED_MM_SEC 240  // maximum speed mm/sec
+#else
+const float MM_PER_REV = 5.0f;                                 // distance in mm per revolution
+const float MAX_REVOLUTIONS = 18;                              // maximum revolutions
+const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;  // Safe traveling distance in steps
+#define MAX_SPEED_MM_SEC 120  // maximum speed mm/sec
+#endif
+
 const int32_t RANGE = (int32_t)(MAX_REVOLUTIONS * STEPS_PER_REVOLUTIONS);  // Maximum traveling distance, steps
 const int32_t MIN_POS = SAFE_DIST_IN_STEPS;                                // minimal controlled position, steps
 const int32_t MAX_POS = RANGE - SAFE_DIST_IN_STEPS;                        // maximal controlled position, steps
@@ -330,9 +353,9 @@ const uint8_t HOME_DIRECTION = HIGH;
 
 #define MMPERSEC2DELAY(mmps) 500000 / (STEPS_PER_REVOLUTIONS * mmps / MM_PER_REV)
 
-#define MAX_SPEED_MM_SEC 120
-#define MIN_SPEED_MM_SEC 10
-#define SLOW_SPEED_MM_SEC 20
+
+#define MIN_SPEED_MM_SEC 5
+#define SLOW_SPEED_MM_SEC 10
 #define DEFAULT_SPEED_MM_SEC 90
 
 #ifndef MAX
@@ -360,6 +383,7 @@ uint8_t _oldDir = LOW;  // previous DIR state
 
 volatile bool LimitChanged = true;
 uint32_t last_step_time = 0;
+double pulse = iSlowPulseDelay;
 
 inline void Step(uint8_t dir, int delay) {
   if (limitSwitchState == HIGH && dir == HOME_DIRECTION)
@@ -372,15 +396,17 @@ inline void Step(uint8_t dir, int delay) {
     _oldDir = dir;
   }
 
-  float delta = MIN((micros() - last_step_time), iSlowPulseDelay);
-  uint32_t pulse = MAX(delay, ceil(delta - (float)accel / delta));
+  double delta = MIN(MAX((micros() - last_step_time), 1), iSlowPulseDelay);
 
+  double acc_pulse = pulse - (double)accel * delta / 1000000.0;
+  pulse = acc_pulse > delay ? acc_pulse : delay;
+
+  last_step_time = micros();
   digitalWrite(stepPin, HIGH);
   delayMicroseconds(MIN_PULSE_DELAY);
   digitalWrite(stepPin, LOW);
-  delayMicroseconds(pulse);
+  delayMicroseconds((uint32_t)pulse);
   currentPos += dir == HIGH ? 1 : -1;
-  last_step_time = micros();
 }
 
 // Limit switch event
