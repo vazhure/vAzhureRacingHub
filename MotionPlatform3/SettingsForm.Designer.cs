@@ -108,6 +108,7 @@ namespace MotionPlatform3
             this.numActuatorTravelMM = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
             this.numSeatOffsetMM = new System.Windows.Forms.NumericUpDown();
+            this.btnSimHub = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
@@ -125,7 +126,7 @@ namespace MotionPlatform3
             this.pbRL.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbRL.Location = new System.Drawing.Point(131, 43);
             this.pbRL.Name = "pbRL";
-            this.pbRL.Size = new System.Drawing.Size(122, 492);
+            this.pbRL.Size = new System.Drawing.Size(122, 474);
             this.pbRL.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRL.TabIndex = 0;
             this.pbRL.TabStop = false;
@@ -168,7 +169,7 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(513, 608);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(513, 590);
             this.tableLayoutPanel1.TabIndex = 8;
             // 
             // lblFrontState
@@ -187,7 +188,7 @@ namespace MotionPlatform3
             this.pbFR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbFR.Location = new System.Drawing.Point(3, 43);
             this.pbFR.Name = "pbFR";
-            this.pbFR.Size = new System.Drawing.Size(122, 492);
+            this.pbFR.Size = new System.Drawing.Size(122, 474);
             this.pbFR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbFR.TabIndex = 0;
             this.pbFR.TabStop = false;
@@ -195,7 +196,7 @@ namespace MotionPlatform3
             // lblName1
             // 
             this.lblName1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName1.Location = new System.Drawing.Point(3, 538);
+            this.lblName1.Location = new System.Drawing.Point(3, 520);
             this.lblName1.Name = "lblName1";
             this.lblName1.Size = new System.Drawing.Size(122, 30);
             this.lblName1.TabIndex = 5;
@@ -205,7 +206,7 @@ namespace MotionPlatform3
             // lblPosFront
             // 
             this.lblPosFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosFront.Location = new System.Drawing.Point(3, 568);
+            this.lblPosFront.Location = new System.Drawing.Point(3, 550);
             this.lblPosFront.Name = "lblPosFront";
             this.lblPosFront.Size = new System.Drawing.Size(122, 20);
             this.lblPosFront.TabIndex = 6;
@@ -215,7 +216,7 @@ namespace MotionPlatform3
             // lblTargetFront
             // 
             this.lblTargetFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetFront.Location = new System.Drawing.Point(3, 588);
+            this.lblTargetFront.Location = new System.Drawing.Point(3, 570);
             this.lblTargetFront.Name = "lblTargetFront";
             this.lblTargetFront.Size = new System.Drawing.Size(122, 20);
             this.lblTargetFront.TabIndex = 7;
@@ -235,7 +236,7 @@ namespace MotionPlatform3
             // lblName2
             // 
             this.lblName2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName2.Location = new System.Drawing.Point(131, 538);
+            this.lblName2.Location = new System.Drawing.Point(131, 520);
             this.lblName2.Name = "lblName2";
             this.lblName2.Size = new System.Drawing.Size(122, 30);
             this.lblName2.TabIndex = 1;
@@ -245,7 +246,7 @@ namespace MotionPlatform3
             // lblPosRL
             // 
             this.lblPosRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRL.Location = new System.Drawing.Point(131, 568);
+            this.lblPosRL.Location = new System.Drawing.Point(131, 550);
             this.lblPosRL.Name = "lblPosRL";
             this.lblPosRL.Size = new System.Drawing.Size(122, 20);
             this.lblPosRL.TabIndex = 2;
@@ -255,7 +256,7 @@ namespace MotionPlatform3
             // lblTargetRL
             // 
             this.lblTargetRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRL.Location = new System.Drawing.Point(131, 588);
+            this.lblTargetRL.Location = new System.Drawing.Point(131, 570);
             this.lblTargetRL.Name = "lblTargetRL";
             this.lblTargetRL.Size = new System.Drawing.Size(122, 20);
             this.lblTargetRL.TabIndex = 3;
@@ -278,7 +279,7 @@ namespace MotionPlatform3
             this.pbRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbRR.Location = new System.Drawing.Point(259, 43);
             this.pbRR.Name = "pbRR";
-            this.pbRR.Size = new System.Drawing.Size(122, 492);
+            this.pbRR.Size = new System.Drawing.Size(122, 474);
             this.pbRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRR.TabIndex = 0;
             this.pbRR.TabStop = false;
@@ -286,7 +287,7 @@ namespace MotionPlatform3
             // lblName3
             // 
             this.lblName3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName3.Location = new System.Drawing.Point(259, 538);
+            this.lblName3.Location = new System.Drawing.Point(259, 520);
             this.lblName3.Name = "lblName3";
             this.lblName3.Size = new System.Drawing.Size(122, 30);
             this.lblName3.TabIndex = 9;
@@ -296,7 +297,7 @@ namespace MotionPlatform3
             // lblPosRR
             // 
             this.lblPosRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRR.Location = new System.Drawing.Point(259, 568);
+            this.lblPosRR.Location = new System.Drawing.Point(259, 550);
             this.lblPosRR.Name = "lblPosRR";
             this.lblPosRR.Size = new System.Drawing.Size(122, 20);
             this.lblPosRR.TabIndex = 10;
@@ -306,7 +307,7 @@ namespace MotionPlatform3
             // lblTargetRR
             // 
             this.lblTargetRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRR.Location = new System.Drawing.Point(259, 588);
+            this.lblTargetRR.Location = new System.Drawing.Point(259, 570);
             this.lblTargetRR.Name = "lblTargetRR";
             this.lblTargetRR.Size = new System.Drawing.Size(122, 20);
             this.lblTargetRR.TabIndex = 11;
@@ -329,7 +330,7 @@ namespace MotionPlatform3
             this.pbFRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbFRR.Location = new System.Drawing.Point(387, 43);
             this.pbFRR.Name = "pbFRR";
-            this.pbFRR.Size = new System.Drawing.Size(123, 492);
+            this.pbFRR.Size = new System.Drawing.Size(123, 474);
             this.pbFRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbFRR.TabIndex = 0;
             this.pbFRR.TabStop = false;
@@ -337,7 +338,7 @@ namespace MotionPlatform3
             // lblName4
             // 
             this.lblName4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName4.Location = new System.Drawing.Point(387, 538);
+            this.lblName4.Location = new System.Drawing.Point(387, 520);
             this.lblName4.Name = "lblName4";
             this.lblName4.Size = new System.Drawing.Size(123, 30);
             this.lblName4.TabIndex = 9;
@@ -347,7 +348,7 @@ namespace MotionPlatform3
             // lblPosFRR
             // 
             this.lblPosFRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosFRR.Location = new System.Drawing.Point(387, 568);
+            this.lblPosFRR.Location = new System.Drawing.Point(387, 550);
             this.lblPosFRR.Name = "lblPosFRR";
             this.lblPosFRR.Size = new System.Drawing.Size(123, 20);
             this.lblPosFRR.TabIndex = 10;
@@ -357,7 +358,7 @@ namespace MotionPlatform3
             // lblTargetFRR
             // 
             this.lblTargetFRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetFRR.Location = new System.Drawing.Point(387, 588);
+            this.lblTargetFRR.Location = new System.Drawing.Point(387, 570);
             this.lblTargetFRR.Name = "lblTargetFRR";
             this.lblTargetFRR.Size = new System.Drawing.Size(123, 20);
             this.lblTargetFRR.TabIndex = 11;
@@ -796,7 +797,7 @@ namespace MotionPlatform3
             // 
             this.btnApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnApply.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnApply.Location = new System.Drawing.Point(827, 632);
+            this.btnApply.Location = new System.Drawing.Point(827, 617);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(147, 44);
             this.btnApply.TabIndex = 48;
@@ -1181,14 +1182,28 @@ namespace MotionPlatform3
             0,
             0});
             // 
+            // btnSimHub
+            // 
+            this.btnSimHub.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSimHub.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSimHub.Image = global::MotionPlatform3.Properties.Resources.simhub24x24;
+            this.btnSimHub.Location = new System.Drawing.Point(882, 149);
+            this.btnSimHub.Name = "btnSimHub";
+            this.btnSimHub.Size = new System.Drawing.Size(92, 27);
+            this.btnSimHub.TabIndex = 49;
+            this.toolTips.SetToolTip(this.btnSimHub, "Generate commands for SimHub Motion");
+            this.btnSimHub.UseVisualStyleBackColor = true;
+            this.btnSimHub.Click += new System.EventHandler(this.BtnSimHub_Click);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(984, 675);
+            this.ClientSize = new System.Drawing.Size(984, 671);
             this.ControlBox = false;
+            this.Controls.Add(this.btnSimHub);
             this.Controls.Add(this.numSeatOffsetMM);
             this.Controls.Add(this.numActuatorTravelMM);
             this.Controls.Add(this.numLeftRightMM);
@@ -1348,5 +1363,6 @@ namespace MotionPlatform3
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.NumericUpDown numSeatOffsetMM;
         private System.Windows.Forms.Button btnSpeedSettings;
+        private System.Windows.Forms.Button btnSimHub;
     }
 }

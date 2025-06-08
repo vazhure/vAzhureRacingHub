@@ -327,7 +327,7 @@ namespace MotionPlatform3
             }
         }
 
-        byte[] GenerateCommand(COMMAND cmd, int par1, int par2, int par3, int par4 = 0)
+        internal byte[] GenerateCommand(COMMAND cmd, int par1, int par2, int par3, int par4 = 0)
         {
             byte[] arr = new byte[PCCMD_SIZE];
 
