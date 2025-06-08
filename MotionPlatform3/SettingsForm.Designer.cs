@@ -98,6 +98,7 @@ namespace MotionPlatform3
             this.btnTestSpeed = new System.Windows.Forms.Button();
             this.chkParkOnIdle = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.chkParkOnQuit = new vAzhureRacingAPI.VAzhureSwitchButton();
+            this.btnSpeedSettings = new System.Windows.Forms.Button();
             this.lblGame = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -924,6 +925,7 @@ namespace MotionPlatform3
             this.sliderGearEffect.SmallStep = 5;
             this.sliderGearEffect.Steps = 10;
             this.sliderGearEffect.TabIndex = 39;
+            this.toolTips.SetToolTip(this.sliderGearEffect, "Gear change effect ratio");
             this.sliderGearEffect.Value = 0;
             this.sliderGearEffect.Vertical = false;
             this.sliderGearEffect.OnValueChanged += new System.EventHandler(this.SliderControl_OnValueChanged);
@@ -953,7 +955,7 @@ namespace MotionPlatform3
             // 
             this.btnTestSpeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnTestSpeed.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnTestSpeed.Location = new System.Drawing.Point(882, 117);
+            this.btnTestSpeed.Location = new System.Drawing.Point(882, 76);
             this.btnTestSpeed.Name = "btnTestSpeed";
             this.btnTestSpeed.Size = new System.Drawing.Size(92, 27);
             this.btnTestSpeed.TabIndex = 13;
@@ -995,6 +997,19 @@ namespace MotionPlatform3
             this.chkParkOnQuit.TabIndex = 8;
             this.toolTips.SetToolTip(this.chkParkOnQuit, "Switch to parking mode when you quit application");
             this.chkParkOnQuit.OnSwitch += new System.EventHandler(this.ChkEnabled_OnSwitch);
+            // 
+            // btnSpeedSettings
+            // 
+            this.btnSpeedSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSpeedSettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSpeedSettings.Location = new System.Drawing.Point(882, 116);
+            this.btnSpeedSettings.Name = "btnSpeedSettings";
+            this.btnSpeedSettings.Size = new System.Drawing.Size(92, 27);
+            this.btnSpeedSettings.TabIndex = 13;
+            this.btnSpeedSettings.Text = "Settings...";
+            this.toolTips.SetToolTip(this.btnSpeedSettings, "Advanced speed settings...");
+            this.btnSpeedSettings.UseVisualStyleBackColor = true;
+            this.btnSpeedSettings.Click += new System.EventHandler(this.BtnSpeedSettings_Click);
             // 
             // lblGame
             // 
@@ -1172,7 +1187,7 @@ namespace MotionPlatform3
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(984, 679);
+            this.ClientSize = new System.Drawing.Size(984, 675);
             this.ControlBox = false;
             this.Controls.Add(this.numSeatOffsetMM);
             this.Controls.Add(this.numActuatorTravelMM);
@@ -1223,6 +1238,7 @@ namespace MotionPlatform3
             this.Controls.Add(this.chkEnabled);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.btnClose);
+            this.Controls.Add(this.btnSpeedSettings);
             this.Controls.Add(this.btnTestSpeed);
             this.Controls.Add(this.btnTune);
             this.Controls.Add(this.btnAlarmReset);
@@ -1331,5 +1347,6 @@ namespace MotionPlatform3
         private System.Windows.Forms.NumericUpDown numActuatorTravelMM;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.NumericUpDown numSeatOffsetMM;
+        private System.Windows.Forms.Button btnSpeedSettings;
     }
 }

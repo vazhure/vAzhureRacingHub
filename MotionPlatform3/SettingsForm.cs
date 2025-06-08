@@ -464,5 +464,23 @@ namespace MotionPlatform3
             }
             mouseControl = null;
         }
+
+        private void BtnSpeedSettings_Click(object sender, EventArgs e)
+        {
+            using (SpeedSettings settings = new SpeedSettings(_plugin))
+            {
+                settings.ShowDialog(this);
+
+                if (_plugin.settings.MinSpeed != sliderSpeed.Minimum)
+                {
+                    sliderSpeed.Minimum = _plugin.settings.MinSpeed;
+                }
+
+                if (_plugin.settings.MinSpeed != sliderSpeed.Minimum)
+                {
+                    sliderSpeed.Maximum = _plugin.settings.MaxSpeed;
+                }
+            }
+        }
     }
 }

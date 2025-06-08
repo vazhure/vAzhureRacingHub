@@ -1041,7 +1041,7 @@ namespace MotionPlatform3
         public bool ParkOnIdle { get; set; } = true;
         public bool ParkOnQuit { get; set; } = true;
         public int SpeedOverride { get; set; } = 100;
-        public int Acceleration { get; set; } = 500;
+        public int Acceleration { get; set; } = 5000;
         public int MaxSpeed { get; set; } = 120;
         public int MinSpeed { get; set; } = 10;
         public int LowSpeedOverride { get; set; } = 10;
