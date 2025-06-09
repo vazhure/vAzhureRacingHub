@@ -515,7 +515,7 @@ void loop() {
             Step(!HOME_DIRECTION, HOMEING_PULSE_DELAY);
           }
 
-          currentPos = RANGE;
+          currentPos = MAX_POS;
           targetPos = (MIN_POS + MAX_POS) / 2;
           // Moving to the center postion at homing speed
           while (targetPos != currentPos)
@@ -529,7 +529,7 @@ void loop() {
 
         digitalWrite(LED_PIN, (millis() % 500) > 250 ? HIGH : LOW);
 
-        if (abs(currentPos) >= RANGE)  // SWITCH NOT FOUND
+        if (abs(currentPos) >= RANGE*1.2)  // SWITCH NOT FOUND
         {
           mode = MODE::ALARM;
           bHomed = false;
