@@ -1,6 +1,6 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2025-06-07
+// version from 2025-06-09
 // stm32duino version
 
 // NOTE: select fake STM32F103C8
@@ -423,7 +423,7 @@ void receiveEvent(int size) {
         if (mode != MODE::HOMEING) {
           mode = MODE::HOMEING;
           currentPos = 0;
-          targetPos = MAX_POS;
+          targetPos = RANGE;
           bHomed = false;
         }
         break;
@@ -515,7 +515,7 @@ void loop() {
             Step(!HOME_DIRECTION, HOMEING_PULSE_DELAY);
           }
 
-          currentPos = MAX_POS;
+          currentPos = RANGE;
           targetPos = (MIN_POS + MAX_POS) / 2;
           // Moving to the center postion at homing speed
           while (targetPos != currentPos)
