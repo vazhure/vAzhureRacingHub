@@ -1,0 +1,4 @@
+Additional Boards Manager URLs:
+http://dan.drown.org/stm32duino/package_STM32duino_index.json
+http://digistump.com/package_digistump_index.json
+https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
