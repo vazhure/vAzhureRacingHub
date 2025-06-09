@@ -58,10 +58,10 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #ifndef I2CMASTER
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Uncomment a single line with desired Address to flash SLAVE device
-#define SLAVE_ADDR SLAVE_ADDR_FL
+//#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-//#define SLAVE_ADDR SLAVE_ADDR_FR
+#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -332,12 +332,12 @@ const int32_t STEPS_PER_REVOLUTIONS = 1000;                    // Steps per revo
 
 #ifdef SFU1610
 const float MM_PER_REV = 10.0f;                                // distance in mm per revolution
-const float MAX_REVOLUTIONS = 8.5;                               // maximum revolutions
+const float MAX_REVOLUTIONS = 8.5;                             // maximum revolutions
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 4;  // Safe traveling distance in steps
 #define MAX_SPEED_MM_SEC 240  // maximum speed mm/sec
 #else
 const float MM_PER_REV = 5.0f;                                 // distance in mm per revolution
-const float MAX_REVOLUTIONS = 17.5;                              // maximum revolutions
+const float MAX_REVOLUTIONS = 17.5;                            // maximum revolutions
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;  // Safe traveling distance in steps
 #define MAX_SPEED_MM_SEC 240  // maximum speed mm/sec
 #endif
@@ -423,7 +423,7 @@ void receiveEvent(int size) {
         if (mode != MODE::HOMEING) {
           mode = MODE::HOMEING;
           currentPos = 0;
-          targetPos = RANGE;
+          targetPos = RANGE * 1.2;
           bHomed = false;
         }
         break;
