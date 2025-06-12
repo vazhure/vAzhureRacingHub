@@ -1,6 +1,6 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2025-06-09
+// version from 2025-06-12
 // stm32duino version
 
 // NOTE: select fake STM32F103C8
@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 // Uncomment this line if you using SF1610
-//#define SFU1610 // Used only in SLAVE devices
+#define SFU1610 // Used only in SLAVE devices
 
 // Uncomment this line to flash MASTER device
 // Comment this line to flash SLAVE devices
@@ -58,10 +58,10 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #ifndef I2CMASTER
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Uncomment a single line with desired Address to flash SLAVE device
-//#define SLAVE_ADDR SLAVE_ADDR_FL
+#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-#define SLAVE_ADDR SLAVE_ADDR_FR
+//#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -326,20 +326,21 @@ const uint8_t limiterPinNC = PA7;
 
 #define ANALOG_INPUT_MAX 4095
 
-uint32_t accel = 20000;
-const int32_t STEPS_PER_REVOLUTIONS = 1000;                    // Steps per revolution
+uint32_t accel = 10000;
 #define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4  // Distance in steps
 
 #ifdef SFU1610
 const float MM_PER_REV = 10.0f;                                // distance in mm per revolution
-const float MAX_REVOLUTIONS = 8.5;                             // maximum revolutions
+const float MAX_REVOLUTIONS = 8.75;                            // maximum revolutions
+const int32_t STEPS_PER_REVOLUTIONS = 2000;                    // Steps per revolution
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 4;  // Safe traveling distance in steps
 #define MAX_SPEED_MM_SEC 240  // maximum speed mm/sec
 #else
 const float MM_PER_REV = 5.0f;                                 // distance in mm per revolution
 const float MAX_REVOLUTIONS = 17.5;                            // maximum revolutions
+const int32_t STEPS_PER_REVOLUTIONS = 1000;                    // Steps per revolution
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;  // Safe traveling distance in steps
-#define MAX_SPEED_MM_SEC 240  // maximum speed mm/sec
+#define MAX_SPEED_MM_SEC 120  // maximum speed mm/sec
 #endif
 
 const int32_t RANGE = (int32_t)(MAX_REVOLUTIONS * STEPS_PER_REVOLUTIONS);  // Maximum traveling distance, steps
@@ -353,7 +354,6 @@ const uint8_t HOME_DIRECTION = HIGH;
 
 #define MMPERSEC2DELAY(mmps) 1000000 / (STEPS_PER_REVOLUTIONS * mmps / MM_PER_REV)
 
-
 #define MIN_SPEED_MM_SEC 10
 #define SLOW_SPEED_MM_SEC 10
 #define DEFAULT_SPEED_MM_SEC 90
@@ -365,7 +365,6 @@ const uint8_t HOME_DIRECTION = HIGH;
 #ifndef MIN
 #define MIN(a, b) (a < b ? a : b)
 #endif
-
 
 const int HOMEING_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(MIN_SPEED_MM_SEC) - MIN_PULSE_DELAY);     // us
 const int FAST_PULSE_DELAY = MAX(MIN_PULSE_DELAY, (int)MMPERSEC2DELAY(DEFAULT_SPEED_MM_SEC) - MIN_PULSE_DELAY);    // us
@@ -529,7 +528,7 @@ void loop() {
 
         digitalWrite(LED_PIN, (millis() % 500) > 250 ? HIGH : LOW);
 
-        if (abs(currentPos) >= RANGE*1.2)  // SWITCH NOT FOUND
+        if (abs(currentPos) >= RANGE * 1.2)  // SWITCH NOT FOUND
         {
           mode = MODE::ALARM;
           bHomed = false;
