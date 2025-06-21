@@ -21,7 +21,7 @@
 
 // Uncomment this line to flash MASTER device
 // Comment this line to flash SLAVE devices
-//#define I2CMASTER
+#define I2CMASTER
 
 // Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
@@ -277,8 +277,8 @@ void loop() {
           for (int t = 0; t < LINEAR_ACTUATORS; t++) {
             uint16_t val = pccmd_sh.data[t];
             val = (val >> 8) | (val << 8);
-            pccmd.data[t] = map(val, 0, 65535, st[t].min, st[t].max);
-            TransmitCMD(SLAVE_FIRST + t, COMMAND::CMD_MOVE, pccmd.data[t]);
+            uint32_t target = map(val, 0, 65535, st[t].min, st[t].max);
+            TransmitCMD(SLAVE_FIRST + t, COMMAND::CMD_MOVE, target);
           }
         }
         break;
