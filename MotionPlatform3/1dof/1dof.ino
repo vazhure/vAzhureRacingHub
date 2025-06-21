@@ -1,6 +1,6 @@
 // 3DOF by Andrey Zhuravlev
 // e-mail: v.azhure@gmail.com
-// version from 2025-06-12
+// version from 2025-06-21
 // stm32duino version
 
 // NOTE: select fake STM32F103C8
