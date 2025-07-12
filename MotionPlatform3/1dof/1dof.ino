@@ -70,7 +70,7 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #define SERIAL_TX_BUFFER_SIZE 512
 #define SERIAL_RX_BUFFER_SIZE 512
 
-#define LED_PIN 32
+#define LED_PIN PC13 // * Check your board. Some have PB2 or another (label near LED).
 
 enum MODE : uint8_t { UNKNOWN,
                       CONNECTED,
