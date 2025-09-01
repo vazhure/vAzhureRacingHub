@@ -1,5 +1,6 @@
 ﻿using Sojaner.MemoryScanner;
 using System;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -141,29 +142,34 @@ namespace WreckfestPlugin
         void Scan_ScanCanceled(object sender, ScanCanceledEventArgs e)
         {
             bScanning = false;
-            _app?.SetStatusText("WreckFest scan canceled...");
+            _app?.SetStatusText("Wreckfest scan canceled...");
         }
 
-        delegate void Completed(object sender, ScanCompletedEventArgs e);
         void Scan_ScanCompleted(object sender, ScanCompletedEventArgs e)
         {
             try
             {
+                if (e.MemoryAddresses == null || e.MemoryAddresses.Length == 0)
+                {
+                    _app?.SetStatusText("Wreckfest scan failed...");
+                    return;
+                }
+
                 memoryAddress = e.MemoryAddresses[0] - ((4 * 4 * 4) + 4); //offset backwards from found address to start of matrix
                 scanThread = new Thread(Run);
                 scanThread.Start();
-                _app?.SetStatusText("WreckFest scan completed...");
+                _app?.SetStatusText("Wreckfest scan completed...");
             }
             catch
             {
-                _app?.SetStatusText("WreckFest scan error...");
+                _app?.SetStatusText("Wreckfest scan error...");
             }
         }
 
         delegate void Progress(object sender, ScanProgressChangedEventArgs e);
         void Scan_ScanProgressChanged(object sender, ScanProgressChangedEventArgs e)
         {
-            _app?.SetStatusText($"WreckFest scan progress {e.Progress}%");
+            _app?.SetStatusText($"Wreckfest scan progress {e.Progress}%");
         }
 
         private readonly ProcessMonitor monitor;
@@ -258,6 +264,7 @@ namespace WreckfestPlugin
                     Vector3 localAcceleration = (localVelocity - lastVelocity);
                     lastVelocity = localVelocity;
 
+                    dataset.CarData.MotionData.LocalVelocity = new[] { localVelocity.X, localVelocity.Z, localVelocity.X }; 
                     dataset.CarData.MotionData.LocalAcceleration = new[] { localAcceleration.X / 9.81f, localAcceleration.Z / 98.1f, localAcceleration.Y / 9.81f };
 
                     float pitch = (float)Math.Asin(-fwd.Y);

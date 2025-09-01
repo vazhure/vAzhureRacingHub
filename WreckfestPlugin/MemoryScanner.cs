@@ -424,9 +424,8 @@ namespace Sojaner.MemoryScanner
                     throw new Exception("CloseHandle failed");
                 }
             }
-            catch (Exception ex)
+            catch 
             {
-                //MessageBox.Show(ex.Message, "error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);
             }
         }
 

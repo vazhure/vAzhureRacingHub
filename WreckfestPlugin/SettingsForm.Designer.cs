@@ -31,11 +31,13 @@
             this.playerComboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnClose = new System.Windows.Forms.Button();
+            this.cbMulti = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // playerComboBox
             // 
             this.playerComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.playerComboBox.Enabled = false;
             this.playerComboBox.FormattingEnabled = true;
             this.playerComboBox.Items.AddRange(new object[] {
             "00",
@@ -88,6 +90,17 @@
             this.btnClose.Text = "Scan";
             this.btnClose.UseVisualStyleBackColor = true;
             // 
+            // cbMulti
+            // 
+            this.cbMulti.AutoSize = true;
+            this.cbMulti.Location = new System.Drawing.Point(183, 66);
+            this.cbMulti.Name = "cbMulti";
+            this.cbMulti.Size = new System.Drawing.Size(76, 17);
+            this.cbMulti.TabIndex = 37;
+            this.cbMulti.Text = "Multiplayer";
+            this.cbMulti.UseVisualStyleBackColor = true;
+            this.cbMulti.CheckStateChanged += new System.EventHandler(this.CbMulti_CheckStateChanged);
+            // 
             // SettingsForm
             // 
             this.AcceptButton = this.btnClose;
@@ -95,6 +108,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.ClientSize = new System.Drawing.Size(415, 128);
+            this.Controls.Add(this.cbMulti);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.playerComboBox);
@@ -117,5 +131,6 @@
         private System.Windows.Forms.ComboBox playerComboBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.CheckBox cbMulti;
     }
 }
