@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32228.343
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vAzhureRacingHub", "vAzhureRacingHub.csproj", "{44ED11E0-0334-4BD6-AFAB-B46D5129E67D}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -94,6 +94,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrucksPlugin", "TrucksPlugi
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "telemetry_mem", "TrucksPlugin\scs_sdk_1_14\examples\telemetry_mem\telemetry_mem.vcxproj", "{9BAFDA36-E52E-41FC-A143-C94B8FB0294B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OMSI2", "OMSI2", "{E966EA1E-D7FA-49D3-BBAC-76F7BE34246C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Omsi2Shared", "OMSI2\Omsi2Shared\Omsi2Shared.vcxproj", "{2BB24116-5656-4AC4-A6FE-456FA896DFE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WreckfestPlugin", "WreckfestPlugin\WreckfestPlugin.csproj", "{FC2CE568-6F40-462B-9D15-2B50F3007798}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -341,9 +347,34 @@ Global
 		{9BAFDA36-E52E-41FC-A143-C94B8FB0294B}.Release|x64.Build.0 = Release|x64
 		{9BAFDA36-E52E-41FC-A143-C94B8FB0294B}.Release|x86.ActiveCfg = Release|Win32
 		{9BAFDA36-E52E-41FC-A143-C94B8FB0294B}.Release|x86.Build.0 = Release|Win32
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Debug|x64.ActiveCfg = Debug|x64
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Debug|x64.Build.0 = Debug|x64
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Debug|x86.ActiveCfg = Debug|Win32
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Debug|x86.Build.0 = Debug|Win32
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Release|Any CPU.ActiveCfg = Release|Win32
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Release|x64.ActiveCfg = Release|x64
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Release|x64.Build.0 = Release|x64
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Release|x86.ActiveCfg = Release|Win32
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6}.Release|x86.Build.0 = Release|Win32
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Debug|x64.Build.0 = Debug|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Debug|x86.Build.0 = Debug|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Release|x64.ActiveCfg = Release|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Release|x64.Build.0 = Release|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Release|x86.ActiveCfg = Release|Any CPU
+		{FC2CE568-6F40-462B-9D15-2B50F3007798}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2BB24116-5656-4AC4-A6FE-456FA896DFE6} = {E966EA1E-D7FA-49D3-BBAC-76F7BE34246C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93D8EFCD-CED6-4720-B207-5762E3567D57}
