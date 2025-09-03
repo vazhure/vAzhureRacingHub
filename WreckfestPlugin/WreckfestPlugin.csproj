@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -45,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameSettings.cs" />
+    <Compile Include="Math2.cs" />
     <Compile Include="MemoryScanner.cs" />
     <Compile Include="NoiseFilter.cs" />
     <Compile Include="Plugin.cs" />
@@ -60,7 +63,9 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UnsafeMethods.cs" />
     <Compile Include="WreckFest2Game.cs" />
+    <Compile Include="Wreckfest2Structs.cs" />
     <Compile Include="WreckFestGame.cs" />
   </ItemGroup>
   <ItemGroup>

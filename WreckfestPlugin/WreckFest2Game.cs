@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Numerics;
 using System.Reflection;
 using vAzhureRacingAPI;
 
@@ -34,9 +35,29 @@ namespace WreckfestPlugin
 
         public WreckFest2Game()
         {
+
+#if DEBUG
+            Console.WriteLine($"sizeof PacketHeader is {Marshal.SizeOf(new Wreckfest2Structs.PacketHeader())}");
+            Console.WriteLine($"sizeof PacketMain is {Marshal.SizeOf(new Wreckfest2Structs.PacketMain())}");
+            Console.WriteLine($"sizeof PacketParticipantsDamage is {Marshal.SizeOf(new Wreckfest2Structs.PacketParticipantsDamage())}");
+            Console.WriteLine($"sizeof PacketParticipantsInfo is {Marshal.SizeOf(new Wreckfest2Structs.PacketParticipantsInfo())}");
+            Console.WriteLine($"sizeof ParticipantInfo is {Marshal.SizeOf(new Wreckfest2Structs.ParticipantInfo())}");
+            Console.WriteLine($"sizeof PacketParticipantsLeaderboard is {Marshal.SizeOf(new Wreckfest2Structs.PacketParticipantsLeaderboard())}");
+            Console.WriteLine($"sizeof PacketParticipantsMotion is {Marshal.SizeOf(new Wreckfest2Structs.PacketParticipantsMotion())}");
+            Console.WriteLine($"sizeof PacketParticipantsTiming is {Marshal.SizeOf(new Wreckfest2Structs.PacketParticipantsTiming())}");
+            Console.WriteLine($"sizeof PacketParticipantsTimingSectors is {Marshal.SizeOf(new Wreckfest2Structs.PacketParticipantsTimingSectors())}");
+#endif
             telemetryDataSet = new TelemetryDataSet(this);
             settings = LoadSettings(Name);
             monitor = new ProcessMonitor(ExecutableProcessName);
+
+            if (Utils.IsProcessRunning(ExecutableProcessName))
+            {
+                Run(settings.PortUDP, 5000);
+                bRunning = true;
+                OnGameStateChanged?.Invoke(this, new EventArgs());
+            }
+
             monitor.OnProcessRunningStateChanged += (object o, bool running) =>
             {
                 bRunning = running;
@@ -63,8 +84,60 @@ namespace WreckfestPlugin
 
         public override void OnDataReceived(ref byte[] bytes)
         {
-            // TODO:
-            OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
+            Wreckfest2Structs.PacketHeader header = Marshalizable<Wreckfest2Structs.PacketHeader>.FromBytes(bytes);
+
+            switch (header.packetType)
+            {
+                case Wreckfest2Structs.PacketType.PACKET_TYPE_PARTICIPANTS_INFO:
+                    {
+                        //Wreckfest2Structs.PacketParticipantsInfo participantsInfo = Marshalizable<Wreckfest2Structs.PacketParticipantsInfo>.FromBytes(bytes);
+                        // header 14
+                        // enum 1
+                        // 36x213 = 7668
+                        // + reserved 510
+                    }
+                    break;
+
+                case Wreckfest2Structs.PacketType.PACKET_TYPE_MAIN:
+                    {
+                        AMMotionData motionData = telemetryDataSet.CarData.MotionData;
+                        
+                        Wreckfest2Structs.PacketMain main = Marshalizable<Wreckfest2Structs.PacketMain>.FromBytes(bytes);
+
+                        motionData.Surge = main.carPlayer.velocity.accelerationLocalZ * 0.10197162129779283f;
+                        motionData.Heave = main.carPlayer.velocity.accelerationLocalY * 0.10197162129779283f;
+                        motionData.Sway = main.carPlayer.velocity.accelerationLocalX * 0.10197162129779283f;
+
+                        motionData.LocalVelocity = new float[] { main.carPlayer.velocity.velocityLocalX, main.carPlayer.velocity.velocityLocalY, main.carPlayer.velocity.velocityLocalZ };
+
+                        Quaternion quaternion = new Quaternion(main.carPlayer.orientation.orientationQuaternionX, main.carPlayer.orientation.orientationQuaternionY, main.carPlayer.orientation.orientationQuaternionZ, main.carPlayer.orientation.orientationQuaternionW);
+                        quaternion = Quaternion.Normalize(quaternion);
+
+                        Vector3 pyr = Math2.GetPYRFromQuaternion(quaternion);
+
+                        float pitch = -pyr.X;
+                        float yaw = -pyr.Y;
+                        float roll = Math2.LoopAngleRad(-pyr.Z, (float)Math.PI * 0.5f);
+
+                        motionData.Pitch = 0.5f * pitch / (float)Math.PI;
+                        motionData.Yaw = yaw / (float)Math.PI;
+                        motionData.Roll = 0.5f * roll / (float)Math.PI;
+
+                        telemetryDataSet.CarData.RPM = main.carPlayer.engine.rpm;
+                        telemetryDataSet.CarData.MaxRPM = main.carPlayer.engine.rpmMax;
+                        telemetryDataSet.CarData.Gear = main.carPlayer.driveline.gear;
+                        telemetryDataSet.CarData.WaterTemp = main.carPlayer.engine.tempWater;
+                        telemetryDataSet.CarData.OilPressure = main.carPlayer.engine.pressureOil;
+                        telemetryDataSet.CarData.Brake = main.carPlayer.input.brake;
+                        telemetryDataSet.CarData.Clutch = main.carPlayer.input.clutch;
+                        telemetryDataSet.CarData.Throttle = main.carPlayer.input.throttle;
+                        telemetryDataSet.SessionInfo.TrackName = main.session.trackName;
+                        telemetryDataSet.SessionInfo.TrackLength = main.session.trackLength;
+
+                        OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
+                    }
+                    break;
+            }
         }
 
         public Icon GetIcon()

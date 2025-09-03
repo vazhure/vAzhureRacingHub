@@ -160,30 +160,7 @@ namespace WreckfestPlugin
         int memoryAddress = 0;
         volatile bool bScanning = false;
 
-        public static Vector3 GetPYRFromQuaternion(Quaternion r)
-        {
-            float yaw = (float)Math.Atan2(2.0f * (r.Y * r.W + r.X * r.Z), 1.0f - 2.0f * (r.X * r.X + r.Y * r.Y));
-            float pitch = (float)Math.Asin(2.0f * (r.X * r.W - r.Y * r.Z));
-            float roll = (float)Math.Atan2(2.0f * (r.X * r.Y + r.Z * r.W), 1.0f - 2.0f * (r.X * r.X + r.Z * r.Z));
 
-            return new Vector3(pitch, yaw, roll);
-        }
-
-        public static float LoopAngleRad(float angle, float minMag)
-        {
-            float absAngle = Math.Abs(angle);
-
-            if (absAngle <= minMag)
-            {
-                return angle;
-            }
-
-            float direction = angle / absAngle;
-
-            float loopedAngle = ((float)Math.PI * direction) - angle;
-
-            return loopedAngle;
-        }
 
         private void Run()
         {
@@ -267,11 +244,11 @@ namespace WreckfestPlugin
                     // Calculate angles
                     Quaternion quat = Quaternion.CreateFromRotationMatrix(transform);
 
-                    Vector3 pyr = GetPYRFromQuaternion(quat);
+                    Vector3 pyr = Math2.GetPYRFromQuaternion(quat);
 
                     float pitch = -pyr.X;
                     float yaw = -pyr.Y;
-                    float roll = LoopAngleRad(-pyr.Z, (float)Math.PI * 0.5f);
+                    float roll = Math2.LoopAngleRad(-pyr.Z, (float)Math.PI * 0.5f);
 
                     dataset.CarData.MotionData.Pitch = pitchFilter.Filter(0.5f * pitch / (float)Math.PI);
                     dataset.CarData.MotionData.Yaw = yawFilter.Filter(yaw / (float)Math.PI);
