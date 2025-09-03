@@ -41,7 +41,8 @@ Supported Game Titles:
 * Richard Burns Rally
 * WRC Generations
 * BeamNG.Drive
-* Wreckfest (1)
+* Wreckfest
+* Wreckfest 2
 
 WIP:
 * F1 2018
