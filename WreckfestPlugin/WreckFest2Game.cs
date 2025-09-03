@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using vAzhureRacingAPI;
 
 namespace WreckfestPlugin
@@ -123,16 +124,65 @@ namespace WreckfestPlugin
                         motionData.Yaw = yaw / (float)Math.PI;
                         motionData.Roll = 0.5f * roll / (float)Math.PI;
 
+                        telemetryDataSet.CarData.Speed = Math.Abs(main.carPlayer.driveline.speed * 3.6f);
                         telemetryDataSet.CarData.RPM = main.carPlayer.engine.rpm;
                         telemetryDataSet.CarData.MaxRPM = main.carPlayer.engine.rpmMax;
+                        telemetryDataSet.CarData.ShiftUpRPM = main.carPlayer.engine.rpmRedline;
                         telemetryDataSet.CarData.Gear = main.carPlayer.driveline.gear;
                         telemetryDataSet.CarData.WaterTemp = main.carPlayer.engine.tempWater;
                         telemetryDataSet.CarData.OilPressure = main.carPlayer.engine.pressureOil;
                         telemetryDataSet.CarData.Brake = main.carPlayer.input.brake;
                         telemetryDataSet.CarData.Clutch = main.carPlayer.input.clutch;
                         telemetryDataSet.CarData.Throttle = main.carPlayer.input.throttle;
+
+                        telemetryDataSet.CarData.Lap = telemetryDataSet.SessionInfo.CurrentLapNumber = main.participantPlayerLeaderboard.lapCurrent;
+                        telemetryDataSet.CarData.Position = telemetryDataSet.SessionInfo.CurrentPosition = main.participantPlayerLeaderboard.position;
+                        telemetryDataSet.CarData.DriverName = main.participantPlayerInfo.playerName;
+                        telemetryDataSet.CarData.CarName = main.participantPlayerInfo.carName;
+                        telemetryDataSet.CarData.CarNumber = main.participantPlayerInfo.participantIndex.ToString();
+
                         telemetryDataSet.SessionInfo.TrackName = main.session.trackName;
                         telemetryDataSet.SessionInfo.TrackLength = main.session.trackLength;
+                        telemetryDataSet.SessionInfo.TotalLapsCount = main.session.laps;
+
+                        telemetryDataSet.SessionInfo.CurrentLapTime = (int) main.participantPlayerTiming.lapTimeCurrent;
+                        telemetryDataSet.SessionInfo.BestLapTime = (int)main.participantPlayerTiming.lapTimeBest;
+                        telemetryDataSet.SessionInfo.LastLapTime = (int)main.participantPlayerTiming.lapTimeLast;
+                        telemetryDataSet.SessionInfo.Sector1BestTime = (int)main.participantPlayerTimingSectors.sectorTimeBest1;
+                        telemetryDataSet.SessionInfo.Sector2BestTime = (int)main.participantPlayerTimingSectors.sectorTimeBest2;
+                        telemetryDataSet.SessionInfo.Sector3BestTime = (int)main.participantPlayerTimingSectors.sectorTimeBest3;
+
+                        switch (main.marshalFlagsPlayer)
+                        {
+                            case Wreckfest2Structs.MarshalFlags.MARSHAL_FLAGS_GREEN:
+                                telemetryDataSet.SessionInfo.Flag = "Green";
+                                telemetryDataSet.CarData.Flags = TelemetryFlags.FlagGreen;
+                                break;
+                            case Wreckfest2Structs.MarshalFlags.MARSHAL_FLAGS_WARNING:
+                                telemetryDataSet.SessionInfo.Flag = "Yellow";
+                                telemetryDataSet.CarData.Flags = TelemetryFlags.FlagGreen | TelemetryFlags.FlagYellow;
+                                break;
+                            case Wreckfest2Structs.MarshalFlags.MARSHAL_FLAGS_FINISH:
+                                telemetryDataSet.SessionInfo.Flag = "Finish";
+                                telemetryDataSet.CarData.Flags = TelemetryFlags.FlagChequered;
+                                break;
+                            case Wreckfest2Structs.MarshalFlags.MARSHAL_FLAGS_BLUE:
+                                telemetryDataSet.SessionInfo.Flag = "Blue";
+                                telemetryDataSet.CarData.Flags = TelemetryFlags.FlagGreen | TelemetryFlags.FlagBlue;
+                                break;
+                            case Wreckfest2Structs.MarshalFlags.MARSHAL_FLAGS_LASTLAP:
+                                telemetryDataSet.SessionInfo.Flag = "White";
+                                telemetryDataSet.CarData.Flags = TelemetryFlags.FlagWhite;
+                                break;
+                            case Wreckfest2Structs.MarshalFlags.MARSHAL_FLAGS_DQ:
+                                telemetryDataSet.SessionInfo.Flag = "Black";
+                                telemetryDataSet.CarData.Flags = TelemetryFlags.FlagBlack;
+                                break;
+                            default:
+                                telemetryDataSet.SessionInfo.Flag = String.Empty;
+                                telemetryDataSet.CarData.Flags = TelemetryFlags.FlagNone;
+                                break;
+                        }
 
                         OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
                     }
