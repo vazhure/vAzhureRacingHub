@@ -44,7 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameSettings.cs" />
     <Compile Include="MemoryScanner.cs" />
+    <Compile Include="NoiseFilter.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -58,6 +60,8 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="WreckFest2Game.cs" />
+    <Compile Include="WreckFestGame.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\vAzhureRacingAPI\vAzhureRacingAPI.csproj">
@@ -76,6 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Wreckfest.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Wreckfest2.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

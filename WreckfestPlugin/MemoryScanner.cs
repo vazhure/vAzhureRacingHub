@@ -4,6 +4,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 
+// Original code:
+// https://github.com/PHARTGAMES/WreckfestSimFeedback/blob/master/Source/MemoryScanner.cs
+
 namespace Sojaner.MemoryScanner
 {
     public class RegularMemoryScan
@@ -163,7 +166,7 @@ namespace Sojaner.MemoryScanner
                     if (found)
                         break;
 
-                    //Calculte and set the progress percentage.
+                    //Calculate and set the progress percentage.
                     progress = (int)(((double)(currentAddress - (int)baseAddress) / (double)memorySize) * 100d);
 
                     //Prepare and set the ScanProgressed event and raise the event.
@@ -207,7 +210,7 @@ namespace Sojaner.MemoryScanner
 
                         }
                     }
-                    //Move currentAddress after the block already scaned, but
+                    //Move currentAddress after the block already scanned, but
                     //move it back some steps backward (as much as arraysDifference)
                     //to avoid loosing any values at the end of the array.
                     currentAddress += array.Length - arraysDifference;
