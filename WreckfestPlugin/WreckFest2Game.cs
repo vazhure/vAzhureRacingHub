@@ -22,8 +22,7 @@ namespace WreckfestPlugin
         public string UserIconPath { get => iconPath; set => iconPath = value; }
         public string UserExecutablePath { get => exePath; set => exePath = value; }
 
-        bool bRunning = false;
-        public bool IsRunning => bRunning;
+        public bool IsRunning => Utils.IsProcessRunning(ExecutableProcessName);
 
         public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
         public event EventHandler OnGameStateChanged;
@@ -52,18 +51,9 @@ namespace WreckfestPlugin
             settings = LoadSettings(Name);
             monitor = new ProcessMonitor(ExecutableProcessName);
 
-            if (Utils.IsProcessRunning(ExecutableProcessName))
+            monitor.OnProcessRunningStateChanged += (object o, bool bRunning) =>
             {
-                Run(settings.PortUDP, 5000);
-                bRunning = true;
-                OnGameStateChanged?.Invoke(this, new EventArgs());
-            }
-
-            monitor.OnProcessRunningStateChanged += (object o, bool running) =>
-            {
-                bRunning = running;
-
-                if (running)
+                if (bRunning)
                 {
                     Run(settings.PortUDP, 5000);
                 }
@@ -76,10 +66,13 @@ namespace WreckfestPlugin
 
                 OnGameStateChanged?.Invoke(this, new EventArgs());
             };
+
+            monitor.Start();
         }
 
-         ~WreckFest2Game()
+        public void Finalize()
         {
+            Stop();
             SaveSettings(settings, Name);
         }
 
@@ -124,7 +117,7 @@ namespace WreckfestPlugin
                         motionData.Yaw = yaw / (float)Math.PI;
                         motionData.Roll = 0.5f * roll / (float)Math.PI;
 
-                        telemetryDataSet.CarData.Speed = Math.Abs(main.carPlayer.driveline.speed * 3.6f);
+                        telemetryDataSet.CarData.Speed = Math.Abs(main.carPlayer.driveline.speed * 3.6);
                         telemetryDataSet.CarData.RPM = main.carPlayer.engine.rpm;
                         telemetryDataSet.CarData.MaxRPM = main.carPlayer.engine.rpmMax;
                         telemetryDataSet.CarData.ShiftUpRPM = main.carPlayer.engine.rpmRedline;
@@ -139,7 +132,7 @@ namespace WreckfestPlugin
                         telemetryDataSet.CarData.Position = telemetryDataSet.SessionInfo.CurrentPosition = main.participantPlayerLeaderboard.position;
                         telemetryDataSet.CarData.DriverName = main.participantPlayerInfo.playerName;
                         telemetryDataSet.CarData.CarName = main.participantPlayerInfo.carName;
-                        telemetryDataSet.CarData.CarNumber = main.participantPlayerInfo.participantIndex.ToString();
+                        telemetryDataSet.CarData.CarNumber = main.participantPlayerInfo.carId;
 
                         telemetryDataSet.SessionInfo.TrackName = main.session.trackName;
                         telemetryDataSet.SessionInfo.TrackLength = main.session.trackLength;
@@ -151,6 +144,30 @@ namespace WreckfestPlugin
                         telemetryDataSet.SessionInfo.Sector1BestTime = (int)main.participantPlayerTimingSectors.sectorTimeBest1;
                         telemetryDataSet.SessionInfo.Sector2BestTime = (int)main.participantPlayerTimingSectors.sectorTimeBest2;
                         telemetryDataSet.SessionInfo.Sector3BestTime = (int)main.participantPlayerTimingSectors.sectorTimeBest3;
+
+                        AMCarData carData = telemetryDataSet.CarData;
+
+                        carData.Tires = carData.Tires ?? new AMTireData[4];
+
+                        carData.Tires[0].Temperature[1] = main.carPlayer.tires[0].temperatureInner;
+                        carData.Tires[1].Temperature[1] = main.carPlayer.tires[1].temperatureInner;
+                        carData.Tires[2].Temperature[1] = main.carPlayer.tires[2].temperatureInner;
+                        carData.Tires[3].Temperature[1] = main.carPlayer.tires[3].temperatureInner;
+
+                        carData.Tires[0].Pressure = 140;
+                        carData.Tires[1].Pressure = 140;
+                        carData.Tires[2].Pressure = 140;
+                        carData.Tires[3].Pressure = 140;
+
+                        carData.Tires[0].Detached = main.participantPlayerDamage.damageStates[(int)Wreckfest2Structs.DamagePart.PART_TIRE_FL] == (byte)Wreckfest2Structs.DamageState.STATE_TERMINAL;
+                        carData.Tires[1].Detached = main.participantPlayerDamage.damageStates[(int)Wreckfest2Structs.DamagePart.PART_TIRE_FR] == (byte)Wreckfest2Structs.DamageState.STATE_TERMINAL;
+                        carData.Tires[2].Detached = main.participantPlayerDamage.damageStates[(int)Wreckfest2Structs.DamagePart.PART_TIRE_RL] == (byte)Wreckfest2Structs.DamageState.STATE_TERMINAL;
+                        carData.Tires[3].Detached = main.participantPlayerDamage.damageStates[(int)Wreckfest2Structs.DamagePart.PART_TIRE_RR] == (byte)Wreckfest2Structs.DamageState.STATE_TERMINAL;
+
+                        carData.Tires[0].Temperature[0] = carData.Tires[0].Temperature[2] = main.carPlayer.tires[0].temperatureTread;
+                        carData.Tires[1].Temperature[0] = carData.Tires[1].Temperature[2] = main.carPlayer.tires[1].temperatureTread;
+                        carData.Tires[2].Temperature[0] = carData.Tires[2].Temperature[2] = main.carPlayer.tires[2].temperatureTread;
+                        carData.Tires[3].Temperature[0] = carData.Tires[3].Temperature[2] = main.carPlayer.tires[3].temperatureTread;
 
                         switch (main.marshalFlagsPlayer)
                         {

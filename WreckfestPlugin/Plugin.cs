@@ -4,8 +4,8 @@ namespace WreckfestPlugin
 {
     public class Plugin : ICustomPlugin
     {
-        private readonly WreckFestGame wreckFestGame = new WreckFestGame();
-        private readonly WreckFest2Game wreckFest2Game = new WreckFest2Game();
+        private WreckFestGame wreckFestGame;
+        private WreckFest2Game wreckFest2Game;
 
         public string Name => "Wreckfest Plugin";
 
@@ -20,7 +20,9 @@ namespace WreckfestPlugin
 
         public bool Initialize(IVAzhureRacingApp app)
         {
+            wreckFestGame = new WreckFestGame();
             app.RegisterGame(wreckFestGame);
+            wreckFest2Game = new WreckFest2Game();
             app.RegisterGame(wreckFest2Game);
 
             return true;
@@ -29,6 +31,7 @@ namespace WreckfestPlugin
         public void Quit(IVAzhureRacingApp app)
         {
             wreckFestGame.Finalize();
+            wreckFest2Game.Finalize();
         }
     }
 }
