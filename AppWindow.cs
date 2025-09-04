@@ -475,7 +475,7 @@ namespace vAzhureRacingHub
         /// </summary>
         public void About()
         {
-            MessageBox.Show(this, "version 1.0.073\r\nRelease Date: 2025-06-08", "vAzhure Racing Hub");
+            MessageBox.Show(this, "version 1.0.075\r\nRelease Date: 2025-09-04", "vAzhure Racing Hub");
         }
 
         AppSettings settings = new AppSettings();
@@ -584,7 +584,12 @@ namespace vAzhureRacingHub
             {
                 BeginInvoke((Action)delegate
                 {
-                    devicePlugin.OnTelemetry(this, e.TelemetryInfo);
+                    try
+                    {
+                        devicePlugin.OnTelemetry(this, e.TelemetryInfo);
+
+                    }
+                    catch { }
                 });
             }
 
