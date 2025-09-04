@@ -98,14 +98,13 @@ namespace WreckfestPlugin
                         
                         Wreckfest2Structs.PacketMain main = Marshalizable<Wreckfest2Structs.PacketMain>.FromBytes(bytes);
 
-                        motionData.Surge = main.carPlayer.velocity.accelerationLocalZ * 0.10197162129779283f;
-                        motionData.Heave = main.carPlayer.velocity.accelerationLocalY * 0.10197162129779283f;
-                        motionData.Sway = main.carPlayer.velocity.accelerationLocalX * 0.10197162129779283f;
+                        motionData.Surge = 0.3f * main.carPlayer.velocity.accelerationLocalZ * 0.10197162129779283f;
+                        motionData.Heave = 0.3f * main.carPlayer.velocity.accelerationLocalY * 0.10197162129779283f;
+                        motionData.Sway = -0.3f * main.carPlayer.velocity.accelerationLocalX * 0.10197162129779283f;
 
                         motionData.LocalVelocity = new float[] { main.carPlayer.velocity.velocityLocalX, main.carPlayer.velocity.velocityLocalY, main.carPlayer.velocity.velocityLocalZ };
 
                         Quaternion quaternion = new Quaternion(main.carPlayer.orientation.orientationQuaternionX, main.carPlayer.orientation.orientationQuaternionY, main.carPlayer.orientation.orientationQuaternionZ, main.carPlayer.orientation.orientationQuaternionW);
-                        quaternion = Quaternion.Normalize(quaternion);
 
                         Vector3 pyr = Math2.GetPYRFromQuaternion(quaternion);
 
@@ -201,7 +200,7 @@ namespace WreckfestPlugin
                                 break;
                         }
 
-                        OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(telemetryDataSet));
+                        OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs((TelemetryDataSet) telemetryDataSet.Clone()));
                     }
                     break;
             }
