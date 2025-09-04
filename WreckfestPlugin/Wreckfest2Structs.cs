@@ -246,7 +246,7 @@ namespace WreckfestPlugin
             public GameMode gameMode;
             public DamageMode damageMode;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 27)]
             public byte[] reserved;
         }
 
@@ -301,17 +301,17 @@ namespace WreckfestPlugin
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct CarChassis
         {
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.AXLE_LOCATION_COUNT)]
             public float[] trackWidth;
 
             public float wheelBase;
             public int steeringWheelLockToLock;
             public float steeringLock;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.TIRE_LOCATION_COUNT)]
             public float[] cornerWeights;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
             public byte[] reserved;
         }
 
@@ -503,7 +503,7 @@ namespace WreckfestPlugin
             public CarFull carPlayer;
             public Session session;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
             public byte[] reserved;
         }
 
@@ -516,7 +516,7 @@ namespace WreckfestPlugin
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.PARTICIPANTS_MAX)]
             public ParticipantLeaderboard[] participantsLeaderboard;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
             public byte[] reserved;
         }
 
@@ -529,7 +529,7 @@ namespace WreckfestPlugin
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.PARTICIPANTS_MAX)]
             public ParticipantTiming[] participantsTiming;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
             public byte[] reserved;
         }
 
@@ -542,7 +542,7 @@ namespace WreckfestPlugin
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.PARTICIPANTS_MAX)]
             public ParticipantTimingSectors[] participantsTimingSectors;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
             public byte[] reserved;
         }
 
@@ -578,7 +578,7 @@ namespace WreckfestPlugin
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.PARTICIPANTS_MAX)]
             public ParticipantDamage[] participantsDamage;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
             public byte[] reserved;
         }
     }
