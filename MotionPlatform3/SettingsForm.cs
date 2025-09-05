@@ -175,6 +175,7 @@ namespace MotionPlatform3
                     }
                     catch { }
                     Thread.Sleep(100);
+
                 }
             }, cancellationToken.Token);
         }
@@ -534,7 +535,7 @@ namespace MotionPlatform3
                 {
                     try
                     {
-                        string jsonNew = ObjectSerializeHelper.GetJson(motionsettings).Replace(@"\u003C", "<").Replace(@"\u003E", ">");
+                        string jsonNew = ObjectSerializeHelper.GetJson(motionsettings).Replace(@"\u003c", "<").Replace(@"\u003e", ">").Replace(@"\u003C", "<").Replace(@"\u003E", ">");
                         File.WriteAllText(saveFileDialog.FileName, jsonNew);
                     }
                     catch { }

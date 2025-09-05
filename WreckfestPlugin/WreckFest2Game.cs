@@ -22,7 +22,10 @@ namespace WreckfestPlugin
         public string UserIconPath { get => iconPath; set => iconPath = value; }
         public string UserExecutablePath { get => exePath; set => exePath = value; }
 
-        public bool IsRunning => Utils.IsProcessRunning(ExecutableProcessName);
+
+        bool _bRunning = false;
+
+        public bool IsRunning => _bRunning;
 
         public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
         public event EventHandler OnGameStateChanged;
@@ -53,6 +56,8 @@ namespace WreckfestPlugin
 
             monitor.OnProcessRunningStateChanged += (object o, bool bRunning) =>
             {
+                _bRunning = bRunning;
+
                 if (bRunning)
                 {
                     Run(settings.PortUDP, 5000);

@@ -306,7 +306,7 @@ namespace iRacingPlugin
         {
             try
             {
-                wrapper.Stop();
+                wrapper?.Stop();
             }
             catch { }
         }

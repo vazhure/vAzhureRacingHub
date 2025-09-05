@@ -94,7 +94,7 @@ namespace MotionPlatform3
 
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
 
-            CalculateLegPos(1f, 1f, 0f);
+            //CalculateLegPos(1f, 1f, 0f);
 
             app.RegisterDevice(this);
             app.OnDeviceArrival += delegate (object sender, DeviceChangeEventsArgs e)
@@ -316,6 +316,7 @@ namespace MotionPlatform3
             }
 
             Status = serialPort.IsOpen ? DeviceStatus.Connected : DeviceStatus.ConnectionError;
+
             if (IsConnected)
             {
                 SetSpeed(settings.SpeedOverride);
@@ -357,12 +358,16 @@ namespace MotionPlatform3
         {
             if (!IsConnected)
                 return;
+
             lock (serialPort)
             {
                 try
                 {
                     byte[] data = GenerateCommand(COMMAND.CMD_GET_STATE, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
+#if DEBUG
+                    Console.WriteLine($"State requested at: {DateTime.UtcNow:hhMMss.f}");
+#endif
                 }
                 catch (Exception e)
                 {
@@ -678,13 +683,20 @@ namespace MotionPlatform3
         float _gearSign = 1;
         DateTime _gearSwitched = DateTime.Now;
 
+        GameData gd = null;
+
         private void ProcessTelemetry2()
         {
             if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
                 return;
 
             string name = tds?.GamePlugin?.Name;
-            GameData gd = settings.gamesData.FirstOrDefault(o => o.GameName == name) ?? new GameData(Name);
+
+            if (gd == null || gd.GameName != name)
+            {
+                gd = settings.gamesData.FirstOrDefault(o => o.GameName == name) ?? new GameData(name);
+            }
+
             {
                 float absPitch = Math.Max(Math.Abs(gd.minPitch), Math.Abs(gd.maxPitch));
                 float absRoll = Math.Max(Math.Abs(gd.minRoll), Math.Abs(gd.maxRoll));
@@ -822,14 +834,20 @@ namespace MotionPlatform3
                         if (serialPort.Read(data, 0, AXIS_STATE_SIZE) == AXIS_STATE_SIZE)
                             try
                             {
-                                GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                                AXIS_STATE state = (AXIS_STATE)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(AXIS_STATE));
-                                h.Free();
+                                AXIS_STATE state = Marshalizable<AXIS_STATE>.FromBytes(data);
+                                //GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
+                                //AXIS_STATE state = (AXIS_STATE)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(AXIS_STATE));
+                                //h.Free();
 
                                 states[addr - cFirstAddr] = state;
+
                                 if (state.mode != DEVICE_MODE.UNKNOWN)
                                     devMap[addr] = true;
+                                
                                 OnAxisStateChanged?.Invoke(this, new AxisStateChanged(addr, state));
+#if DEBUG
+                                Console.WriteLine($"SerialPort_DataReceived at addr: {addr} {DateTime.UtcNow:hhMMss.f}");
+#endif
                             }
                             catch
                             {

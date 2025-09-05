@@ -84,7 +84,9 @@ namespace Codemasters
         public string UserIconPath { get => userIconPath; set => userIconPath = value; }
         public string UserExecutablePath { get => settings.ExecutablePath; set => settings.ExecutablePath = value; }
 
-        public bool IsRunning => Utils.IsProcessRunning(ExecutableProcessName);
+        private bool _bRunning = false;
+
+        public bool IsRunning => _bRunning;
 
         public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
         public event EventHandler OnGameStateChanged;
@@ -106,6 +108,8 @@ namespace Codemasters
             monitor = new ProcessMonitor(ExecutableProcessName, 500);
             monitor.OnProcessRunningStateChanged += delegate (object o, bool bRunning)
             {
+                _bRunning = bRunning;
+
                 if (bRunning)
                     _client?.Run(Port);
                 else

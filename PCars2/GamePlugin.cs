@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 using vAzhureRacingAPI;
 
 namespace PCars2
@@ -9,10 +10,37 @@ namespace PCars2
         public enum GameID { AMS2, PC2, PC3 };
 
         readonly GameID m_gameID = GameID.AMS2;
+        private readonly ProcessMonitor monitor;
+
         public GamePlugin(GameID gameID)
         {
             TelemetryData = new TelemetryDataSet(this);
             m_gameID = gameID;
+
+            monitor = new ProcessMonitor(ExecutableProcessName);
+
+            monitor.OnProcessRunningStateChanged += (object o, bool bRunning) =>
+            {
+                _bRunning = bRunning;
+
+                try
+                {
+                    if (!bRunning)
+                    {
+                        TelemetryData.LoadDefaults();
+                        OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(TelemetryData));
+                    }
+
+                    OnGameStateChanged?.Invoke(this, new EventArgs());
+                }
+                catch { }
+            };
+
+            monitor.Start();
+        }
+        ~GamePlugin()
+        {
+            monitor.Stop();
         }
 
         public string Name
@@ -59,6 +87,7 @@ namespace PCars2
 
         string sUserIconPath = "";
         string sUserExecutablePath = "";
+        private bool _bRunning;
 
         public string UserIconPath
         {
@@ -78,13 +107,7 @@ namespace PCars2
         }
         public string UserExecutablePath { get => sUserExecutablePath; set => sUserExecutablePath = value; }
 
-        public bool IsRunning
-        {
-            get
-            {
-                return Utils.IsProcessRunning(ExecutableProcessName);
-            }
-        }
+        public bool IsRunning => _bRunning;
 
         public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
         public event EventHandler OnGameStateChanged;
