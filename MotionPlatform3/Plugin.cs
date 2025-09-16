@@ -638,9 +638,9 @@ namespace MotionPlatform3
             float fpitch = new Vector3(settings.DistanceFrontRearMM, settings.DistanceLeftRightMM * roll, 0).Length();
             float froll = new Vector3(settings.DistanceFrontRearMM * pitch, settings.DistanceLeftRightMM, 0).Length();
             // Max calculated pitch angle, radians
-            float pitchAngle = (float)Math.Atan2(z - heaveMM * 2f, fpitch);
+            float pitchAngle = (float)Math.Atan2(z - heaveMM * 2f, fpitch) * settings.LimitPitchAngle;
             // Max calculated roll angle, radians
-            float rollAngle = (float)Math.Atan2(z - heaveMM * 2f, froll);
+            float rollAngle = (float)Math.Atan2(z - heaveMM * 2f, froll) * settings.LimitRollAngle;
 
             Vector3[] cornersZero = {
                     new Vector3(-x, y, 0),  // FL
@@ -730,11 +730,11 @@ namespace MotionPlatform3
 
                 gearEffect *= (float)(1 - tds.CarData.Clutch);
 
-                float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, settings.ClipByRange);
-                float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, settings.ClipByRange);
-                float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, settings.ClipByRange);
-                float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, settings.ClipByRange);
-                float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, settings.ClipByRange);
+                float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, false, settings.ClipByRange);
+                float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, false, settings.ClipByRange);
+                float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, false, settings.ClipByRange);
+                float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, false, settings.ClipByRange);
+                float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, false, settings.ClipByRange);
 
                 // Gear switch effect routine
                 float gearTS = (float)(DateTime.Now - _gearSwitched).TotalMilliseconds;
@@ -1083,6 +1083,9 @@ namespace MotionPlatform3
         public int GearChangeRampUp { get; set; } = 150;
         public int GearChangePulse { get; set; } = 10;
         public int GearChangeRampDown { get; set; } = 150;
+
+        public float LimitPitchAngle { get; set; } = 1;
+        public float LimitRollAngle { get; set; } = 1;
 
         /// <summary>
         /// Returns max angle for Pitch, radians
