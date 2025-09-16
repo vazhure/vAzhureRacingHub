@@ -29,8 +29,8 @@ namespace DCS
 
         private readonly GameSettings settings;
 
-        ProcessMonitor monitor;
-        TelemetryDataSet dataSet;
+        private readonly ProcessMonitor monitor;
+        private readonly TelemetryDataSet dataSet;
 
         public DCSGame()
         {
@@ -59,11 +59,25 @@ namespace DCS
                 }
                 else
                 {
+                    dataSet.LoadDefaults();
+                    OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
                     Stop();
                 }
                 OnGameStateChanged?.Invoke(this, EventArgs.Empty);
             };
             monitor.Start();
+        }
+
+        ~DCSGame()
+        {
+            try
+            {
+                string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+
+                string json = ObjectSerializeHelper.GetJson(settings);
+                File.WriteAllText(path, json);
+            }
+            catch { }
         }
 
         public System.Drawing.Icon GetIcon()
@@ -73,7 +87,7 @@ namespace DCS
 
         public void ShowSettings(IVAzhureRacingApp app)
         {
-            if (MessageBox.Show("Path DCS World?", "Path", buttons: MessageBoxButtons.YesNoCancel) == DialogResult.Yes)
+            if (MessageBox.Show("Patch DCS World?", "Patch", buttons: MessageBoxButtons.YesNoCancel) == DialogResult.Yes)
             {
                 ///Saved Games\DCS\Scripts\Hooks
                 string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Saved Games", "DCS", "Scripts", "Hooks");
@@ -96,7 +110,7 @@ namespace DCS
                 }
                 catch
                 {
-                    app.SetStatusText($"Failed to path {Name}");
+                    app.SetStatusText($"Failed to patch {Name}");
                 }
             }
         }
