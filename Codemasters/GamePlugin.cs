@@ -14,10 +14,12 @@ namespace Codemasters
         readonly UDPClient _client;
         readonly ProcessMonitor monitor;
         public int Port { get => settings.Port; set => settings.Port = value; }
+        public string IP { get => settings.IP; set => settings.IP = value; }
 
         public class GameSettings
         {
             public int Port { get; set; } = 20777;
+            public string IP { get; set; } = "127.0.0.1";
             public string ExecutablePath = "";
         }
 
@@ -125,7 +127,7 @@ namespace Codemasters
 
         private void LoadSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
             if (File.Exists(path))
             {
                 try
@@ -227,7 +229,7 @@ namespace Codemasters
                             case 0: sb.AppendLine("WRC.Telemetry.TelemetryRate = 60;"); bPatched = true; break;
                             case 1: sb.AppendLine($"WRC.Telemetry.TelemetryPort = {Port};"); bPatched = true; break;
                             case 2: sb.AppendLine("WRC.Telemetry.EnableTelemetry = true;"); bPatched = true; break;
-                            case 3: sb.AppendLine("WRC.Telemetry.TelemetryAdress = \"127.0.1.1\""); bPatched = true; break;
+                            case 3: sb.AppendLine($"WRC.Telemetry.TelemetryAdress = \"{IP}\""); bPatched = true; break;
                         }
                     }
                 }
@@ -245,116 +247,125 @@ namespace Codemasters
             else
             {
                 string config_file_name = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", Name, "hardwaresettings", "hardware_settings_config.xml");
+                string config_file_nameVR = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", Name, "hardwaresettings", "hardware_settings_config_vr.xml");
 
-                if (File.Exists(config_file_name))
+                PatchDirtRally(config_file_name, bAskToPatch);
+                PatchDirtRally(config_file_nameVR, bAskToPatch);
+            }
+        }
+
+        private void PatchDirtRally(string config_file_name, bool bAskToPatch = true)
+        {
+            string fname = Path.GetFileName(config_file_name);
+
+            if (File.Exists(config_file_name))
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                string xml = File.ReadAllText(config_file_name);
+                bool bChanged = false;
+                using (StringReader sr = new StringReader(xml))
                 {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    string xml = File.ReadAllText(config_file_name);
-                    bool bChanged = false;
-                    using (StringReader sr = new StringReader(xml))
+                    xmlDoc.Load(sr);
+                    if (xmlDoc.SelectNodes("//motion_platform//udp") is XmlNodeList nodes)
                     {
-                        xmlDoc.Load(sr);
-                        if (xmlDoc.SelectNodes("//motion_platform//udp") is XmlNodeList nodes)
+                        if (nodes.Count == 1)
                         {
-                            if (nodes.Count == 1)
+                            XmlNode xn = nodes.Item(0);
+
+                            if (xn.Attributes.GetNamedItem("enabled") is XmlAttribute enabled)
                             {
-                                XmlNode xn = nodes.Item(0);
-
-                                if (xn.Attributes.GetNamedItem("enabled") is XmlAttribute enabled)
+                                if (enabled.Value != "true")
                                 {
-                                    if (enabled.Value != "true")
-                                    {
-                                        enabled.Value = "true";
-                                        bChanged = true;
-                                    }
-                                }
-                                else
-                                {
-                                    xn.Attributes.Append(xmlDoc.CreateAttribute("enabled"));
-                                    xn.Attributes["enabled"].Value = "true";
-                                    bChanged = true;
-                                }
-
-                                if (xn.Attributes.GetNamedItem("port") is XmlAttribute port)
-                                {
-                                    if (port.Value != $"{Port}")
-                                    {
-                                        port.Value = $"{Port}";
-                                        bChanged = true;
-                                    }
-                                }
-                                else
-                                {
-                                    xn.Attributes.Append(xmlDoc.CreateAttribute("port"));
-                                    xn.Attributes["port"].Value = $"{Port}";
-                                    bChanged = true;
-                                }
-
-                                if (xn.Attributes.GetNamedItem("ip") is XmlAttribute ip)
-                                {
-                                    if (ip.Value != "127.0.0.1")
-                                    {
-                                        ip.Value = "127.0.0.1";
-                                        bChanged = true;
-                                    }
-                                }
-                                else
-                                {
-                                    xn.Attributes.Append(xmlDoc.CreateAttribute("ip"));
-                                    xn.Attributes["ip"].Value = "127.0.0.1";
-                                    bChanged = true;
-                                }
-
-                                if (xn.Attributes.GetNamedItem("extradata") is XmlAttribute extradata)
-                                {
-                                    if (extradata.Value != "3")
-                                    {
-                                        extradata.Value = "3";
-                                        bChanged = true;
-                                    }
-                                }
-                                else
-                                {
-                                    xn.Attributes.Append(xmlDoc.CreateAttribute("extradata"));
-                                    xn.Attributes["extradata"].Value = "3";
-                                    bChanged = true;
-                                }
-
-                                if (xn.Attributes.GetNamedItem("delay") is XmlAttribute delay)
-                                {
-                                    if (delay.Value != "1")
-                                    {
-                                        delay.Value = "1";
-                                        bChanged = true;
-                                    }
-                                }
-                                else
-                                {
-                                    xn.Attributes.Append(xmlDoc.CreateAttribute("delay"));
-                                    xn.Attributes["delay"].Value = "1";
+                                    enabled.Value = "true";
                                     bChanged = true;
                                 }
                             }
-                        }
-                    }
-
-                    if (bChanged)
-                    {
-                        try
-                        {
-                            if (bAskToPatch == false || MessageBox.Show("Config file not patched! Patch now?", Name, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            else
                             {
-                                xmlDoc.Save(config_file_name);
+                                xn.Attributes.Append(xmlDoc.CreateAttribute("enabled"));
+                                xn.Attributes["enabled"].Value = "true";
+                                bChanged = true;
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            MessageBox.Show(e.Message);
+
+                            if (xn.Attributes.GetNamedItem("port") is XmlAttribute port)
+                            {
+                                if (port.Value != $"{Port}")
+                                {
+                                    port.Value = $"{Port}";
+                                    bChanged = true;
+                                }
+                            }
+                            else
+                            {
+                                xn.Attributes.Append(xmlDoc.CreateAttribute("port"));
+                                xn.Attributes["port"].Value = $"{Port}";
+                                bChanged = true;
+                            }
+
+                            if (xn.Attributes.GetNamedItem("ip") is XmlAttribute ip)
+                            {
+                                if (ip.Value != IP)
+                                {
+                                    ip.Value = IP;
+                                    bChanged = true;
+                                }
+                            }
+                            else
+                            {
+                                xn.Attributes.Append(xmlDoc.CreateAttribute("ip"));
+                                xn.Attributes["ip"].Value = IP;
+                                bChanged = true;
+                            }
+
+                            if (xn.Attributes.GetNamedItem("extradata") is XmlAttribute extradata)
+                            {
+                                if (extradata.Value != "3")
+                                {
+                                    extradata.Value = "3";
+                                    bChanged = true;
+                                }
+                            }
+                            else
+                            {
+                                xn.Attributes.Append(xmlDoc.CreateAttribute("extradata"));
+                                xn.Attributes["extradata"].Value = "3";
+                                bChanged = true;
+                            }
+
+                            if (xn.Attributes.GetNamedItem("delay") is XmlAttribute delay)
+                            {
+                                if (delay.Value != "1")
+                                {
+                                    delay.Value = "1";
+                                    bChanged = true;
+                                }
+                            }
+                            else
+                            {
+                                xn.Attributes.Append(xmlDoc.CreateAttribute("delay"));
+                                xn.Attributes["delay"].Value = "1";
+                                bChanged = true;
+                            }
                         }
                     }
                 }
-                else MessageBox.Show("Configuration file not found! Run the game and close it!");
+
+                if (bChanged)
+                {
+                    try
+                    {
+                        if (bAskToPatch == false || MessageBox.Show($"Config file {fname} not patched! Patch now?", Name, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
+                            xmlDoc.Save(config_file_name);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
+                }
             }
+            else MessageBox.Show($"Configuration file {fname} not found! Run the game and close it!");
         }
 
         public void Dispose()
@@ -372,7 +383,7 @@ namespace Codemasters
 
         private void SaveSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
             string json = "";
             if (File.Exists(path))
             {

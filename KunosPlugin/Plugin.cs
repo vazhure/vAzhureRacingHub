@@ -33,7 +33,7 @@ namespace KunosPlugin
         {
             get
             {
-                return Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             }
         }
 

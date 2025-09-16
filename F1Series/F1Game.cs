@@ -36,7 +36,7 @@ namespace F1Series
 
         private void LoadSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
             if (File.Exists(path))
             {
                 try
@@ -51,7 +51,7 @@ namespace F1Series
 
         private void SaveSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
             string json = "";
             if (File.Exists(path))
             {

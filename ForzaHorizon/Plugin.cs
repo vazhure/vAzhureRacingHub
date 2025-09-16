@@ -151,7 +151,7 @@ namespace ForzaHorizon
 
         private void LoadSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{m_version.ToString()}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{m_version.ToString()}.json");
             if (File.Exists(path))
             {
                 try
@@ -359,7 +359,7 @@ namespace ForzaHorizon
 
         private void SaveSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{m_version.ToString()}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{m_version.ToString()}.json");
             string json = "";
             if (File.Exists(path))
             {

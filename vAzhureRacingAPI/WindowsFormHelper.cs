@@ -54,21 +54,52 @@ namespace vAzhureRacingAPI
         {
             string formName = form.GetType().ToString();
 
+            // Load saved position and size
             int left = (int)LoadSetting("FormLeft", formName, form.DesktopBounds.Left);
             int top = (int)LoadSetting("FormTop", formName, form.DesktopBounds.Top);
             int width = form.Width;
             int height = form.Height;
 
-            if (form.FormBorderStyle == FormBorderStyle.Sizable || form.FormBorderStyle == FormBorderStyle.SizableToolWindow)
+            if (form.FormBorderStyle == FormBorderStyle.Sizable ||
+                form.FormBorderStyle == FormBorderStyle.SizableToolWindow)
             {
                 width = (int)LoadSetting("FormWidth", formName, form.DesktopBounds.Width);
                 height = (int)LoadSetting("FormHeight", formName, form.DesktopBounds.Height);
             }
 
-            form.DesktopBounds = new System.Drawing.Rectangle(left, top, width, height);
-
-            if (LoadSetting("Maximized", formName, "False") is string sMaximized && sMaximized.ToLower() == "true")
+            // Handle maximized state
+            if (LoadSetting("Maximized", formName, "False") is string sMaximized &&
+                sMaximized.ToLower() == "true")
+            {
                 form.WindowState = FormWindowState.Maximized;
+                return; // No need to adjust position if maximized
+            }
+
+            // Determine the appropriate screen based on saved position
+            Screen targetScreen = null;
+            foreach (var screen in Screen.AllScreens)
+            {
+                if (screen.Bounds.Contains(new Point(left, top)))
+                {
+                    targetScreen = screen;
+                    break;
+                }
+            }
+
+            if (targetScreen == null)
+            {
+                targetScreen = Screen.PrimaryScreen;
+            }
+
+            // Adjust position to fit within the screen's working area
+            var workArea = targetScreen.WorkingArea;
+            left = Math.Max(workArea.Left, Math.Min(left, workArea.Right - width));
+            top = Math.Max(workArea.Top, Math.Min(top, workArea.Bottom - height));
+
+            // Set form's location and size
+            form.Location = new Point(left, top);
+            form.Width = width;
+            form.Height = height;
         }
 
         public static int GetSystemDpi()

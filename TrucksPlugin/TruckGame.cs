@@ -68,7 +68,7 @@ namespace TrucksPlugin
 
         private void LoadSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
             if (File.Exists(path))
             {
                 try
@@ -83,7 +83,7 @@ namespace TrucksPlugin
 
         private void SaveSettings()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
             string json = "";
             if (File.Exists(path))
             {
@@ -125,7 +125,7 @@ namespace TrucksPlugin
             }
         }
 
-        readonly string assemblyPath = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+        readonly string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         public void ShowSettings(IVAzhureRacingApp app)
         {
@@ -183,6 +183,7 @@ namespace TrucksPlugin
                         car.FuelCapacity = data.fuelCapacity;
                         car.FuelConsumptionPerLap = data.truckFuelConsumptionAverageLiters;
 
+                        userData["int.gear"] = data.gear;
                         userData["uint.gameTime"] = data.gameTime;
                         userData["uint.restStop"] = data.restStop;
                         userData["uint.deliveryTime"] = data.deliveryTime;

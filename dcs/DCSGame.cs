@@ -40,7 +40,7 @@ namespace DCS
 
             try
             {
-                string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+                string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
                 if (File.Exists(path))
                 {
                     string json = File.ReadAllText(path);
@@ -70,9 +70,10 @@ namespace DCS
 
         ~DCSGame()
         {
+            monitor?.Stop();
             try
             {
-                string path = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), $"{Name}.json");
+                string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
 
                 string json = ObjectSerializeHelper.GetJson(settings);
                 File.WriteAllText(path, json);
@@ -91,7 +92,7 @@ namespace DCS
             {
                 ///Saved Games\DCS\Scripts\Hooks
                 string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Saved Games", "DCS", "Scripts", "Hooks");
-                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "SHTelemetry.lua");
+                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "SHTelemetry.lua");
                 string destPath = Path.Combine(dir, "SHTelemetry.lua");
 
                 if (File.Exists(destPath))
