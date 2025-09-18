@@ -87,11 +87,16 @@ namespace MotionPlatform3
             return true;
         }
 
+        private MotionRigPose rigPose;
+
         public bool Initialize(IVAzhureRacingApp app)
         {
             vAzhureRacingApp = app;
 
-
+            rigPose = new MotionRigPose();
+            
+            //rigPose.SetPose(Math.PI / 4.0, Math.PI / 8.0, 10.0);
+           
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
 
             //CalculateLegPos(1f, 1f, 0f);
@@ -641,6 +646,9 @@ namespace MotionPlatform3
             float pitchAngle = (float)Math.Atan2(z - heaveMM * 2f, fpitch) * settings.LimitPitchAngle;
             // Max calculated roll angle, radians
             float rollAngle = (float)Math.Atan2(z - heaveMM * 2f, froll) * settings.LimitRollAngle;
+
+            if (DeviceEnabled && IsConnected && IsDeviceReady)
+                rigPose?.SetPose(pitch * pitchAngle, roll * rollAngle, Math.Sign(heave) * heaveMM);
 
             Vector3[] cornersZero = {
                     new Vector3(-x, y, 0),  // FL
