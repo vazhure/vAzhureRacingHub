@@ -57,6 +57,7 @@
     <Compile Include="GameTuneDlg.Designer.cs">
       <DependentUpon>GameTuneDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="IniFile.cs" />
     <Compile Include="ManualControlForm.cs">
       <SubType>Form</SubType>
     </Compile>

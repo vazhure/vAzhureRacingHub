@@ -99,6 +99,7 @@ namespace MotionPlatform3
             this.chkParkOnIdle = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.chkParkOnQuit = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.btnSpeedSettings = new System.Windows.Forms.Button();
+            this.btnSimHub = new System.Windows.Forms.Button();
             this.lblGame = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -108,7 +109,11 @@ namespace MotionPlatform3
             this.numActuatorTravelMM = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
             this.numSeatOffsetMM = new System.Windows.Forms.NumericUpDown();
-            this.btnSimHub = new System.Windows.Forms.Button();
+            this.chkMotionCompensation = new vAzhureRacingAPI.VAzhureSwitchButton();
+            this.lblOpenXRStatus = new System.Windows.Forms.Label();
+            this.lblOpenXRConfigured = new System.Windows.Forms.Label();
+            this.btnPathOpenXRConfig = new System.Windows.Forms.Button();
+            this.btnDownloadOpenXR = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
@@ -126,7 +131,7 @@ namespace MotionPlatform3
             this.pbRL.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbRL.Location = new System.Drawing.Point(131, 43);
             this.pbRL.Name = "pbRL";
-            this.pbRL.Size = new System.Drawing.Size(122, 474);
+            this.pbRL.Size = new System.Drawing.Size(122, 531);
             this.pbRL.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRL.TabIndex = 0;
             this.pbRL.TabStop = false;
@@ -169,7 +174,7 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(513, 590);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(513, 647);
             this.tableLayoutPanel1.TabIndex = 8;
             // 
             // lblFrontState
@@ -188,7 +193,7 @@ namespace MotionPlatform3
             this.pbFR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbFR.Location = new System.Drawing.Point(3, 43);
             this.pbFR.Name = "pbFR";
-            this.pbFR.Size = new System.Drawing.Size(122, 474);
+            this.pbFR.Size = new System.Drawing.Size(122, 531);
             this.pbFR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbFR.TabIndex = 0;
             this.pbFR.TabStop = false;
@@ -196,7 +201,7 @@ namespace MotionPlatform3
             // lblName1
             // 
             this.lblName1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName1.Location = new System.Drawing.Point(3, 520);
+            this.lblName1.Location = new System.Drawing.Point(3, 577);
             this.lblName1.Name = "lblName1";
             this.lblName1.Size = new System.Drawing.Size(122, 30);
             this.lblName1.TabIndex = 5;
@@ -206,7 +211,7 @@ namespace MotionPlatform3
             // lblPosFront
             // 
             this.lblPosFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosFront.Location = new System.Drawing.Point(3, 550);
+            this.lblPosFront.Location = new System.Drawing.Point(3, 607);
             this.lblPosFront.Name = "lblPosFront";
             this.lblPosFront.Size = new System.Drawing.Size(122, 20);
             this.lblPosFront.TabIndex = 6;
@@ -216,7 +221,7 @@ namespace MotionPlatform3
             // lblTargetFront
             // 
             this.lblTargetFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetFront.Location = new System.Drawing.Point(3, 570);
+            this.lblTargetFront.Location = new System.Drawing.Point(3, 627);
             this.lblTargetFront.Name = "lblTargetFront";
             this.lblTargetFront.Size = new System.Drawing.Size(122, 20);
             this.lblTargetFront.TabIndex = 7;
@@ -236,7 +241,7 @@ namespace MotionPlatform3
             // lblName2
             // 
             this.lblName2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName2.Location = new System.Drawing.Point(131, 520);
+            this.lblName2.Location = new System.Drawing.Point(131, 577);
             this.lblName2.Name = "lblName2";
             this.lblName2.Size = new System.Drawing.Size(122, 30);
             this.lblName2.TabIndex = 1;
@@ -246,7 +251,7 @@ namespace MotionPlatform3
             // lblPosRL
             // 
             this.lblPosRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRL.Location = new System.Drawing.Point(131, 550);
+            this.lblPosRL.Location = new System.Drawing.Point(131, 607);
             this.lblPosRL.Name = "lblPosRL";
             this.lblPosRL.Size = new System.Drawing.Size(122, 20);
             this.lblPosRL.TabIndex = 2;
@@ -256,7 +261,7 @@ namespace MotionPlatform3
             // lblTargetRL
             // 
             this.lblTargetRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRL.Location = new System.Drawing.Point(131, 570);
+            this.lblTargetRL.Location = new System.Drawing.Point(131, 627);
             this.lblTargetRL.Name = "lblTargetRL";
             this.lblTargetRL.Size = new System.Drawing.Size(122, 20);
             this.lblTargetRL.TabIndex = 3;
@@ -279,7 +284,7 @@ namespace MotionPlatform3
             this.pbRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbRR.Location = new System.Drawing.Point(259, 43);
             this.pbRR.Name = "pbRR";
-            this.pbRR.Size = new System.Drawing.Size(122, 474);
+            this.pbRR.Size = new System.Drawing.Size(122, 531);
             this.pbRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRR.TabIndex = 0;
             this.pbRR.TabStop = false;
@@ -287,7 +292,7 @@ namespace MotionPlatform3
             // lblName3
             // 
             this.lblName3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName3.Location = new System.Drawing.Point(259, 520);
+            this.lblName3.Location = new System.Drawing.Point(259, 577);
             this.lblName3.Name = "lblName3";
             this.lblName3.Size = new System.Drawing.Size(122, 30);
             this.lblName3.TabIndex = 9;
@@ -297,7 +302,7 @@ namespace MotionPlatform3
             // lblPosRR
             // 
             this.lblPosRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRR.Location = new System.Drawing.Point(259, 550);
+            this.lblPosRR.Location = new System.Drawing.Point(259, 607);
             this.lblPosRR.Name = "lblPosRR";
             this.lblPosRR.Size = new System.Drawing.Size(122, 20);
             this.lblPosRR.TabIndex = 10;
@@ -307,7 +312,7 @@ namespace MotionPlatform3
             // lblTargetRR
             // 
             this.lblTargetRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRR.Location = new System.Drawing.Point(259, 570);
+            this.lblTargetRR.Location = new System.Drawing.Point(259, 627);
             this.lblTargetRR.Name = "lblTargetRR";
             this.lblTargetRR.Size = new System.Drawing.Size(122, 20);
             this.lblTargetRR.TabIndex = 11;
@@ -330,7 +335,7 @@ namespace MotionPlatform3
             this.pbFRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbFRR.Location = new System.Drawing.Point(387, 43);
             this.pbFRR.Name = "pbFRR";
-            this.pbFRR.Size = new System.Drawing.Size(123, 474);
+            this.pbFRR.Size = new System.Drawing.Size(123, 531);
             this.pbFRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbFRR.TabIndex = 0;
             this.pbFRR.TabStop = false;
@@ -338,7 +343,7 @@ namespace MotionPlatform3
             // lblName4
             // 
             this.lblName4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName4.Location = new System.Drawing.Point(387, 520);
+            this.lblName4.Location = new System.Drawing.Point(387, 577);
             this.lblName4.Name = "lblName4";
             this.lblName4.Size = new System.Drawing.Size(123, 30);
             this.lblName4.TabIndex = 9;
@@ -348,7 +353,7 @@ namespace MotionPlatform3
             // lblPosFRR
             // 
             this.lblPosFRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosFRR.Location = new System.Drawing.Point(387, 550);
+            this.lblPosFRR.Location = new System.Drawing.Point(387, 607);
             this.lblPosFRR.Name = "lblPosFRR";
             this.lblPosFRR.Size = new System.Drawing.Size(123, 20);
             this.lblPosFRR.TabIndex = 10;
@@ -358,7 +363,7 @@ namespace MotionPlatform3
             // lblTargetFRR
             // 
             this.lblTargetFRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetFRR.Location = new System.Drawing.Point(387, 570);
+            this.lblTargetFRR.Location = new System.Drawing.Point(387, 627);
             this.lblTargetFRR.Name = "lblTargetFRR";
             this.lblTargetFRR.Size = new System.Drawing.Size(123, 20);
             this.lblTargetFRR.TabIndex = 11;
@@ -797,9 +802,9 @@ namespace MotionPlatform3
             // 
             this.btnApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnApply.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnApply.Location = new System.Drawing.Point(827, 617);
+            this.btnApply.Location = new System.Drawing.Point(827, 674);
             this.btnApply.Name = "btnApply";
-            this.btnApply.Size = new System.Drawing.Size(147, 44);
+            this.btnApply.Size = new System.Drawing.Size(147, 38);
             this.btnApply.TabIndex = 48;
             this.btnApply.Text = "APPLY";
             this.btnApply.UseVisualStyleBackColor = true;
@@ -907,7 +912,7 @@ namespace MotionPlatform3
             this.btnTune.Size = new System.Drawing.Size(92, 27);
             this.btnTune.TabIndex = 43;
             this.btnTune.Text = "Tune...";
-            this.toolTips.SetToolTip(this.btnTune, "Reset collected game telemetry data to defaults");
+            this.toolTips.SetToolTip(this.btnTune, "Tune game telemetry data");
             this.btnTune.UseVisualStyleBackColor = true;
             this.btnTune.Click += new System.EventHandler(this.BtnTune_Click);
             // 
@@ -961,7 +966,7 @@ namespace MotionPlatform3
             this.btnTestSpeed.Size = new System.Drawing.Size(92, 27);
             this.btnTestSpeed.TabIndex = 13;
             this.btnTestSpeed.Text = "TEST";
-            this.toolTips.SetToolTip(this.btnTestSpeed, "Run speed test: Heave, Pitch, Roll");
+            this.toolTips.SetToolTip(this.btnTestSpeed, "Run manual test: Heave, Pitch, Roll");
             this.btnTestSpeed.UseVisualStyleBackColor = true;
             this.btnTestSpeed.Click += new System.EventHandler(this.BtnTestSpeed_Click);
             // 
@@ -1011,6 +1016,19 @@ namespace MotionPlatform3
             this.toolTips.SetToolTip(this.btnSpeedSettings, "Advanced speed settings...");
             this.btnSpeedSettings.UseVisualStyleBackColor = true;
             this.btnSpeedSettings.Click += new System.EventHandler(this.BtnSpeedSettings_Click);
+            // 
+            // btnSimHub
+            // 
+            this.btnSimHub.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSimHub.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSimHub.Image = global::MotionPlatform3.Properties.Resources.simhub24x24;
+            this.btnSimHub.Location = new System.Drawing.Point(882, 149);
+            this.btnSimHub.Name = "btnSimHub";
+            this.btnSimHub.Size = new System.Drawing.Size(92, 27);
+            this.btnSimHub.TabIndex = 49;
+            this.toolTips.SetToolTip(this.btnSimHub, "Generate commands for SimHub Motion");
+            this.btnSimHub.UseVisualStyleBackColor = true;
+            this.btnSimHub.Click += new System.EventHandler(this.BtnSimHub_Click);
             // 
             // lblGame
             // 
@@ -1182,18 +1200,65 @@ namespace MotionPlatform3
             0,
             0});
             // 
-            // btnSimHub
+            // chkMotionCompensation
             // 
-            this.btnSimHub.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSimHub.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSimHub.Image = global::MotionPlatform3.Properties.Resources.simhub24x24;
-            this.btnSimHub.Location = new System.Drawing.Point(882, 149);
-            this.btnSimHub.Name = "btnSimHub";
-            this.btnSimHub.Size = new System.Drawing.Size(92, 27);
-            this.btnSimHub.TabIndex = 49;
-            this.toolTips.SetToolTip(this.btnSimHub, "Generate commands for SimHub Motion");
-            this.btnSimHub.UseVisualStyleBackColor = true;
-            this.btnSimHub.Click += new System.EventHandler(this.BtnSimHub_Click);
+            this.chkMotionCompensation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkMotionCompensation.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.chkMotionCompensation.Checked = true;
+            this.chkMotionCompensation.Location = new System.Drawing.Point(534, 634);
+            this.chkMotionCompensation.MaximumSize = new System.Drawing.Size(148, 32);
+            this.chkMotionCompensation.MinimumSize = new System.Drawing.Size(148, 32);
+            this.chkMotionCompensation.Name = "chkMotionCompensation";
+            this.chkMotionCompensation.Size = new System.Drawing.Size(148, 32);
+            this.chkMotionCompensation.StateOff = ((System.Drawing.Image)(resources.GetObject("chkMotionCompensation.StateOff")));
+            this.chkMotionCompensation.StateOn = ((System.Drawing.Image)(resources.GetObject("chkMotionCompensation.StateOn")));
+            this.chkMotionCompensation.SwitchText = "Motion Compensation";
+            this.chkMotionCompensation.TabIndex = 8;
+            this.chkMotionCompensation.OnSwitch += new System.EventHandler(this.OnMotionCompensation);
+            // 
+            // lblOpenXRStatus
+            // 
+            this.lblOpenXRStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblOpenXRStatus.AutoSize = true;
+            this.lblOpenXRStatus.Location = new System.Drawing.Point(531, 669);
+            this.lblOpenXRStatus.Name = "lblOpenXRStatus";
+            this.lblOpenXRStatus.Size = new System.Drawing.Size(159, 13);
+            this.lblOpenXRStatus.TabIndex = 41;
+            this.lblOpenXRStatus.Text = "OpenXR Compensation installed";
+            // 
+            // lblOpenXRConfigured
+            // 
+            this.lblOpenXRConfigured.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblOpenXRConfigured.AutoSize = true;
+            this.lblOpenXRConfigured.Location = new System.Drawing.Point(531, 697);
+            this.lblOpenXRConfigured.Name = "lblOpenXRConfigured";
+            this.lblOpenXRConfigured.Size = new System.Drawing.Size(171, 13);
+            this.lblOpenXRConfigured.TabIndex = 41;
+            this.lblOpenXRConfigured.Text = "OpenXR Compensation configured";
+            // 
+            // btnPathOpenXRConfig
+            // 
+            this.btnPathOpenXRConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnPathOpenXRConfig.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPathOpenXRConfig.Location = new System.Drawing.Point(724, 691);
+            this.btnPathOpenXRConfig.Name = "btnPathOpenXRConfig";
+            this.btnPathOpenXRConfig.Size = new System.Drawing.Size(89, 27);
+            this.btnPathOpenXRConfig.TabIndex = 43;
+            this.btnPathOpenXRConfig.Text = "Fix";
+            this.btnPathOpenXRConfig.UseVisualStyleBackColor = true;
+            this.btnPathOpenXRConfig.Click += new System.EventHandler(this.BtnPathOpenXRConfig);
+            // 
+            // btnDownloadOpenXR
+            // 
+            this.btnDownloadOpenXR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDownloadOpenXR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDownloadOpenXR.Location = new System.Drawing.Point(724, 662);
+            this.btnDownloadOpenXR.Name = "btnDownloadOpenXR";
+            this.btnDownloadOpenXR.Size = new System.Drawing.Size(89, 27);
+            this.btnDownloadOpenXR.TabIndex = 43;
+            this.btnDownloadOpenXR.Text = "Download";
+            this.btnDownloadOpenXR.UseVisualStyleBackColor = true;
+            this.btnDownloadOpenXR.Click += new System.EventHandler(this.OnDownloadOpenXRCompensation);
             // 
             // SettingsForm
             // 
@@ -1201,13 +1266,15 @@ namespace MotionPlatform3
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(984, 671);
+            this.ClientSize = new System.Drawing.Size(984, 724);
             this.ControlBox = false;
             this.Controls.Add(this.btnSimHub);
             this.Controls.Add(this.numSeatOffsetMM);
             this.Controls.Add(this.numActuatorTravelMM);
             this.Controls.Add(this.numLeftRightMM);
             this.Controls.Add(this.numFrontRearMM);
+            this.Controls.Add(this.lblOpenXRConfigured);
+            this.Controls.Add(this.lblOpenXRStatus);
             this.Controls.Add(this.lblGame);
             this.Controls.Add(this.comboComPort);
             this.Controls.Add(this.label7);
@@ -1248,6 +1315,7 @@ namespace MotionPlatform3
             this.Controls.Add(this.chkInvertRoll);
             this.Controls.Add(this.chkInvertPitch);
             this.Controls.Add(this.chkCollect);
+            this.Controls.Add(this.chkMotionCompensation);
             this.Controls.Add(this.chkParkOnQuit);
             this.Controls.Add(this.chkParkOnIdle);
             this.Controls.Add(this.chkEnabled);
@@ -1255,6 +1323,8 @@ namespace MotionPlatform3
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.btnSpeedSettings);
             this.Controls.Add(this.btnTestSpeed);
+            this.Controls.Add(this.btnDownloadOpenXR);
+            this.Controls.Add(this.btnPathOpenXRConfig);
             this.Controls.Add(this.btnTune);
             this.Controls.Add(this.btnAlarmReset);
             this.Controls.Add(this.btnPark);
@@ -1264,7 +1334,7 @@ namespace MotionPlatform3
             this.ForeColor = System.Drawing.Color.White;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(1000, 660);
+            this.MinimumSize = new System.Drawing.Size(1000, 740);
             this.Name = "SettingsForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -1364,5 +1434,10 @@ namespace MotionPlatform3
         private System.Windows.Forms.NumericUpDown numSeatOffsetMM;
         private System.Windows.Forms.Button btnSpeedSettings;
         private System.Windows.Forms.Button btnSimHub;
+        private vAzhureRacingAPI.VAzhureSwitchButton chkMotionCompensation;
+        private System.Windows.Forms.Label lblOpenXRStatus;
+        private System.Windows.Forms.Label lblOpenXRConfigured;
+        private System.Windows.Forms.Button btnPathOpenXRConfig;
+        private System.Windows.Forms.Button btnDownloadOpenXR;
     }
 }

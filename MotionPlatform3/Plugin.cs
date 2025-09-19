@@ -94,9 +94,14 @@ namespace MotionPlatform3
             vAzhureRacingApp = app;
 
             rigPose = new MotionRigPose();
-            
+
+#if DEBUG
             //rigPose.SetPose(Math.PI / 4.0, Math.PI / 8.0, 10.0);
-           
+
+            //PosFilter posFilter = new PosFilter(0, 10);
+            //posFilter.Test(Path.Combine(AssemblyPath, "filter.csv"));
+#endif
+
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
 
             //CalculateLegPos(1f, 1f, 0f);
@@ -647,7 +652,7 @@ namespace MotionPlatform3
             // Max calculated roll angle, radians
             float rollAngle = (float)Math.Atan2(z - heaveMM * 2f, froll) * settings.LimitRollAngle;
 
-            if (DeviceEnabled && IsConnected && IsDeviceReady)
+            if (settings.OpenXRMotionCompensation && DeviceEnabled && IsConnected && IsDeviceReady)
                 rigPose?.SetPose(pitch * pitchAngle, roll * rollAngle, Math.Sign(heave) * heaveMM);
 
             Vector3[] cornersZero = {
@@ -1094,6 +1099,11 @@ namespace MotionPlatform3
 
         public float LimitPitchAngle { get; set; } = 1;
         public float LimitRollAngle { get; set; } = 1;
+
+        /// <summary>
+        /// Enable or disable OpenXR Motion Compensation
+        /// </summary>
+        public bool OpenXRMotionCompensation { get; set; } = true;
 
         /// <summary>
         /// Returns max angle for Pitch, radians

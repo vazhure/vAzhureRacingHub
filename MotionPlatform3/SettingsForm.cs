@@ -120,6 +120,14 @@ namespace MotionPlatform3
             chkInvertPitch.Checked = _plugin.settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch);
             chkInvertSway.Checked = _plugin.settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway);
             chkInvertSurge.Checked = _plugin.settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge);
+            chkMotionCompensation.Checked = _plugin.settings.OpenXRMotionCompensation;
+
+            lblOpenXRStatus.ForeColor = MotionRigPose.IsOpenXR ? Color.LightGreen : Color.White;
+            lblOpenXRStatus.Text = MotionRigPose.IsOpenXR ? "OpenXR Compensation installed" : "OpenXR Compensation not installed";
+
+            bool bconfigured = MotionRigPose.IsOpenXRCompensationConfigured;
+            lblOpenXRConfigured.ForeColor = bconfigured ? Color.LightGreen : Color.White;
+            btnPathOpenXRConfig.Enabled = !bconfigured;
 
             chkCollect.Checked = _plugin.settings.mode == MODE.CollectingGameData;
             sliderOveralEffects.Value = _plugin.settings.OveralCoefficient;
@@ -541,6 +549,23 @@ namespace MotionPlatform3
                     catch { }
                 }
             }
+        }
+
+        private void OnMotionCompensation(object sender, EventArgs e)
+        {
+            _plugin.settings.OpenXRMotionCompensation = chkMotionCompensation.Checked;
+        }
+
+        private void BtnPathOpenXRConfig(object sender, EventArgs e)
+        {
+            bool bconf = MotionRigPose.PathOpenXRConfig();
+            lblOpenXRConfigured.ForeColor = bconf ? Color.LightGreen : Color.White;
+            btnPathOpenXRConfig.Enabled = !bconf;
+        }
+
+        private void OnDownloadOpenXRCompensation(object sender, EventArgs e)
+        {
+
         }
     }
 
