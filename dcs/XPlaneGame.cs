@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Drawing;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using vAzhureRacingAPI;
 
@@ -65,7 +67,11 @@ namespace DCS
             monitor.Start();
         }
 
-        private readonly byte[] dataStatic = new byte[XPlaneTelemetrySize]; 
+        private readonly byte[] dataStatic = new byte[XPlaneTelemetrySize];
+
+#if DEBUG
+    private readonly List<XPlaneTelemetry> telemetry = new List<XPlaneTelemetry>(10000000);
+#endif
 
         private void ProcessSharedMemory()
         {
@@ -78,12 +84,19 @@ namespace DCS
 
                     XPlaneTelemetry xPlaneTelemetry = Marshalizable<XPlaneTelemetry>.FromBytes(dataStatic);
 
+#if DEBUG
+                    if (telemetry.Count < telemetry.Capacity)
+                        telemetry.Add(xPlaneTelemetry);
+#endif
+
                     AMMotionData data = new AMMotionData()
                     {
-                        Pitch = xPlaneTelemetry.Pitch * 0.0055555555555556f,
-                        Roll = xPlaneTelemetry.Roll * 0.0055555555555556f,
-                        Yaw = xPlaneTelemetry.Yaw * 0.0055555555555556f,
-                        Heave = xPlaneTelemetry.Axil / 10.0f,
+                        Pitch = xPlaneTelemetry.Pitch * 0.0055555555555556f, // to radians
+                        Roll = xPlaneTelemetry.Roll * 0.0055555555555556f, // to radians
+                        Yaw = xPlaneTelemetry.Yaw * 0.0055555555555556f, // to radians
+                        Heave = (xPlaneTelemetry.Normal - 9.81f) / 9.81f,
+                        Surge = xPlaneTelemetry.Axil / 9.81f,
+                        Sway = xPlaneTelemetry.Side / 9.81f,
                     };
 
                     dataSet.CarData.MotionData = data;
@@ -135,6 +148,14 @@ namespace DCS
         internal void Stop()
         {
             customSharedMemClient?.StopTrhead();
+
+#if DEBUG
+            StringBuilder sb = new StringBuilder();
+            foreach (var tele in telemetry)
+                sb.AppendLine($"{tele.Pitch};{tele.Roll};{tele.Yaw};{tele.Side};{tele.Axil};{tele.Normal};");
+
+            File.WriteAllText(Path.Combine(assemblyPath, "telemetry.csv"), sb.ToString());
+#endif
         }
 
         public class GameSettings
@@ -148,11 +169,29 @@ namespace DCS
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct XPlaneTelemetry
     {
+        /// <summary>
+        /// Pitch, degrees
+        /// </summary>
         public float Pitch;
+        /// <summary>
+        /// Yaw, degrees
+        /// </summary>
         public float Yaw;
+        /// <summary>
+        /// Roll, degrees
+        /// </summary>
         public float Roll;
+        /// <summary>
+        /// Gear/ground forces - sideways - ACF X, newtons
+        /// </summary>
         public float Side;
+        /// <summary>
+        /// Gear/ground forces - upward - ACF Y, newtons 
+        /// </summary>
         public float Normal;
+        /// <summary>
+        /// Gear/ground forces - backward - ACF Z, newtons
+        /// </summary>
         public float Axil;
     };
 
