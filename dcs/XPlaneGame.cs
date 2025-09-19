@@ -18,7 +18,7 @@ namespace DCS
 
         public uint SteamGameID => 269950U;
 
-        public string[] ExecutableProcessName => new[] { "X-Plane" }; // TODO:
+        public string[] ExecutableProcessName => new[] { "X-Plane" };
 
         private string strUserIcon = "";
 
@@ -94,8 +94,8 @@ namespace DCS
                         Pitch = xPlaneTelemetry.Pitch * 0.0055555555555556f, // to radians
                         Roll = xPlaneTelemetry.Roll * 0.0055555555555556f, // to radians
                         Yaw = xPlaneTelemetry.Yaw * 0.0055555555555556f, // to radians
-                        Heave = (xPlaneTelemetry.Normal - 9.81f) / 9.81f,
-                        Surge = xPlaneTelemetry.Axil / 9.81f,
+                        Heave = Math.Abs(xPlaneTelemetry.Normal) < float.Epsilon ? 0 : (xPlaneTelemetry.Normal - 9.81f) / 9.81f,
+                        Surge = -xPlaneTelemetry.Axil / 9.81f,
                         Sway = xPlaneTelemetry.Side / 9.81f,
                     };
 
