@@ -63,7 +63,7 @@ namespace KunosPlugin
 
                         if (viewStreamStatic.SafeMemoryMappedViewHandle != null)
                         {
-                            viewStreamStatic.ReadAsync(dataStatic, 0, dataStatic.Length);
+                            viewStreamStatic.ReadAsync(dataStatic, 0, dataStatic.Length).Wait();
 
                             var pageFileStatic = Marshalizable<SPageFileStatic>.FromBytes(dataStatic);
 
@@ -86,7 +86,7 @@ namespace KunosPlugin
 
                         if (viewStreamGraphics.SafeMemoryMappedViewHandle != null)
                         {
-                            viewStreamGraphics.ReadAsync(dataGraphics, 0, dataGraphics.Length);
+                            viewStreamGraphics.ReadAsync(dataGraphics, 0, dataGraphics.Length).Wait();
 
                             var graphics = Marshalizable<SPageFileGraphics>.FromBytes(dataGraphics);
 
@@ -266,7 +266,7 @@ namespace KunosPlugin
                             SessionInfo.FinishStatus = graphics.GlobalChequered > 0 ? "Finished" : "";
                         }
 
-                        viewStreamPhysic.ReadAsync(dataPhysics, 0, dataPhysics.Length);
+                        viewStreamPhysic.ReadAsync(dataPhysics, 0, dataPhysics.Length).Wait();
 
                         var physics = SPageFilePhysics.FromBytes(dataPhysics);
 

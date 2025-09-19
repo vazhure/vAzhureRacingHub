@@ -43,6 +43,7 @@ namespace rFactor2plugin
 
         private bool bTimingSession = false;
         private bool bGameRunning = false;
+
         public override void UserFunc()
         {
             GamePlugin gamePlugin = gamePlugins.Where(o => o.Running).FirstOrDefault();
@@ -55,12 +56,6 @@ namespace rFactor2plugin
                         dataSet = new TelemetryDataSet(game);
                 }
 
-                if (!bGameRunning)
-                {
-                    bGameRunning = true;
-                    gamePlugin.NotifyGameState();
-                }
-
                 try
                 {
                     using (var memoryFile = MemoryMappedFile.OpenExisting(MM_TELEMETRY_FILE_NAME, MemoryMappedFileRights.Read))
@@ -70,8 +65,8 @@ namespace rFactor2plugin
                     using (var exMemoryFile = MemoryMappedFile.OpenExisting(MM_EXTENDED_FILE_NAME, MemoryMappedFileRights.Read))
                     using (var exViewStream = scMemoryFile.CreateViewStream(0L, dataExt.Length, MemoryMappedFileAccess.Read))
                     {
-                        viewStream.ReadAsync(data, 0, data.Length);
-                        scViewStream.ReadAsync(scData, 0, scData.Length);
+                        viewStream.ReadAsync(data, 0, data.Length).Wait();
+                        scViewStream.ReadAsync(scData, 0, scData.Length).Wait();
 
                         var rf2data = Marshalizable<rF2Telemetry>.FromBytes(data);
                         var rf2Scoring = Marshalizable<rF2Scoring>.FromBytes(scData);
@@ -122,7 +117,7 @@ namespace rFactor2plugin
                             rF2Vec3 oriY = new rF2Vec3() { x = vt.mOri[1].x, y = vt.mOri[1].y, z = vt.mOri[1].z };
                             rF2Vec3 oriZ = new rF2Vec3() { x = vt.mOri[2].x, y = vt.mOri[2].y, z = vt.mOri[2].z };
 
-                            motionData.Yaw = (float)Math.Atan2(oriZ.x, oriZ.z) / 3.1415f;
+                            motionData.Yaw =  (float)Math.Atan2(oriX.z, oriZ.z) / 3.1415f;
                             motionData.Pitch = (float)Math.Atan2(-oriY.z, Math.Sqrt(oriX.z * oriX.z + oriZ.z * oriZ.z)) / 3.1415f;
                             motionData.Roll = (float)Math.Atan2(oriY.x, Math.Sqrt(oriX.x * oriX.x + oriZ.x * oriZ.x)) / 3.1415f;
 
@@ -400,13 +395,6 @@ namespace rFactor2plugin
             }
             else
             {
-                if (bGameRunning)
-                {
-                    bGameRunning = false;
-                    gamePlugin.NotifyGameState();
-                    lap_delta.Initialize();
-                }
-
                 Thread.Sleep(1000);
             }
         }

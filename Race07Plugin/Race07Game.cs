@@ -66,7 +66,7 @@ namespace Race07Plugin
                 using (var mappedFile = MemoryMappedFile.OpenExisting(m_gtr ? "$gtr2$" : "$Race$", MemoryMappedFileRights.ReadWrite))
                 using (var reader = mappedFile.CreateViewStream(0L, viewData.Length, MemoryMappedFileAccess.ReadWrite))
                 {
-                    reader.ReadAsync(viewData, 0, viewData.Length);
+                    reader.ReadAsync(viewData, 0, viewData.Length).Wait();
 
                     var data = Marshalizable<DataStruct>.FromBytes(viewData);
                     var carData = telemetry.CarData;

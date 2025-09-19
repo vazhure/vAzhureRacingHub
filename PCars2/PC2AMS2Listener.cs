@@ -15,6 +15,9 @@ namespace PCars2
             games = gamePlugins;
         }
 
+        /// <summary>
+        /// TODO: settings.json with Steam player name property
+        /// </summary>
         public string PlayerName { get; set; } = "V.AZHURE";
 
         const string PC2sharedMemoryFile = @"$pcars2$";
@@ -38,7 +41,7 @@ namespace PCars2
                 int idx = 0;
                 foreach (ParticipantInfo pi in pCars2APIStruct.mParticipantInfo)
                 {
-                    if (pi.mName.ToString() == playerName)
+                    if (pi.mName == playerName)
                         return idx;
                     idx++;
                 }
@@ -85,8 +88,8 @@ namespace PCars2
                     using (var memoryFile = MemoryMappedFile.OpenExisting(PC2sharedMemoryFile, MemoryMappedFileRights.Read))
                     using (var viewStream = memoryFile.CreateViewStream(0L, data.Length, MemoryMappedFileAccess.Read))
                     {
-                        viewStream.ReadAsync(data, 0, data.Length);
-                        var pageFileContent = PC2SharedMemoryStruct.FromBytes(data);
+                        viewStream.ReadAsync(data, 0, data.Length).Wait();
+                        var pageFileContent = Marshalizable<PC2SharedMemoryStruct>.FromBytes(data);
 
                         //pageFileContent.mVersion
 
@@ -186,10 +189,10 @@ namespace PCars2
                                 carData.Throttle = pageFileContent.mUnfilteredThrottle;
                                 carData.Steering = pageFileContent.mUnfilteredSteering * Math.PI * 2.0;
 
-                                carData.CarClass = pageFileContent.mCarClassName.ToString(); 
+                                carData.CarClass = pageFileContent.mCarClassName; 
                                 carData.FuelConsumptionPerLap = 0;
-                                carData.DriverName = pi.mName.ToString();
-                                carData.CarName = pageFileContent.mCarName.ToString();
+                                carData.DriverName = pi.mName;
+                                carData.CarName = pageFileContent.mCarName;
                                 carData.CarNumber = "";
 
                                 carData.Tires = new AMTireData[]
@@ -205,7 +208,7 @@ namespace PCars2
                                             pageFileContent.mTyreTemp[0],
                                             pageFileContent.mTyreTemp[0],
                                         },
-                                        Compound = pageFileContent.mTyreCompound[0].ToString()
+                                        Compound = pageFileContent.mTyreCompound[0].text
                                     },
                                     new AMTireData
                                     {
@@ -218,7 +221,7 @@ namespace PCars2
                                             pageFileContent.mTyreTemp[1],
                                             pageFileContent.mTyreTemp[1],
                                         },
-                                        Compound = pageFileContent.mTyreCompound[1].ToString()
+                                        Compound = pageFileContent.mTyreCompound[1].text
                                     },
                                     new AMTireData
                                     {
@@ -231,7 +234,7 @@ namespace PCars2
                                             pageFileContent.mTyreTemp[2],
                                             pageFileContent.mTyreTemp[2],
                                         },
-                                        Compound = pageFileContent.mTyreCompound[2].ToString()
+                                        Compound = pageFileContent.mTyreCompound[2].text
                                     },
                                      new AMTireData
                                     {
@@ -244,7 +247,7 @@ namespace PCars2
                                             pageFileContent.mTyreTemp[3],
                                             pageFileContent.mTyreTemp[3],
                                         },
-                                        Compound = pageFileContent.mTyreCompound[3].ToString()
+                                        Compound = pageFileContent.mTyreCompound[3].text
                                     },
                                 };
 
@@ -291,8 +294,8 @@ namespace PCars2
                                 sessionInfo.RemainingLaps = (int)pageFileContent.mLapsInEvent - (int)pi.mCurrentLap - 1;
                                 sessionInfo.TrackLength = pageFileContent.mTrackLength;
                                 sessionInfo.DriversCount = pageFileContent.mNumParticipants;
-                                sessionInfo.TrackName = pageFileContent.mTrackLocation.ToString();
-                                sessionInfo.TrackConfig = pageFileContent.mTrackVariation.ToString();
+                                sessionInfo.TrackName = pageFileContent.mTrackLocation;
+                                sessionInfo.TrackConfig = pageFileContent.mTrackVariation;
                                 sessionInfo.Sector = pi.mCurrentSector + 1;
                                 sessionInfo.SessionState = pageFileContent.mSessionState == SessionState.FORMATION_LAP ? "Formation Lap" :
                                 pageFileContent.mSessionState == SessionState.PRACTICE ? "Practice" :

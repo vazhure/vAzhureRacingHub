@@ -81,7 +81,7 @@ namespace RaceRoomPlugin
                     using (var memoryFile = MemoryMappedFile.OpenExisting(Constant.SharedMemoryName, MemoryMappedFileRights.Read, HandleInheritability.None))
                     using (var viewStream = memoryFile.CreateViewStream(0L, data.Length, MemoryMappedFileAccess.Read))
                     {
-                        viewStream.ReadAsync(data, 0, data.Length);
+                        viewStream.ReadAsync(data, 0, data.Length).Wait();
                         var pageFileContent = Marshalizable<RaceRoomSharedMemory>.FromBytes(data);
 
                         bool bInGame = pageFileContent.GamePaused == 0 &&
@@ -339,9 +339,9 @@ namespace RaceRoomPlugin
                             dataSet.CarData.MotionData.Pitch = pageFileContent.CarOrientation.Pitch / (float)Math.PI;
                             dataSet.CarData.MotionData.Roll = pageFileContent.CarOrientation.Roll / (float)Math.PI;
                             dataSet.CarData.MotionData.Yaw = pageFileContent.CarOrientation.Yaw / (float)Math.PI;
-                            dataSet.CarData.MotionData.Sway = pageFileContent.LocalAcceleration.X / (9.81f * (float)Math.PI);
-                            dataSet.CarData.MotionData.Heave = pageFileContent.LocalAcceleration.Y / (9.81f * (float)Math.PI);
-                            dataSet.CarData.MotionData.Surge = -pageFileContent.LocalAcceleration.Z / (9.81f * (float)Math.PI);
+                            dataSet.CarData.MotionData.Sway = pageFileContent.LocalAcceleration.X / 30f;
+                            dataSet.CarData.MotionData.Heave = pageFileContent.LocalAcceleration.Y / 30f;
+                            dataSet.CarData.MotionData.Surge = -pageFileContent.LocalAcceleration.Z / 30f;
 
                             dataSet.CarData.MotionData.LocalRotAcceleration = new float[] { (float)pageFileContent.Player.AngularAcceleration.X,
                                 (float)pageFileContent.Player.AngularAcceleration.Y, (float)pageFileContent.Player.AngularAcceleration.Z };

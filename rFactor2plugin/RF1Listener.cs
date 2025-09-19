@@ -39,7 +39,7 @@ namespace rFactor2plugin
                 using (var memoryFile = MemoryMappedFile.OpenExisting(RFactor1.RF_SHARED_MEMORY_NAME, MemoryMappedFileRights.Read))
                 using (var viewStream = memoryFile.CreateViewStream(0L, data.Length, MemoryMappedFileAccess.Read))
                 {
-                    viewStream.ReadAsync(data, 0, data.Length);
+                    viewStream.ReadAsync(data, 0, data.Length).Wait();
 
                     AMCarData carData = dataSet.CarData;
                     AMSessionInfo sessionInfo = dataSet.SessionInfo;

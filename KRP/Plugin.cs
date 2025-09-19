@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using vAzhureRacingAPI;
 using KartRacingPro;
+using System.Threading.Tasks;
 
 namespace KRP
 {
@@ -150,7 +151,7 @@ namespace KRP
 
                     if (viewRaceEventInfo.SafeMemoryMappedViewHandle != null)
                     {
-                        viewRaceEventInfo.ReadAsync(dataRaceInfo, 0, dataRaceInfo.Length);
+                        viewRaceEventInfo.ReadAsync(dataRaceInfo, 0, dataRaceInfo.Length).Wait();
 
                         var data = Marshalizable<RaceEventInfo>.FromBytes(dataRaceInfo);
 
@@ -160,7 +161,7 @@ namespace KRP
 
                     if (!bIsReplay && viewKartTelemetryInfo.SafeMemoryMappedViewHandle != null)
                     {
-                        viewKartTelemetryInfo.ReadAsync(dataKartTelemetryInfo, 0, dataKartTelemetryInfo.Length);
+                        viewKartTelemetryInfo.ReadAsync(dataKartTelemetryInfo, 0, dataKartTelemetryInfo.Length).Wait();
 
                         KartTelemetryInfo data = Marshalizable<KartTelemetryInfo>.FromBytes(dataKartTelemetryInfo);
 
@@ -186,7 +187,7 @@ namespace KRP
 
                     if (viewKartEventInfo.SafeMemoryMappedViewHandle != null)
                     {
-                        viewKartEventInfo.ReadAsync(dataKartEventInfo, 0, dataKartEventInfo.Length);
+                        viewKartEventInfo.ReadAsync(dataKartEventInfo, 0, dataKartEventInfo.Length).Wait();
 
                         KartEventInfo data = Marshalizable<KartEventInfo>.FromBytes(dataKartEventInfo);
 
@@ -206,7 +207,7 @@ namespace KRP
 
                     if (viewKartSessionInfo.SafeMemoryMappedViewHandle != null)
                     {
-                        viewKartSessionInfo.ReadAsync(dataKartSessionInfo, 0, dataKartSessionInfo.Length);
+                        viewKartSessionInfo.ReadAsync(dataKartSessionInfo, 0, dataKartSessionInfo.Length).Wait();
 
                         KartSessionInfo data = Marshalizable<KartSessionInfo>.FromBytes(dataKartSessionInfo);
 
@@ -254,7 +255,7 @@ namespace KRP
 
                     if (viewRaceSessionEventInfo.SafeMemoryMappedViewHandle != null)
                     {
-                        viewRaceSessionEventInfo.ReadAsync(dataRaceSessionInfo, 0, dataRaceSessionInfo.Length);
+                        viewRaceSessionEventInfo.ReadAsync(dataRaceSessionInfo, 0, dataRaceSessionInfo.Length).Wait();
 
                         RaceSessionInfo data = Marshalizable<RaceSessionInfo>.FromBytes(dataRaceSessionInfo);
 
@@ -267,7 +268,7 @@ namespace KRP
 
                     if (viewKartLapInfo.SafeMemoryMappedViewHandle != null)
                     {
-                        viewKartLapInfo.ReadAsync(dataKartLapInfo, 0, dataKartLapInfo.Length);
+                        viewKartLapInfo.ReadAsync(dataKartLapInfo, 0, dataKartLapInfo.Length).Wait();
 
                         KartLapInfo data = Marshalizable<KartLapInfo>.FromBytes(dataKartLapInfo);
 
@@ -282,7 +283,7 @@ namespace KRP
 
                     if (viewKartSplitInfo.SafeMemoryMappedViewHandle != null)
                     {
-                        viewKartSplitInfo.ReadAsync(dataKartSplitInfo, 0, dataKartSplitInfo.Length);
+                        viewKartSplitInfo.ReadAsync(dataKartSplitInfo, 0, dataKartSplitInfo.Length).Wait();
 
                         KartSplitInfo data = Marshalizable<KartSplitInfo>.FromBytes(dataKartSplitInfo);
 
