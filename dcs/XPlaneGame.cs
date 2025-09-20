@@ -88,18 +88,18 @@ namespace DCS
                     if (telemetry.Count < telemetry.Capacity)
                         telemetry.Add(xPlaneTelemetry);
 #endif
-
-                    AMMotionData data = new AMMotionData()
-                    {
-                        Pitch = xPlaneTelemetry.Pitch * 0.0055555555555556f, // to radians
-                        Roll = xPlaneTelemetry.Roll * 0.0055555555555556f, // to radians
-                        Yaw = xPlaneTelemetry.Yaw * 0.0055555555555556f, // to radians
-                        Heave = Math.Abs(xPlaneTelemetry.Normal) < float.Epsilon ? 0 : (xPlaneTelemetry.Normal - 9.81f) / 9.81f,
-                        Surge = -xPlaneTelemetry.Axil / 9.81f,
-                        Sway = xPlaneTelemetry.Side / 9.81f,
-                    };
-
-                    dataSet.CarData.MotionData = data;
+                    if (xPlaneTelemetry.Axil == 0 && xPlaneTelemetry.Normal == 0 && xPlaneTelemetry.Roll == 0 && xPlaneTelemetry.Side == 0 && xPlaneTelemetry.Pitch == 0 && xPlaneTelemetry.Yaw == 0)
+                        dataSet.CarData.MotionData = new AMMotionData();
+                    else
+                        dataSet.CarData.MotionData = new AMMotionData()
+                        {
+                            Pitch = xPlaneTelemetry.Pitch / 180.0f, // to radians
+                            Roll = xPlaneTelemetry.Roll / 180.0f, // to radians
+                            Yaw = xPlaneTelemetry.Yaw / 180.0f, // to radians
+                            Heave = (xPlaneTelemetry.Normal - 9.81f) / 9.81f,
+                            Surge = -xPlaneTelemetry.Axil / 9.81f,
+                            Sway = xPlaneTelemetry.Side / 9.81f
+                        };
 
                     OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
                 }

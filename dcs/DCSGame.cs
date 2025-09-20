@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -141,14 +142,20 @@ namespace DCS
 
                 if (telemetry != null)
                 {
-                    var motion = dataSet.CarData.MotionData = new AMMotionData() {
-                        Roll = (float)(telemetry.aDIBank / Math.PI),
-                        Pitch = (float)(telemetry.aDIPitch / Math.PI),
-                        Yaw = (float)(telemetry.aDIYaw / Math.PI),
-                        Surge = telemetry.accelerationUnits.x,
-                        Sway = telemetry.accelerationUnits.z,
-                        Heave = telemetry.accelerationUnits.y > float.Epsilon? (telemetry.accelerationUnits.y - 1f) : 0,
-                    };
+                    if (telemetry.missionStartTime > 0)
+                    {
+                        var motion = dataSet.CarData.MotionData = new AMMotionData()
+                        {
+                            Roll = (float)(telemetry.aDIBank / Math.PI),
+                            Pitch = (float)(telemetry.aDIPitch / Math.PI),
+                            Yaw = (float)(telemetry.aDIYaw / Math.PI),
+                            Surge = telemetry.accelerationUnits.x,
+                            Sway = -telemetry.accelerationUnits.z,
+                            Heave = -(telemetry.accelerationUnits.y - 1f),
+                        };
+                    }
+                    else
+                        dataSet.CarData.MotionData = new AMMotionData();
 
                     OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
                 }
@@ -205,5 +212,6 @@ namespace DCS
         public Vec3 angularVelocity { get; set; } = new Vec3();
         public Vec3 vectorVelocity { get; set; } = new Vec3();
         public float verticalVelocity { get; set; } = 0;
+        public int missionStartTime { get; set; } = 0;
     }
 }
