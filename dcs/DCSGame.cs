@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
+using static DCS.DCSGame;
 
 namespace DCS
 {
-    public class DCSGame : VAzhureUDPClient, IGamePlugin
+    public class DCSGame : VAzhureUDPClient, IGamePlugin, IDisposable
     {
         public string Name => "DCS World";
 
@@ -68,18 +70,7 @@ namespace DCS
             monitor.Start();
         }
 
-        ~DCSGame()
-        {
-            monitor?.Stop();
-            try
-            {
-                string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
-
-                string json = ObjectSerializeHelper.GetJson(settings);
-                File.WriteAllText(path, json);
-            }
-            catch { }
-        }
+        readonly string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         public System.Drawing.Icon GetIcon()
         {
@@ -132,6 +123,10 @@ namespace DCS
             }
         }
 
+#if DEBUG
+    private readonly List<Telemetry> telemetry_cache = new List<Telemetry>(10000000);
+#endif
+
         public override void OnDataReceived(ref byte[] bytes)
         {
             try
@@ -139,16 +134,49 @@ namespace DCS
                 string message = Encoding.UTF8.GetString(bytes);
                 Telemetry telemetry = ObjectSerializeHelper.DeserializeJson<Telemetry>(message);
 
+#if DEBUG
+                    if (telemetry_cache.Count < telemetry_cache.Capacity)
+                        telemetry_cache.Add(telemetry);
+#endif
+
                 if (telemetry != null)
                 {
-                    var motion = dataSet.CarData.MotionData;
+                    var motion = dataSet.CarData.MotionData = new AMMotionData() {
+                        Roll = (float)(telemetry.aDIBank / Math.PI),
+                        Pitch = (float)(telemetry.aDIPitch / Math.PI),
+                        Yaw = (float)(telemetry.aDIYaw / Math.PI),
+                        Surge = telemetry.accelerationUnits.x,
+                        Sway = telemetry.accelerationUnits.z,
+                        Heave = telemetry.accelerationUnits.y > float.Epsilon? (telemetry.accelerationUnits.y - 1f) : 0,
+                    };
 
-                    motion.Roll = (float)(telemetry.aDIBank / Math.PI);
-                    motion.Pitch = (float)(telemetry.aDIPitch / Math.PI);
-                    motion.Yaw = (float)(telemetry.aDIYaw / Math.PI);
-
-                    OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs((TelemetryDataSet)dataSet.Clone()));
+                    OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
                 }
+            }
+            catch { }
+        }
+
+        public void Dispose()
+        {
+#if DEBUG
+            if (telemetry_cache.Count > 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("aDIPitch;aDIBank;aDIYaw;accelerationUnits.x;accelerationUnits.y;accelerationUnits.z;");
+                foreach (var tele in telemetry_cache)
+                    sb.AppendLine($"{tele.aDIPitch};{tele.aDIBank};{tele.aDIYaw};{tele.accelerationUnits.x};{tele.accelerationUnits.y};{tele.accelerationUnits.z};");
+
+                File.WriteAllText(Path.Combine(assemblyPath, "dcs_telemetry.csv"), sb.ToString());
+            }
+#endif
+
+            monitor?.Stop();
+            try
+            {
+                string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{Name}.json");
+
+                string json = ObjectSerializeHelper.GetJson(settings);
+                File.WriteAllText(path, json);
             }
             catch { }
         }

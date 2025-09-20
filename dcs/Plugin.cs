@@ -37,6 +37,7 @@ namespace DCS
         public void Quit(IVAzhureRacingApp app)
         {
             game.Stop();
+            game.Dispose();
             xPlaneGame.Stop();
         }
     }

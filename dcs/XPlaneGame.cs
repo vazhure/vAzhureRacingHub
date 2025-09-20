@@ -150,11 +150,14 @@ namespace DCS
             customSharedMemClient?.StopTrhead();
 
 #if DEBUG
-            StringBuilder sb = new StringBuilder();
-            foreach (var tele in telemetry)
-                sb.AppendLine($"{tele.Pitch};{tele.Roll};{tele.Yaw};{tele.Side};{tele.Axil};{tele.Normal};");
+            if (telemetry.Count > 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var tele in telemetry)
+                    sb.AppendLine($"{tele.Pitch};{tele.Roll};{tele.Yaw};{tele.Side};{tele.Axil};{tele.Normal};");
 
-            File.WriteAllText(Path.Combine(assemblyPath, "telemetry.csv"), sb.ToString());
+                File.WriteAllText(Path.Combine(assemblyPath, "telemetry.csv"), sb.ToString());
+            }
 #endif
         }
 
