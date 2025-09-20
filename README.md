@@ -43,8 +43,8 @@ Supported Game Titles:
 * BeamNG.Drive
 * Wreckfest
 * Wreckfest 2
-* DCS World (Pitch, Roll only)
-* X-Plane 11 (Pitch, Roll only)
+* DCS World (beta)
+* X-Plane 11 (beta)
 
 WIP:
 * F1 2018
