@@ -56,7 +56,7 @@ namespace MotionPlatform3
 
             try
             {
-                memMotionRig = MemoryMappedFile.CreateNew(cSharedMemCOR, cMemSize, MemoryMappedFileAccess.ReadWrite);
+                memMotionRig = MemoryMappedFile.CreateNew(cSharedMemLocalMotionRig, cMemSize, MemoryMappedFileAccess.ReadWrite);
             }
             catch
             {

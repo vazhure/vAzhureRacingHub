@@ -28,7 +28,7 @@ namespace MotionPlatform3
         volatile float _heave = float.MaxValue;
         volatile float _pitch = float.MaxValue;
         volatile float _roll = float.MaxValue;
-
+        private MODE _oldMode;
         readonly NoiseFilter pitchFilter = new NoiseFilter(3);
         readonly NoiseFilter rollFilter = new NoiseFilter(3);
         readonly NoiseFilter heaveFilter = new NoiseFilter(3);
@@ -36,6 +36,9 @@ namespace MotionPlatform3
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            _oldMode = _plugin.settings.mode;
+            _plugin.settings.mode = MODE.Test;
+
             _heaveUnits = (_plugin.FrontAxisState.max - _plugin.FrontAxisState.min) / 2;
             sliderHeave.Minimum = -(int)_heaveUnits;
             sliderHeave.Maximum = (int)_heaveUnits;
@@ -81,6 +84,7 @@ namespace MotionPlatform3
             cancellationToken.Cancel();
             task.Wait(100);
 
+            _plugin.settings.mode = _oldMode;
             base.OnClosed(e);
             DoMove(0, 0, 0);
         }
