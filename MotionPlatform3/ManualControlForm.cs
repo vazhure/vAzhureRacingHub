@@ -1,5 +1,4 @@
-﻿using NoiseFilters;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -28,10 +27,16 @@ namespace MotionPlatform3
         volatile float _heave = float.MaxValue;
         volatile float _pitch = float.MaxValue;
         volatile float _roll = float.MaxValue;
+
         private MODE _oldMode;
-        readonly NoiseFilter pitchFilter = new NoiseFilter(3);
-        readonly NoiseFilter rollFilter = new NoiseFilter(3);
-        readonly NoiseFilter heaveFilter = new NoiseFilter(3);
+
+        PosFilter pitchFilter;
+        PosFilter rollFilter;
+        PosFilter heaveFilter;
+
+        float minSpeedMM = 0.1f;
+        float minSpeedAngularX = 0.1f;
+        float minSpeedAngularY = 0.1f;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -48,6 +53,14 @@ namespace MotionPlatform3
             // Maximum calculated rig angle sideway
             float maxAngleX = _plugin.settings.MaxRollAngle * 57.3f;
 
+            minSpeedMM = 20f / Math.Max(_plugin.settings.ActuatorTravelMM, 1);
+            minSpeedAngularX = 2f / maxAngleX;
+            minSpeedAngularY = 2f / maxAngleY;
+
+            pitchFilter = new PosFilter(0, minSpeedAngularY);
+            rollFilter = new PosFilter(0, minSpeedAngularX);
+            heaveFilter = new PosFilter(0, minSpeedMM);
+
             sliderPitch.Minimum = (int)(-maxAngleY * 100f);
             sliderPitch.Maximum = (int)(maxAngleY * 100f);
 
@@ -57,24 +70,24 @@ namespace MotionPlatform3
             _stepsPerMM = _plugin.settings.StepsPerMM;
             task = Task.Run(() =>
             {
-                    while (!cancellationToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    try
                     {
-                        try
+                        if (Math.Abs(pitch - _pitch) > float.Epsilon
+                            || Math.Abs(roll - _roll) > float.Epsilon
+                            || Math.Abs(heave - _heave) > float.Epsilon)
                         {
-                            if (Math.Abs(pitch - _pitch) > float.Epsilon
-                                || Math.Abs(roll - _roll) > float.Epsilon
-                                || Math.Abs(heave - _heave) > float.Epsilon)
-                            {
-                                _pitch = pitchFilter.Filter(pitch);
-                                _roll = rollFilter.Filter(roll);
-                                _heave = heaveFilter.Filter(heave);
-                                UpdateLabels();
-                                DoMove(_pitch, _roll, _heave);
-                            }
+                            _pitch = (float)pitchFilter.UpdatePosition(pitch);  // [-1..1]
+                            _roll = (float)rollFilter.UpdatePosition(roll);     // [-1..1]
+                            _heave = (float)heaveFilter.UpdatePosition(heave);  // [-1..1]
+                            UpdateLabels();
+                            DoMove(_pitch, _roll, _heave);
                         }
-                        catch { }
-                        Thread.Sleep(10);
                     }
+                    catch { }
+                    Thread.Sleep(15);
+                }
             }, cancellationToken.Token);
             chkReducedSpeed.Checked = true;
         }
@@ -134,10 +147,15 @@ namespace MotionPlatform3
 
         private void ChkReducedSpeed_OnSwitch(object sender, EventArgs e)
         {
+            // Maximum calculated rig angle forward
+            float maxAngleY = _plugin.settings.MaxPitchAngle * 57.3f;
+            // Maximum calculated rig angle sideway
+            float maxAngleX = _plugin.settings.MaxRollAngle * 57.3f;
+
             bool bReduced = chkReducedSpeed.Checked;
-            pitchFilter.MaxInputDelta = bReduced ? 0.01f : 1f;
-            rollFilter.MaxInputDelta = bReduced ? 0.01f : 1f;
-            heaveFilter.MaxInputDelta = bReduced ? 0.01f : 1f;
+            pitchFilter.SetSpeed(bReduced ? minSpeedAngularY : _plugin.settings.OpenXRMotionCompensationAngularSpeed / maxAngleY);
+            rollFilter.SetSpeed(bReduced ? minSpeedAngularX : _plugin.settings.OpenXRMotionCompensationAngularSpeed / maxAngleX);
+            heaveFilter.SetSpeed(bReduced ? minSpeedMM : 2f * _plugin.settings.SpeedOverride / _plugin.settings.ActuatorTravelMM);
         }
     }
 }
