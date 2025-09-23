@@ -54,32 +54,33 @@ namespace vAzhureRacingAPI
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            switch (e.KeyCode)
-            {
-                case Keys.Home:
-                    Value = m_min;
-                    break;
-                case Keys.End:
-                    Value = m_max;
-                    break;
-                case Keys.Left:
-                case Keys.Down:
-                    Value -= e.Shift ? 1 : m_stepSmall;
-                    break;
-                case Keys.PageDown:
-                    Value -= m_stepBig;
-                    break;
-                case Keys.PageUp:
-                    Value += m_stepBig;
-                    break;
-                case Keys.Right:
-                case Keys.Up:
-                    Value += e.Shift ? 1 : m_stepSmall;
-                    break;
-                default:
-                    base.OnKeyDown(e);
-                    break;
-            }
+            if (e.Modifiers == Keys.None || e.Modifiers == Keys.Shift)
+                switch (e.KeyCode)
+                {
+                    case Keys.Home:
+                        Value = m_min;
+                        break;
+                    case Keys.End:
+                        Value = m_max;
+                        break;
+                    case Keys.Left:
+                    case Keys.Down:
+                        Value -= e.Modifiers == Keys.Shift ? m_stepBig : m_stepSmall;
+                        break;
+                    case Keys.PageDown:
+                        Value -= m_stepBig;
+                        break;
+                    case Keys.PageUp:
+                        Value += m_stepBig;
+                        break;
+                    case Keys.Right:
+                    case Keys.Up:
+                        Value += e.Modifiers == Keys.Shift ? m_stepBig : m_stepSmall;
+                        break;
+                    default:
+                        base.OnKeyDown(e);
+                        break;
+                }
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
@@ -195,6 +196,18 @@ namespace vAzhureRacingAPI
 
         protected override Size DefaultSize => new Size(100, cBallSize);
 
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+            Invalidate();
+        }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+            Invalidate();
+        }
+
         /// <summary>
         /// Отрисовка слайдера
         /// </summary>
@@ -204,7 +217,6 @@ namespace vAzhureRacingAPI
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             Rectangle rcClient = ClientRectWOPading;
-
 
             if (m_bVertical)
             {
@@ -218,14 +230,15 @@ namespace vAzhureRacingAPI
                 Rectangle rcSlider = new Rectangle(rcClient.Left + (rcClient.Width - dia) / 2, rcClient.Top, dia, dia);
                 rcSlider.Offset(0, (int)p);
 
-                using (Brush brSemitransparent = new SolidBrush(Color.FromArgb(127, 255, 255, 255)))
-                using (Brush brSlider = new SolidBrush(m_SliderColor))
-                using (Pen penShadow = new Pen(Color.FromArgb(m_SliderColor.R / 2, m_SliderColor.G / 2, m_SliderColor.B / 2), 0))
+                using (var brSemitransparent = new SolidBrush(Color.FromArgb(127, 255, 255, 255)))
+                using (var brSlider = new SolidBrush(m_SliderColor))
+                using (var penShadow = new Pen(Color.FromArgb(m_SliderColor.R / 2, m_SliderColor.G / 2, m_SliderColor.B / 2), 0))
+                using (var penHighLight = new Pen(Color.LightGray, 0))
                 {
                     e.Graphics.FillRoundedRect(brSemitransparent, rcMid, cH / 2);
                     e.Graphics.FillRoundedRect(brSlider, rcActive, dH / 2);
                     e.Graphics.FillEllipse(brSlider, rcSlider);
-                    e.Graphics.DrawEllipse(penShadow, rcSlider);
+                    e.Graphics.DrawEllipse(Focused? penHighLight: penShadow, rcSlider);
                 }
             }
             else
@@ -240,14 +253,15 @@ namespace vAzhureRacingAPI
                 Rectangle rcSlider = new Rectangle(rcClient.Left, rcClient.Top + (rcClient.Height - dia) / 2, dia, dia);
                 rcSlider.Offset((int)p, 0);
 
-                using (Brush brSemitransparent = new SolidBrush(Color.FromArgb(127, 255, 255, 255)))
-                using (Brush brSlider = new SolidBrush(m_SliderColor))
-                using (Pen penShadow = new Pen(Color.FromArgb(m_SliderColor.R / 2, m_SliderColor.G / 2, m_SliderColor.B / 2), 0))
+                using (var brSemitransparent = new SolidBrush(Color.FromArgb(127, 255, 255, 255)))
+                using (var brSlider = new SolidBrush(m_SliderColor))
+                using (var penShadow = new Pen(Color.FromArgb(m_SliderColor.R / 2, m_SliderColor.G / 2, m_SliderColor.B / 2), 0))
+                using (var penHighLight = new Pen(Color.LightGray, 0))
                 {
                     e.Graphics.FillRoundedRect(brSemitransparent, rcMid, cH / 2);
                     e.Graphics.FillRoundedRect(brSlider, rcActive, dH / 2);
                     e.Graphics.FillEllipse(brSlider, rcSlider);
-                    e.Graphics.DrawEllipse(penShadow, rcSlider);
+                    e.Graphics.DrawEllipse(Focused ? penHighLight : penShadow, rcSlider);
                 }
             }
         }
