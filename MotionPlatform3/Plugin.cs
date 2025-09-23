@@ -87,6 +87,9 @@ namespace MotionPlatform3
             return true;
         }
 
+        /// <summary>
+        /// Motion compensation rig pose
+        /// </summary>
         private MotionRigPose rigPose;
 
         public bool Initialize(IVAzhureRacingApp app)
@@ -103,6 +106,10 @@ namespace MotionPlatform3
 #endif
 
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
+
+            posPitchFilter = new PosFilter(0, settings.OpenXRMotionCompensationAngularSpeed * Math.PI / 180f); // rad / sec
+            posRollFilter = new PosFilter(0, settings.OpenXRMotionCompensationAngularSpeed * Math.PI / 180f); // rad / sec
+            posHeaveFilter = new PosFilter(0, settings.OpenXRMotionCompensationLinearSpeed); // mm / sec
 
             //CalculateLegPos(1f, 1f, 0f);
 
@@ -624,6 +631,9 @@ namespace MotionPlatform3
             Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
+
+        PosFilter posPitchFilter, posRollFilter, posHeaveFilter;
+
         /// <summary>
         /// 
         /// </summary>
@@ -653,7 +663,9 @@ namespace MotionPlatform3
             float rollAngle = (float)Math.Atan2(z - heaveMM * 2f, froll) * settings.LimitRollAngle;
 
             if (settings.OpenXRMotionCompensation && DeviceEnabled && IsConnected && IsDeviceReady)
-                rigPose?.SetPose(pitch * pitchAngle, roll * rollAngle, Math.Sign(heave) * heaveMM);
+            {
+                rigPose?.SetPose(posPitchFilter.UpdatePosition(pitch * pitchAngle), posRollFilter.UpdatePosition(roll * rollAngle), posHeaveFilter.UpdatePosition(Math.Sign(heave) * heaveMM));
+            }
 
             Vector3[] cornersZero = {
                     new Vector3(-x, y, 0),  // FL
@@ -1103,7 +1115,9 @@ namespace MotionPlatform3
         /// <summary>
         /// Enable or disable OpenXR Motion Compensation
         /// </summary>
-        public bool OpenXRMotionCompensation { get; set; } = true;
+        public bool OpenXRMotionCompensation { get; set; } = false;
+        public float OpenXRMotionCompensationAngularSpeed { get; set; } = 10f;
+        public float OpenXRMotionCompensationLinearSpeed { get; set; } = 100f;
 
         /// <summary>
         /// Returns max angle for Pitch, radians

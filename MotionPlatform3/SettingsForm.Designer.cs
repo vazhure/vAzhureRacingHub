@@ -410,7 +410,7 @@ namespace MotionPlatform3
             // sliderSpeed
             // 
             this.sliderSpeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderSpeed.BigStep = 10;
+            this.sliderSpeed.BigStep = 5;
             this.sliderSpeed.Location = new System.Drawing.Point(602, 116);
             this.sliderSpeed.Maximum = 100;
             this.sliderSpeed.Minimum = 10;
@@ -419,7 +419,7 @@ namespace MotionPlatform3
             this.sliderSpeed.Padding = new System.Windows.Forms.Padding(1);
             this.sliderSpeed.Size = new System.Drawing.Size(161, 29);
             this.sliderSpeed.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderSpeed.SmallStep = 5;
+            this.sliderSpeed.SmallStep = 1;
             this.sliderSpeed.Steps = 10;
             this.sliderSpeed.TabIndex = 10;
             this.toolTips.SetToolTip(this.sliderSpeed, "Speed override");
@@ -457,7 +457,7 @@ namespace MotionPlatform3
             // sliderPitch
             // 
             this.sliderPitch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderPitch.BigStep = 10;
+            this.sliderPitch.BigStep = 5;
             this.sliderPitch.Location = new System.Drawing.Point(602, 186);
             this.sliderPitch.Maximum = 200;
             this.sliderPitch.Minimum = 0;
@@ -466,7 +466,7 @@ namespace MotionPlatform3
             this.sliderPitch.Padding = new System.Windows.Forms.Padding(1);
             this.sliderPitch.Size = new System.Drawing.Size(161, 29);
             this.sliderPitch.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderPitch.SmallStep = 5;
+            this.sliderPitch.SmallStep = 1;
             this.sliderPitch.Steps = 10;
             this.sliderPitch.TabIndex = 16;
             this.toolTips.SetToolTip(this.sliderPitch, "Pitch ratio");
@@ -484,9 +484,6 @@ namespace MotionPlatform3
             this.labelPitch.TabIndex = 15;
             this.labelPitch.Text = "Pitch";
             this.toolTips.SetToolTip(this.labelPitch, "Forward/backward");
-            this.labelPitch.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
-            this.labelPitch.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
-            this.labelPitch.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
             // 
             // lblSpeed
             // 
@@ -511,7 +508,7 @@ namespace MotionPlatform3
             // sliderRoll
             // 
             this.sliderRoll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderRoll.BigStep = 10;
+            this.sliderRoll.BigStep = 5;
             this.sliderRoll.Location = new System.Drawing.Point(602, 221);
             this.sliderRoll.Maximum = 200;
             this.sliderRoll.Minimum = 0;
@@ -520,7 +517,7 @@ namespace MotionPlatform3
             this.sliderRoll.Padding = new System.Windows.Forms.Padding(1);
             this.sliderRoll.Size = new System.Drawing.Size(161, 29);
             this.sliderRoll.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderRoll.SmallStep = 5;
+            this.sliderRoll.SmallStep = 1;
             this.sliderRoll.Steps = 10;
             this.sliderRoll.TabIndex = 20;
             this.toolTips.SetToolTip(this.sliderRoll, "Roll ratio");
@@ -538,9 +535,6 @@ namespace MotionPlatform3
             this.labelRoll.TabIndex = 19;
             this.labelRoll.Text = "Roll";
             this.toolTips.SetToolTip(this.labelRoll, "Left/right");
-            this.labelRoll.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
-            this.labelRoll.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
-            this.labelRoll.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
             // 
             // lblRoll
             // 
@@ -555,7 +549,7 @@ namespace MotionPlatform3
             // sliderHeave
             // 
             this.sliderHeave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderHeave.BigStep = 10;
+            this.sliderHeave.BigStep = 5;
             this.sliderHeave.Location = new System.Drawing.Point(602, 256);
             this.sliderHeave.Maximum = 200;
             this.sliderHeave.Minimum = 0;
@@ -564,7 +558,7 @@ namespace MotionPlatform3
             this.sliderHeave.Padding = new System.Windows.Forms.Padding(1);
             this.sliderHeave.Size = new System.Drawing.Size(161, 29);
             this.sliderHeave.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderHeave.SmallStep = 5;
+            this.sliderHeave.SmallStep = 1;
             this.sliderHeave.Steps = 10;
             this.sliderHeave.TabIndex = 24;
             this.toolTips.SetToolTip(this.sliderHeave, "Heave ratio");
@@ -582,9 +576,6 @@ namespace MotionPlatform3
             this.labelHeave.TabIndex = 23;
             this.labelHeave.Text = "Heave";
             this.toolTips.SetToolTip(this.labelHeave, "Up/down");
-            this.labelHeave.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseDown);
-            this.labelHeave.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseMove);
-            this.labelHeave.MouseUp += new System.Windows.Forms.MouseEventHandler(this.OnLabelMouseUp);
             // 
             // lblHeave
             // 
@@ -599,7 +590,7 @@ namespace MotionPlatform3
             // sliderSurge
             // 
             this.sliderSurge.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderSurge.BigStep = 10;
+            this.sliderSurge.BigStep = 5;
             this.sliderSurge.Location = new System.Drawing.Point(602, 291);
             this.sliderSurge.Maximum = 200;
             this.sliderSurge.Minimum = 0;
@@ -608,7 +599,7 @@ namespace MotionPlatform3
             this.sliderSurge.Padding = new System.Windows.Forms.Padding(1);
             this.sliderSurge.Size = new System.Drawing.Size(161, 29);
             this.sliderSurge.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderSurge.SmallStep = 5;
+            this.sliderSurge.SmallStep = 1;
             this.sliderSurge.Steps = 10;
             this.sliderSurge.TabIndex = 28;
             this.toolTips.SetToolTip(this.sliderSurge, "Surge ratio");
@@ -640,7 +631,7 @@ namespace MotionPlatform3
             // sliderSway
             // 
             this.sliderSway.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderSway.BigStep = 10;
+            this.sliderSway.BigStep = 5;
             this.sliderSway.Location = new System.Drawing.Point(602, 326);
             this.sliderSway.Maximum = 200;
             this.sliderSway.Minimum = 0;
@@ -649,7 +640,7 @@ namespace MotionPlatform3
             this.sliderSway.Padding = new System.Windows.Forms.Padding(1);
             this.sliderSway.Size = new System.Drawing.Size(161, 29);
             this.sliderSway.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderSway.SmallStep = 5;
+            this.sliderSway.SmallStep = 1;
             this.sliderSway.Steps = 10;
             this.sliderSway.TabIndex = 32;
             this.toolTips.SetToolTip(this.sliderSway, "Sway ratio");
@@ -761,7 +752,7 @@ namespace MotionPlatform3
             // sliderOveralEffects
             // 
             this.sliderOveralEffects.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderOveralEffects.BigStep = 10;
+            this.sliderOveralEffects.BigStep = 5;
             this.sliderOveralEffects.Location = new System.Drawing.Point(602, 151);
             this.sliderOveralEffects.Maximum = 100;
             this.sliderOveralEffects.Minimum = 0;
@@ -770,7 +761,7 @@ namespace MotionPlatform3
             this.sliderOveralEffects.Padding = new System.Windows.Forms.Padding(1);
             this.sliderOveralEffects.Size = new System.Drawing.Size(161, 29);
             this.sliderOveralEffects.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderOveralEffects.SmallStep = 5;
+            this.sliderOveralEffects.SmallStep = 1;
             this.sliderOveralEffects.Steps = 10;
             this.sliderOveralEffects.TabIndex = 13;
             this.toolTips.SetToolTip(this.sliderOveralEffects, "Overal effects override");
@@ -842,7 +833,7 @@ namespace MotionPlatform3
             // sliderSmooth
             // 
             this.sliderSmooth.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderSmooth.BigStep = 10;
+            this.sliderSmooth.BigStep = 5;
             this.sliderSmooth.Location = new System.Drawing.Point(602, 361);
             this.sliderSmooth.Maximum = 100;
             this.sliderSmooth.Minimum = 0;
@@ -851,7 +842,7 @@ namespace MotionPlatform3
             this.sliderSmooth.Padding = new System.Windows.Forms.Padding(1);
             this.sliderSmooth.Size = new System.Drawing.Size(161, 29);
             this.sliderSmooth.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderSmooth.SmallStep = 5;
+            this.sliderSmooth.SmallStep = 1;
             this.sliderSmooth.Steps = 10;
             this.sliderSmooth.TabIndex = 36;
             this.toolTips.SetToolTip(this.sliderSmooth, "Input filtering ratio");
@@ -919,7 +910,7 @@ namespace MotionPlatform3
             // sliderGearEffect
             // 
             this.sliderGearEffect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.sliderGearEffect.BigStep = 10;
+            this.sliderGearEffect.BigStep = 5;
             this.sliderGearEffect.Location = new System.Drawing.Point(602, 396);
             this.sliderGearEffect.Maximum = 100;
             this.sliderGearEffect.Minimum = 0;
@@ -928,7 +919,7 @@ namespace MotionPlatform3
             this.sliderGearEffect.Padding = new System.Windows.Forms.Padding(1);
             this.sliderGearEffect.Size = new System.Drawing.Size(161, 29);
             this.sliderGearEffect.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
-            this.sliderGearEffect.SmallStep = 5;
+            this.sliderGearEffect.SmallStep = 1;
             this.sliderGearEffect.Steps = 10;
             this.sliderGearEffect.TabIndex = 39;
             this.toolTips.SetToolTip(this.sliderGearEffect, "Gear change effect ratio");

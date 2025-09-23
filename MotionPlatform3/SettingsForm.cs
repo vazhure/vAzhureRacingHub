@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MotionPlatform3
 {
@@ -123,11 +124,12 @@ namespace MotionPlatform3
             chkMotionCompensation.Checked = _plugin.settings.OpenXRMotionCompensation;
 
             lblOpenXRStatus.ForeColor = MotionRigPose.IsOpenXR ? Color.LightGreen : Color.White;
-            lblOpenXRStatus.Text = MotionRigPose.IsOpenXR ? "OpenXR Compensation installed" : "OpenXR Compensation not installed";
+            lblOpenXRStatus.Text = MotionRigPose.IsOpenXR ? "OpenXR Compensation is active" : "OpenXR Compensation is not active";
 
             bool bconfigured = MotionRigPose.IsOpenXRCompensationConfigured;
             lblOpenXRConfigured.ForeColor = bconfigured ? Color.LightGreen : Color.White;
             btnPathOpenXRConfig.Enabled = !bconfigured;
+            lblOpenXRConfigured.Text = bconfigured ? "OpenXR Compensation is configured" : "OpenXR Compensation is not configured";
 
             chkCollect.Checked = _plugin.settings.mode == MODE.CollectingGameData;
             sliderOveralEffects.Value = _plugin.settings.OveralCoefficient;
@@ -417,66 +419,6 @@ namespace MotionPlatform3
             //}
         }
 
-        Label mouseControl = null;
-        Point ptDown = new Point();
-
-        private void OnLabelMouseDown(object sender, MouseEventArgs e)
-        {
-            if (_plugin.settings.mode != MODE.Test)
-            {
-                mouseControl = sender as Label;
-                ptDown = e.Location;
-                oldMode = _plugin.settings.mode;
-                _plugin.settings.mode = MODE.Test;
-            }
-        }
-
-        private void OnLabelMouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.Button.HasFlag(MouseButtons.Left))
-            {
-                if (mouseControl != null)
-                {
-                    float dX = Math2.Clamp(e.X - ptDown.X, -100, 100);
-                    float dY = Math2.Clamp(e.Y - ptDown.Y, -100, 100);
-                    float delta = (Math.Abs(dX) > Math.Abs(dY) ? dX : dY) / 100.0f;
-
-                    switch (mouseControl.Name)
-                    {
-                        case "labelHeave":
-                            _plugin.DoHeave(delta);
-                            break;
-                        case "labelPitch":
-                            _plugin.DoPitch(delta);
-                            break;
-                        case "labelRoll":
-                            _plugin.DoRoll(delta);
-                            break;
-                    }
-                }
-            }
-            else
-                mouseControl = null;
-        }
-
-        private void OnLabelMouseUp(object sender, MouseEventArgs e)
-        {
-            _plugin.settings.mode = oldMode;
-            switch (mouseControl?.Name)
-            {
-                case "labelHeave":
-                    _plugin.DoHeave(0);
-                    break;
-                case "labelPitch":
-                    _plugin.DoPitch(0);
-                    break;
-                case "labelRoll":
-                    _plugin.DoRoll(0);
-                    break;
-            }
-            mouseControl = null;
-        }
-
         private void BtnSpeedSettings_Click(object sender, EventArgs e)
         {
             using (SpeedSettings settings = new SpeedSettings(_plugin))
@@ -558,14 +500,14 @@ namespace MotionPlatform3
 
         private void BtnPathOpenXRConfig(object sender, EventArgs e)
         {
-            bool bconf = MotionRigPose.PathOpenXRConfig();
+            bool bconf = MotionRigPose.PatchOpenXRConfig();
             lblOpenXRConfigured.ForeColor = bconf ? Color.LightGreen : Color.White;
             btnPathOpenXRConfig.Enabled = !bconf;
         }
 
         private void OnDownloadOpenXRCompensation(object sender, EventArgs e)
         {
-
+            System.Diagnostics.Process.Start("https://github.com/BuzzteeBear/OpenXR-MotionCompensation/releases/latest");
         }
     }
 

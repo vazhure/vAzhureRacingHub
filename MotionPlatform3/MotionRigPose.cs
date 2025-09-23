@@ -121,7 +121,7 @@ namespace MotionPlatform3
         /// Path OpenXR Configuration file
         /// </summary>
         /// <returns></returns>
-        public static bool PathOpenXRConfig()
+        public static bool PatchOpenXRConfig()
         {
             if (File.Exists(IniFilePath))
             {
@@ -251,7 +251,12 @@ namespace MotionPlatform3
         /// <param name="speed">Max value change Units per second </param>
         public PosFilter(double initialTarget, double speed)
         {
-            _target = initialTarget;
+            Initialize(initialTarget, speed);
+        }
+
+        public void Initialize(double initialTarget, double speed)
+        {
+            _position = _target = initialTarget;
             _speed = speed;
             _prevTime = DateTime.MinValue;
         }
