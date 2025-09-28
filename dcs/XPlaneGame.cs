@@ -14,9 +14,10 @@ namespace DCS
 {
     public class XPlaneGame : IGamePlugin
     {
-        public string Name => "X-Plane 11";
+        private int Version { get; set; } = 11; 
+        public string Name => $"X-Plane {Version}";
 
-        public uint SteamGameID => 269950U;
+        public uint SteamGameID => Version == 11 ? 269950U : 2014780;
 
         public string[] ExecutableProcessName => new[] { "X-Plane" };
 
@@ -40,8 +41,9 @@ namespace DCS
 
         public static readonly string sXPlaneMMFName = @"Local\XPlaneMotionData";
 
-        public XPlaneGame()
+        public XPlaneGame(int version = 11)
         {
+            Version = version;
             dataSet = new TelemetryDataSet(this);
 
             monitor = new ProcessMonitor(ExecutableProcessName);
@@ -49,12 +51,15 @@ namespace DCS
             {
                 if (bRunning)
                 {
-                    customSharedMemClient = new CustomSharedMemClient();
-                    customSharedMemClient.StartThread();
-                    customSharedMemClient.OnUserFunc += delegate(object sender, EventArgs ea)
+                    if (Version == 11)
                     {
-                        ProcessSharedMemory();
-                    };
+                        customSharedMemClient = new CustomSharedMemClient();
+                        customSharedMemClient.StartThread();
+                        customSharedMemClient.OnUserFunc += delegate (object sender, EventArgs ea)
+                        {
+                            ProcessSharedMemory();
+                        };
+                    }
                 }
                 else
                 {
@@ -120,7 +125,7 @@ namespace DCS
 
         public Icon GetIcon()
         {
-            return Properties.Resources.X_Plane;
+            return Version == 11 ? Properties.Resources.X_Plane : Properties.Resources.X_Plane12;
         }
 
         readonly string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

@@ -21,15 +21,18 @@ namespace DCS
         }
 
         private DCSGame game;
-        private XPlaneGame xPlaneGame;
+        private XPlaneGame xPlaneGame11;
+        private XPlaneGame xPlaneGame12;
 
         public bool Initialize(IVAzhureRacingApp app)
         {
             game = new DCSGame();
-            xPlaneGame = new XPlaneGame();
+            xPlaneGame11 = new XPlaneGame();
+            xPlaneGame12 = new XPlaneGame(12);
 
             app.RegisterGame(game);
-            app.RegisterGame(xPlaneGame);
+            app.RegisterGame(xPlaneGame11);
+            app.RegisterGame(xPlaneGame12);
 
             return true;
         }
@@ -38,7 +41,8 @@ namespace DCS
         {
             game.Stop();
             game.Dispose();
-            xPlaneGame.Stop();
+            xPlaneGame11.Stop();
+            xPlaneGame12.Stop();
         }
     }
 }
