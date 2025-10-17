@@ -114,11 +114,13 @@ namespace BusBound
                             carData.Gear = (short)(telemetry.Bus.Data.Engine.Data.Gear + 1);
                             carData.RPM = telemetry.Bus.Data.Engine.Data.RPM;
                             carData.MaxRPM = telemetry.Bus.Data.Engine.Data.MaxRPM;
-                            carData.Speed = Math.Abs(telemetry.Bus.Data.SpeedCMS * 3.6f);
+                            carData.Speed = Math.Abs(telemetry.Bus.Data.SpeedCMS * 0.036f);
                             carData.Throttle = telemetry.Bus.Data.Throttle;
                             carData.Brake = telemetry.Bus.Data.Brake;
+                            carData.Clutch = 1f;
 
                             carData.Electronics = CarElectronics.None;
+                            dataSet.WeatherData.AmbientTemp = telemetry.Bus.Data.Temperature;
 
                             if (telemetry.Bus.Data.IsFarLightOn)
                                 carData.Electronics |= CarElectronics.Headlight;
@@ -134,9 +136,9 @@ namespace BusBound
 
                             carData.MotionData = new AMMotionData()
                             {
-                                Sway = -(float)telemetry.Bus.Data.LocalAcceleration.y / 98.1f,
-                                Surge = (float)telemetry.Bus.Data.LocalAcceleration.x / 98.1f,
-                                Heave = (float)telemetry.Bus.Data.LocalAcceleration.z / 98.1f,
+                                Sway = -(float)telemetry.Bus.Data.LocalAcceleration.y / 1000f,
+                                Surge = (float)telemetry.Bus.Data.LocalAcceleration.x / 1000f,
+                                Heave = (float)telemetry.Bus.Data.LocalAcceleration.z / 1000f,
                                 Yaw = (float)(telemetry.Bus.Data.Rotation.yaw / 180.0f),
                                 Pitch = (float)(telemetry.Bus.Data.Rotation.pitch / 180.0f),
                                 Roll = (float)(telemetry.Bus.Data.Rotation.roll / 180.0f),
