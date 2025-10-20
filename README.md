@@ -16,6 +16,7 @@ Supported Game Titles:
 * Project Cars 2
 * Automobilista 1
 * Automobilista 2
+* Bus Bound Demo
 * Dirt 4
 * Dirt Rally
 * Dirt Rally 2
