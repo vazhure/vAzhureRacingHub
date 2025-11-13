@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Drawing;
 using vAzhureRacingAPI;
+using static System.Net.WebRequestMethods;
 
 namespace KunosPlugin
 {
     internal class GamePlugin : IGamePlugin
     {
-        public enum GameID { AC, ACC, ACEVO };
+        public enum GameID { AC, ACC, ACEVO, ACRALLY };
         public readonly GameID gameID = GameID.ACC;
 
         public TelemetryDataSet DataSet { get; private set; }
@@ -31,6 +32,7 @@ namespace KunosPlugin
                     case GameID.AC: return "Assetto Corsa";
                     case GameID.ACEVO: return "Assetto Corsa EVO";
                     case GameID.ACC: return "Assetto Corsa Competizione";
+                    case GameID.ACRALLY: return "Assetto Corsa Rally";
                 }
            }
         }
@@ -46,6 +48,7 @@ namespace KunosPlugin
                     case GameID.AC: return 244210U;
                     case GameID.ACEVO: return 3058630U;
                     case GameID.ACC: return 805550U;
+                    case GameID.ACRALLY: return 3917090U;
                 }
             }
         }
@@ -60,6 +63,7 @@ namespace KunosPlugin
                     case GameID.AC: return new string[] { "acs", "acs_x86" };
                     case GameID.ACEVO: return new string[] { "AssettoCorsaEVO" };
                     case GameID.ACC: return new string[] { "acc", "AC2-Win64-Shipping"};
+                    case GameID.ACRALLY:return new string[] { "acr" };
                 }
             }
         }
@@ -112,6 +116,7 @@ namespace KunosPlugin
                 case GameID.AC: return Properties.Resources.AssettoCorsa;
                 case GameID.ACEVO: return Properties.Resources.evo;
                 case GameID.ACC: return Properties.Resources.acc;
+                case GameID.ACRALLY: return Properties.Resources.acr;
             }
         }
 

@@ -40,6 +40,7 @@ namespace KunosPlugin
         readonly GamePlugin acc = new GamePlugin(GamePlugin.GameID.ACC);
         readonly GamePlugin ac = new GamePlugin(GamePlugin.GameID.AC);
         readonly GamePlugin acevo = new GamePlugin(GamePlugin.GameID.ACEVO);
+        readonly GamePlugin acrally = new GamePlugin(GamePlugin.GameID.ACRALLY);
 
         GameListener listener;
         public bool Initialize(IVAzhureRacingApp app)
@@ -47,12 +48,13 @@ namespace KunosPlugin
             app.RegisterGame(ac);
             app.RegisterGame(acevo);
             app.RegisterGame(acc);
+            app.RegisterGame(acrally);
 
             string filename = Path.Combine(AssemblyPath, cKunosData);
 
             sVechicleInfo = VechicleInfo.Load(filename);
 
-            listener = new GameListener(new GamePlugin[] { ac, acc, acevo });
+            listener = new GameListener(new GamePlugin[] { ac, acc, acevo, acrally });
             listener.StartThread();
 
             return true;
