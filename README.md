@@ -10,6 +10,7 @@ Application for Sim Racing Games. Supporting plugins and external devices via Se
 Supported Game Titles:
 * Assetto Corsa
 * Assetto Corsa EVO
+* Assetto Corsa Rally
 * Assetto Corsa Competizione
 * American Truck Simulator
 * Euro Truck Simulator 2
