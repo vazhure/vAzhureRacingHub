@@ -29,7 +29,7 @@ namespace ProjectMotorSports
             {
                 return false;
             }
-            
+
             return true;
         }
 
@@ -82,7 +82,7 @@ namespace ProjectMotorSports
                 sessionInfo.TrackConfig = raceinfo.m_layout;
                 sessionInfo.TrackName = raceinfo.m_track;
                 sessionInfo.TotalLapsCount = raceinfo.m_isLaps ? (int)raceinfo.m_duration : -1;
-                sessionInfo.RemainingTime = raceinfo.m_isLaps ?  -1 : (int)raceinfo.m_duration;
+                sessionInfo.RemainingTime = raceinfo.m_isLaps ? -1 : (int)(raceinfo.m_duration * 1000f);
                 sessionInfo.TrackLength = raceinfo.m_layoutLength;
 
                 AMWeatherData weatherData = TelemetryData.WeatherData;
@@ -94,7 +94,8 @@ namespace ProjectMotorSports
                     case UDPRaceSessionState.Active:
                         {
                             sessionInfo.SessionState = raceinfo.m_session.ToUpper();
-                        }break;
+                        }
+                        break;
                     case UDPRaceSessionState.Complete:
                         {
                             sessionInfo.SessionState = "Finish";
@@ -121,18 +122,18 @@ namespace ProjectMotorSports
                     sessionInfo.CurrentPosition = participant.m_racePos;
                     sessionInfo.CurrentLapNumber = participant.m_currentLap;
                     sessionInfo.Sector = participant.m_currentSector;
-                    sessionInfo.CurrentLapTime = (int)participant.m_currentLapTime;
-                    sessionInfo.CurrentLapTime = (int)participant.m_bestLapTime;
+                    sessionInfo.CurrentLapTime = (int)(participant.m_currentLapTime * 1000f);
+                    sessionInfo.BestLapTime = (int)(participant.m_bestLapTime * 1000f);
                     sessionInfo.CurrentLapNumber = participant.m_currentLap;
 
-                    if (participant.m_sectorTimes.Count == 2)
+                    if (participant.m_sectorTimes.Count == 3)
                     {
-                        sessionInfo.CurrentSector1Time = (int)participant.m_sectorTimes[0];
-                        sessionInfo.CurrentSector2Time = (int)participant.m_sectorTimes[1];
-                        sessionInfo.CurrentSector3Time = (int)participant.m_sectorTimes[2];
-                        sessionInfo.Sector1BestTime = (int)participant.m_bestSectorTimes[0];
-                        sessionInfo.Sector2BestTime = (int)participant.m_bestSectorTimes[1];
-                        sessionInfo.Sector3BestTime = (int)participant.m_bestSectorTimes[2];
+                        sessionInfo.CurrentSector1Time = (int)(participant.m_sectorTimes[0] * 1000f);
+                        sessionInfo.CurrentSector2Time = (int)(participant.m_sectorTimes[1] * 1000f);
+                        sessionInfo.CurrentSector3Time = (int)(participant.m_sectorTimes[2] * 1000f);
+                        sessionInfo.Sector1BestTime = (int)(participant.m_bestSectorTimes[0] * 1000f);
+                        sessionInfo.Sector2BestTime = (int)(participant.m_bestSectorTimes[1] * 1000f);
+                        sessionInfo.Sector3BestTime = (int)(participant.m_bestSectorTimes[2] * 1000f);
                     }
 
                     carData.InPits = participant.m_inPits;
@@ -220,13 +221,13 @@ namespace ProjectMotorSports
 
                     vechicle.m_chassis.m_quat.GetYawPitchRoll(out float yaw, out float pitch, out float roll);
 
-                    motionData.Pitch = 0.5f * pitch / (float)Math.PI;
+                    motionData.Roll = pitch / (float)Math.PI;
                     motionData.Yaw = yaw / (float)Math.PI;
-                    motionData.Roll = 0.5f * roll / (float)Math.PI;
+                    motionData.Pitch = roll / (float)Math.PI;
 
-                    motionData.Sway = vechicle.m_chassis.m_accelerationLS.x / 30f;
-                    motionData.Heave = vechicle.m_chassis.m_accelerationLS.y / 30f;
-                    motionData.Surge = vechicle.m_chassis.m_accelerationLS.z / 30f;
+                    motionData.Sway = -vechicle.m_chassis.m_accelerationLS.z / 50f;
+                    motionData.Heave = vechicle.m_chassis.m_accelerationLS.y / 50f;
+                    motionData.Surge = vechicle.m_chassis.m_accelerationLS.x / 50f;
 
                     carData.AbsLevel = vechicle.m_setup.m_absLevel;
                     carData.TcLevel = vechicle.m_setup.m_tcsLevel;
