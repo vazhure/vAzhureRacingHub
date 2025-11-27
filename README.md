@@ -1,6 +1,6 @@
 # vAzhureRacingHub
 Application for Sim Racing Games. Supporting plugins and external devices via Serial Port
-![vAzhureRacingHub 09 06 2025 10_18_37](https://github.com/user-attachments/assets/d6042b7d-de50-4852-86ec-7aa70b714e90)
+<img width="889" height="558" alt="vAzhureRacingHub 27 11 2025 16_03_26" src="https://github.com/user-attachments/assets/1d60eeab-c7cd-442a-994e-a08c35fa50bb" />
 ![vAzhureRacingHub 09 06 2025 10_17_12](https://github.com/user-attachments/assets/35255aae-dcd6-4079-a659-d69bf89b591e)
 ![vAzhureRacingHub 09 06 2025 10_17_53](https://github.com/user-attachments/assets/7deeaa70-29cc-43f3-b8a1-4128373b133d)
 ![vAzhureRacingHub 09 06 2025 10_18_06](https://github.com/user-attachments/assets/861ae3d0-353d-4d71-b789-5ca2b0d0682a)
@@ -14,7 +14,6 @@ Supported Game Titles:
 * Assetto Corsa Competizione
 * American Truck Simulator
 * Euro Truck Simulator 2
-* Project Cars 2
 * Automobilista 1
 * Automobilista 2
 * Bus Bound Demo
@@ -36,6 +35,9 @@ Supported Game Titles:
 * KartKraft
 * Kart Racing Pro
 * Le Mans Ultimate
+* Project Cars 2
+* Project Cars 3
+* Project Motor Racing Game
 * Race 07
 * RaceRoom Racing Experience
 * rFactor
