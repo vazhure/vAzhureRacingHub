@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace ProjectMotorSports
 {
     internal class UDPThread : IDisposable
     {
-        static IPEndPoint m_endPoint = null;
-        static IPAddress m_multicastGroup = null;
-        static UdpClient m_udpClient = null;
-        static bool m_multiCast = true;
-        static readonly int m_defaultPort = 7576;
-        static readonly string m_defaultMulticastGroup = "224.0.0.150";
-        public readonly static UInt16 m_expectedVersion = 1;
+        private IPEndPoint m_endPoint = null;
+        private IPAddress m_multicastGroup = null;
+        private UdpClient m_udpClient = null;
+        private readonly bool m_multiCast = true;
+        public const int cDefaultPort = 7576;
+        public const string cDefaultMulticastGroup = "224.0.0.150";
+        public const UInt16 cExpectedVersion = 1;
+        private readonly int m_port = cDefaultPort;
+        private readonly string m_sMulticastGroup = cDefaultMulticastGroup;
 
         public EventHandler<UDPRaceInfo> OnRaceInfo;
         public EventHandler<UDPVehicleTelemetry> OnVehicleTelemetry;
@@ -27,45 +28,76 @@ namespace ProjectMotorSports
             get => m_dataStore;
         }
 
-        public UDPThread( string[] args)
+        public UDPThread(int port = cDefaultPort, string multicastGroup = cDefaultMulticastGroup, bool bMulticast = true)
         {
-            m_multiCast = GetOptionValue<bool>(args, "multicast", true);
-            int port = GetOptionValue<int>(args, "port", m_defaultPort);
-            string multicastGroup = GetOptionValue<string>(args, "multicast_group", m_defaultMulticastGroup);
+            m_multiCast = bMulticast;
+            m_port = port;
+            m_sMulticastGroup = multicastGroup;
+        }
+
+        private bool m_bRunning = false;
+
+        public void Start()
+        {
+            m_dataStore = new DataStore();
 
             if (m_multiCast)
             {
-                m_udpClient = new UdpClient(port);
-                m_multicastGroup = IPAddress.Parse(multicastGroup);
-                m_endPoint = new IPEndPoint(m_multicastGroup, port);
+                m_udpClient = new UdpClient(m_port)
+                {
+                    DontFragment = true
+                };
+
+                m_multicastGroup = IPAddress.Parse(m_sMulticastGroup);
+                m_endPoint = new IPEndPoint(m_multicastGroup, m_port);
                 m_udpClient.JoinMulticastGroup(m_multicastGroup);
             }
             else
             {
-                m_endPoint = new IPEndPoint(IPAddress.Any, port);
+                m_endPoint = new IPEndPoint(IPAddress.Any, m_port);
                 m_udpClient = new UdpClient(m_endPoint);
+            }
+
+            m_bRunning = true;
+            m_udpClient.BeginReceive(new AsyncCallback(OnUdpData), m_udpClient);
+        }
+
+        public void Stop()
+        {
+            m_bRunning = false;
+            try
+            {
+                m_udpClient?.Dispose();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                m_udpClient = null;
+                m_endPoint = null;
             }
         }
 
-        private T GetOptionValue<T>(string[] args, string option, T defaultValue)
+        private void OnUdpData(IAsyncResult result)
         {
-            foreach (string s in args)
+            if (m_bRunning && m_udpClient != null)
             {
-                if (s.Contains(option))
+                try
                 {
-                    string[] split = s.Split('=');
-                    if (split.Length > 1)
-                    {
-                        return (T)Convert.ChangeType(split[1], typeof(T));
-                    }
-                    else
-                    {
-                        return defaultValue;
-                    }
+                    byte[] bytes = m_udpClient.EndReceive(result, ref m_endPoint);
+
+                    DecodePacket(ref bytes);
+                }
+                catch
+                {
+                }
+                finally
+                {
+                    m_udpClient?.BeginReceive(new AsyncCallback(OnUdpData), m_udpClient);
                 }
             }
-
-            return defaultValue;
         }
 
         private void DecodePacket(ref byte[] data)
@@ -93,57 +125,9 @@ namespace ProjectMotorSports
             m_dataStore.WriteTimestamp();
         }
 
-        private void DoWork(object thread)
-        {
-            // Create an endpoint to store the sender's address
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-
-            while (!m_aborted)
-            {
-                // Receive data from a client
-                try
-                {
-                    byte[] data = m_udpClient.Receive(ref sender);
-                    DecodePacket(ref data);
-                }
-                catch (SocketException)
-                {
-                    OnUdpClosed?.Invoke(this, EventArgs.Empty);
-                }
-            }
-        }
-
-        public void StartThread()
-        {
-            m_aborted = false;
-            m_dataStore = new DataStore();
-            m_updateThread = new Thread(new ParameterizedThreadStart(DoWork));
-            m_updateThread.Start(this);
-        }
-
-        public void StopThread()
-        {
-            if (!m_aborted)
-            {
-                m_aborted = true;
-                try
-                {
-                    if (!m_updateThread.Join(1000))
-                    {
-                        m_updateThread.Abort();
-                    }
-                }
-                catch { }
-                m_dataStore = new DataStore();
-            }
-        }
-
         public void Dispose()
         {
-            m_udpClient?.Close();
+            Stop();
         }
-
-        private volatile bool m_aborted = false;
-        private Thread m_updateThread;
     }
 }

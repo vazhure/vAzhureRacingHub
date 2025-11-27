@@ -167,25 +167,6 @@ namespace ProjectMotorSports
             {
                 UDPParticipantRaceState curr = m_raceStates[i];
                 UDPParticipantRaceState prev = m_prevRaceStates[i];
-
-                if (curr.m_vehicleId == prev.m_vehicleId)
-                {
-                    if (curr.m_currentSector != prev.m_currentSector)
-                    {
-                        updates.Add(string.Format("{0} finished sector {1} in {2:0.00} seconds!\r\n", curr.m_driverName, prev.m_currentSector + 1, prev.m_sectorTimes[prev.m_currentSector]));
-                    }
-
-                    if (prev.m_currentLap > 0 && curr.m_currentLap != prev.m_currentLap)
-                    {
-                        updates.Add(string.Format("{0} finished lap {1} in {2:0.00} seconds!\r\n", curr.m_driverName, prev.m_currentLap, prev.m_currentLapTime));
-                    }
-
-                    if (curr.m_sessionFinished && !prev.m_sessionFinished)
-                    {
-                        updates.Add(string.Format("{0} finished session with a best lap of {1:0.00} seconds!\r\n", curr.m_driverName, curr.m_bestLapTime));
-                    }
-
-                }
             }
 
             return updates;

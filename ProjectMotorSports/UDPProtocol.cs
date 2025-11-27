@@ -8,6 +8,53 @@ namespace ProjectMotorSports
     // PROTOCOL START
     ///////////////////////////////////////////////////////////////////////////////////////
 
+    /// <summary>
+    /// Wheel material enum
+    /// </summary>
+    public enum WheelMaterial
+    {
+        ROAD_CSM = 0x191ED,
+        ROADAV_CSM = 0x1FCF4,
+        ROADP_CSM = 0x1C95F,
+        CONC_CSM = 0x1909F,
+        CONCS_CSM = 0x1C982,
+        ROADC_CSM = 0x1C320,
+        RUNOFFROAD_CSM = 0x2DCC1,
+        LGROAD_CSM = 0x1FAF9,
+        B1ROAD_CSM = 0x1DD03,
+        B2ROAD_CSM = 0x1DD7B,
+        B3ROAD_CSM = 0x1DDF3,
+        DAMROAD1_CSM = 0x244FE,
+        COBBLES_CSM = 0x22C56,
+        B1COBBLES_CSM = 0x279D4,
+        RMBL_CSM = 0x19546,
+        RMBM_CSM = 0x195C0,
+        RMBH_CSM = 0x1935E,
+        H1RMBL_CSM = 0x1E334,
+        RUBRMBL_CSM = 0x2395B,
+        DRAIN_CSM = 0x1C5B1,
+        MARBLES_CSM = 0x231FC,
+        GCRETE_CSM = 0x1FB9F,
+        ASTRO_CSM = 0x1D284,
+        GRASS_CSM = 0x1CE41,
+        GRV_CSM = 0x166DB,
+        SAND_CSM = 0x191F9,
+        DIRT_CSM = 0x19844,
+        BDIRT_CSM = 0x1C927,
+        RSAND1_CSM = 0x1E39D,
+        RSAND2_CSM = 0x1E419,
+        TWALL_CSM = 0x1CFF1,
+        CWALL_CSM = 0x1C80A,
+        GRDR_CSM = 0x1964F,
+        FNCE_CSM = 0x18D4D,
+        TPRO_CSM = 0x1A09A,
+        SWALL_CSM = 0x1CF7A,
+        ICE_CSM = 0x158B8,
+        CAR_CARBON = 0x1F329,
+        CAR_PLASTIC = 0x230AB,
+        CAR_STEEL = 0x1C6B1
+    }
+
     //
     // packet type
     enum UDPPacketType
@@ -28,6 +75,16 @@ namespace ProjectMotorSports
         Inactive = 0,
         Active = 1,
         Complete = 2
+    };
+
+    //
+    // flag types
+    public enum UDPFlagType : byte
+    {
+        ChequeredFlag = 0,
+        YellowFlag = 1,
+        WhiteFlag = 2,
+        BlueFlag = 3
     };
 
     public class UDPRaceInfo
@@ -63,7 +120,7 @@ namespace ProjectMotorSports
             }
             else
             {
-                Console.WriteLine("Failed version check! Expected version: {0} - Got Version: {1}", m_expectedPacketVersion, p.m_packetVersion);
+                //
             }
 
             return p;
@@ -181,7 +238,7 @@ namespace ProjectMotorSports
             }
             else
             {
-                Console.WriteLine("Failed version check! Expected version: {0} - Got Version: {1}", m_expectedPacketVersion, p.m_packetVersion);
+                //Console.WriteLine("Failed version check! Expected version: {0} - Got Version: {1}", m_expectedPacketVersion, p.m_packetVersion);
             }
 
             return p;
@@ -229,8 +286,6 @@ namespace ProjectMotorSports
 
         public static UInt16 m_expectedPacketVersion = 1;
     };
-
-
 
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -288,36 +343,36 @@ namespace ProjectMotorSports
         Int32 m_contactMaterialHash = 0;
 
         // wheel data
-        float m_angVel = 0.0f;
-        float m_linearSpeed = 0.0f;
+        public float m_angVel = 0.0f;
+        public float m_linearSpeed = 0.0f;
 
         // tyre data
-        UDPVec3 m_slideLS;
-        UDPVec3 m_forceLS;
-        UDPVec3 m_momentLS;
-        float m_contactRadius = 0.0f;
-        float m_pressure = 0.0f;
-        float m_inclination = 0.0f;
-        float m_slipRatio = 0.0f;
-        float m_slipAngle = 0.0f;
+        public UDPVec3 m_slideLS;
+        public UDPVec3 m_forceLS;
+        public UDPVec3 m_momentLS;
+        public float m_contactRadius = 0.0f;
+        public float m_pressure = 0.0f;
+        public float m_inclination = 0.0f;
+        public float m_slipRatio = 0.0f;
+        public float m_slipAngle = 0.0f;
 
         // thermodynamics data
-        UDPVec3 m_tread;
-        float m_carcass = 0.0f;
-        float m_internalAir = 0.0f;
-        float m_wellAir = 0.0f;
-        float m_rim = 0.0f;
-        float m_brake = 0.0f;
+        public UDPVec3 m_tread;
+        public float m_carcass = 0.0f;
+        public float m_internalAir = 0.0f;
+        public float m_wellAir = 0.0f;
+        public float m_rim = 0.0f;
+        public float m_brake = 0.0f;
 
         // suspension data
-        float m_springStrain = 0.0f;
-        float m_damperVelocity = 0.0f;
+        public float m_springStrain = 0.0f;
+        public float m_damperVelocity = 0.0f;
 
         // drivetrain data
-        float m_hubTorque = 0.0f;
-        float m_hubPower = 0.0f;
-        float m_wheelTorque = 0.0f;
-        float m_wheelPower = 0.0f;
+        public float m_hubTorque = 0.0f;
+        public float m_hubPower = 0.0f;
+        public float m_wheelTorque = 0.0f;
+        public float m_wheelPower = 0.0f;
 
         internal static UDPVehicleTelemetryWheel Decode(ref byte[] data, ref int dataIdx)
         {
@@ -732,7 +787,7 @@ namespace ProjectMotorSports
             }
             else
             {
-                Console.WriteLine("Failed version check! Expected version: {0} - Got Version: {1}", m_expectedPacketVersion, p.m_packetVersion);
+                //Console.WriteLine("Failed version check! Expected version: {0} - Got Version: {1}", m_expectedPacketVersion, p.m_packetVersion);
             }
 
             return p;
