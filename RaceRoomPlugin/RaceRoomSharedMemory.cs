@@ -1,9 +1,4 @@
-﻿///
-/// [r3e]: http://game.raceroom.com/
-/// [vs2013]: https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx
-/// [data]: https://github.com/sector3studios/r3e-spectator-overlay/blob/master/r3e-data.json
-
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace RaceRoom.Structs
@@ -12,19 +7,32 @@ namespace RaceRoom.Structs
     {
         public const string SharedMemoryName = "$R3E";
 
-        enum VersionMajor
+        public enum VersionMajor
         {
             // Major version number to test against
-            R3E_VERSION_MAJOR = 2
+            R3E_VERSION_MAJOR = 3
         };
 
-        enum VersionMinor
+        public enum VersionMinor
         {
             // Minor version number to test against
-            R3E_VERSION_MINOR = 6
+            R3E_VERSION_MINOR = 4
         };
 
-        public enum Session : int
+        public enum GameMode
+        {
+            Unavailable = -1,
+            TrackTest = 0,
+            LeaderboardChallenge = 1,
+            Competition = 2,
+            SingleRace = 3,
+            Championship = 4,
+            Multiplayer = 5,
+            MultiplayerRanked = 6, // not impl currently
+            TryBeforeYouBuy = 7,
+        };
+
+        public enum Session
         {
             Unavailable = -1,
             Practice = 0,
@@ -93,16 +101,19 @@ namespace RaceRoom.Structs
             Completed = 4,
         };
 
-        enum PitStopStatus
+        public enum PitStopStatus
         {
             // No mandatory pitstops
             Unavailable = -1,
 
-            // Mandatory pitstop not served yet
-            Unserved = 0,
+            // Mandatory pitstop for two tyres not served yet
+            UnservedTwoTyres = 0,
+
+            // Mandatory pitstop for four tyres not served yet
+            UnservedFourTyres = 1,
 
             // Mandatory pitstop served
-            Served = 1,
+            Served = 2,
         };
 
         public enum FinishStatus
@@ -156,16 +167,17 @@ namespace RaceRoom.Structs
             Fuel = 3,
             Fronttires = 4,
             Reartires = 5,
-            Frontwing = 6,
-            Rearwing = 7,
-            Suspension = 8,
+            Body = 6,
+            Frontwing = 7,
+            Rearwing = 8,
+            Suspension = 9,
 
             // Pit menu buttons
-            ButtonTop = 9,
-            ButtonBottom = 10,
+            ButtonTop = 10,
+            ButtonBottom = 11,
 
             // Pit menu nothing selected
-            Max = 11
+            Max = 12
         };
 
         public enum TireType
@@ -185,6 +197,17 @@ namespace RaceRoom.Structs
             Hard = 4
         };
 
+        public enum MtrlType
+        {
+            Unavailable = -1,
+            None = 0,
+            Tarmac = 1,
+            Grass = 2,
+            Dirt = 3,
+            Gravel = 4,
+            Rumble = 5
+        };
+
         public enum EngineType
         {
             COMBUSTION = 0,
@@ -199,10 +222,6 @@ namespace RaceRoom.Structs
         public T Race1;
         public T Race2;
         public T Race3;
-        public T[] ToArray()
-        {
-            return new T[] { Race1, Race2, Race3 };
-        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -211,11 +230,6 @@ namespace RaceRoom.Structs
         public T X;
         public T Y;
         public T Z;
-
-        public T[] ToArray()
-        {
-            return new T[] { X, Y, Z };
-        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -224,10 +238,6 @@ namespace RaceRoom.Structs
         public T Pitch;
         public T Yaw;
         public T Roll;
-        public T[] ToArray()
-        {
-            return new T[] { Pitch, Yaw, Roll };
-        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -236,15 +246,14 @@ namespace RaceRoom.Structs
         public T Sector1;
         public T Sector2;
         public T Sector3;
-        public T[] ToArray()
-        {
-            return new T[] { Sector1, Sector2, Sector3 };
-        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct PlayerData
     {
+        // Player user id
+        public Int32 UserId;
+
         // Virtual physics time
         // Unit: Ticks (1 tick = 1/400th of a second)
         public Int32 GameSimulationTicks;
@@ -319,11 +328,15 @@ namespace RaceRoom.Structs
         public Double FrontWingHeight;
         public Double FrontRollAngle;
         public Double RearRollAngle;
+        public Double ThirdSpringSuspensionDeflectionFront;
+        public Double ThirdSpringSuspensionVelocityFront;
+        public Double ThirdSpringSuspensionDeflectionRear;
+        public Double ThirdSpringSuspensionVelocityRear;
 
         // Reserved data
         public Double Unused1;
         public Double Unused2;
-        public Vector3<Double> Unused3;
+        public Double Unused3;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -446,6 +459,7 @@ namespace RaceRoom.Structs
         public Int32 Fuel;
         public Int32 FrontTires;
         public Int32 RearTires;
+        public Int32 Body;
         public Int32 FrontWing;
         public Int32 RearWing;
         public Int32 Suspension;
@@ -458,11 +472,12 @@ namespace RaceRoom.Structs
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct CutTrackPenalties
     {
-        public Int32 DriveThrough;
-        public Int32 StopAndGo;
-        public Int32 PitStop;
-        public Int32 TimeDeduction;
-        public Int32 SlowDown;
+        // -1.0 = none pending, otherwise penalty time dep on penalty type (drive-through active = 0.0, stop-and-go = time to stay, slow-down = time left to give back etc))
+        public Single DriveThrough;
+        public Single StopAndGo;
+        public Single PitStop;
+        public Single TimeDeduction;
+        public Single SlowDown;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -558,9 +573,14 @@ namespace RaceRoom.Structs
         public Int32 ClassPerformanceIndex;
         // Note: See the EngineType enum
         public Int32 EngineType;
+        public Single CarWidth;
+        public Single CarLength;
+        public Single Rating;
+        public Single Reputation;
 
-        public Int32 Unused1;
-        public Int32 Unused2;
+        // Reserved data
+        public Single Unused1;
+        public Single Unused2;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -573,6 +593,7 @@ namespace RaceRoom.Structs
         // Based on performance index
         public Int32 PlaceClass;
         public Single LapDistance;
+        public Single LapDistanceFraction;
         public Vector3<Single> Position;
         public Int32 TrackSector;
         public Int32 CompletedLaps;
@@ -606,6 +627,9 @@ namespace RaceRoom.Structs
         public Int32 DrsState;
         public Int32 PtpState;
 
+        // -1.0 unavailable, 0.0 - 1.0 tank factor
+        public Single VirtualEnergy;
+
         // -1 unavailable, DriveThrough = 0, StopAndGo = 1, Pitstop = 2, Time = 3, Slowdown = 4, Disqualify = 5,
         public Int32 PenaltyType;
 
@@ -627,7 +651,8 @@ namespace RaceRoom.Structs
         // StopAndGoPenaltyCutTrack1st = 1,
         // StopAndGoPenaltyCutTrackMult = 2,
         // StopAndGoPenaltyYellowFlagOvertake = 3,
-        // StopAndGoPenaltyMax = 4
+        // StopAndGoPenaltyVirtualEnergy = 4,
+        // StopAndGoPenaltyMax = 5
 
         // PitstopPenaltyInvalid = 0,
         // PitstopPenaltyIgnoredPitstopWindow = 1,
@@ -661,11 +686,17 @@ namespace RaceRoom.Structs
         // DisqualifyPenaltyMax = 14
         public Int32 PenaltyReason;
 
+        // -1 unavailable, 0 = ignition off, 1 = ignition on but not running, 2 = ignition on and starter running, 3 = ignition on and running
+        public Int32 EngineState;
+
+        // Car body orientation
+        // Unit: Euler angles
+        public Vector3<Single> Orientation;
+
         // Reserved data
-        public Int32 Unused1;
-        public Int32 Unused2;
+        public Single Unused1;
+        public Single Unused2;
         public Single Unused3;
-        public Single Unused4;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -683,6 +714,7 @@ namespace RaceRoom.Structs
         // Game State
         //////////////////////////////////////////////////////////////////////////
 
+        public Int32 GameMode; // Note: See the R3E.Constant.GameMode enum
         public Int32 GamePaused;
         public Int32 GameInMenus;
         public Int32 GameInReplay;
@@ -771,8 +803,11 @@ namespace RaceRoom.Structs
         public Single SessionTimeDuration;
         public Single SessionTimeRemaining;
 
+        // Server max incident points, -1 = N/A
+        public Int32 MaxIncidentPoints;
+
         // Reserved data
-        public Int32 EventUnused1;
+        public Single EventUnused1;
         public Single EventUnused2;
 
         //////////////////////////////////////////////////////////////////////////
@@ -805,15 +840,14 @@ namespace RaceRoom.Structs
         public Single PitTotalDuration;
         public Single PitElapsedTime;
 
-        // Current vehicle pit action (-1 = N/A, 0 = None, 1 = Preparing, (combination of 2 = Penalty serve, 4 = Driver change, 8 = Refueling, 16 = Front tires, 32 = Rear tires, 64 = Front wing, 128 = Rear wing, 256 = Suspension))
+        // Current vehicle pit action (-1 = N/A, 0 = None, 1 = Preparing, (combination of 2 = Penalty serve, 4 = Driver change, 8 = Refueling, 16 = Front tires, 32 = Rear tires, 64 = Body, 128 = Front wing, 256 = Rear wing, 512 = Suspension))
         public Int32 PitAction;
 
         // Number of pitstops the current vehicle has performed (-1 = N/A)
         public Int32 NumPitstopsPerformed;
 
-        // Reserved data
-        public Int32 PitUnused1;
-        public Single PitUnused2;
+        public Single PitMinDurationTotal;
+        public Single PitMinDurationLeft;
 
         //////////////////////////////////////////////////////////////////////////
         // Scoring & Timings
@@ -881,12 +915,17 @@ namespace RaceRoom.Structs
         public Sectors<Single> BestIndividualSectorTimeSelf;
         public Sectors<Single> BestIndividualSectorTimeLeader;
         public Sectors<Single> BestIndividualSectorTimeLeaderClass;
+        public Int32 IncidentPoints;
+
+        // -1 = N/A, 0 = this and next lap valid, 1 = this lap invalid, 2 = this and next lap invalid
+        public Int32 LapValidState;
+        // -1 = N/A, 0 = invalid, 1 = valid
+        public Int32 PrevLapValid;
 
         // Reserved data
-        public Int32 ScoreUnused1;
-        public Int32 ScoreUnused2;
-        public Single ScoreUnused3;
-        public Single ScoreUnused4;
+        public Single Unused1;
+        public Single Unused2;
+        public Single Unused3;
 
         //////////////////////////////////////////////////////////////////////////
         // Vehicle information
@@ -936,9 +975,15 @@ namespace RaceRoom.Structs
         public Single FuelLeft;
         public Single FuelCapacity;
         public Single FuelPerLap;
+        // Unit: Mega-Joule (MJ)
+        // Note: -1.0f when not enough data, then max recorded virtual energy per lap
+        // Note: Not valid for remote players
+        public Single VirtualEnergyLeft;
+        public Single VirtualEnergyCapacity;
+        public Single VirtualEnergyPerLap;
         // Unit: Celsius (C)
         // Note: Not valid for AI or remote players
-        public Single EngineWaterTemp;
+        public Single EngineTemp;
         public Single EngineOilTemp;
         // Unit: Kilopascals (KPa)
         // Note: Not valid for AI or remote players
@@ -993,12 +1038,27 @@ namespace RaceRoom.Structs
         // Note: Not valid for AI or remote players
         public Single BrakeBias;
 
+        // DRS activations available in total (-1 = N/A or endless)
+        public Int32 DrsNumActivationsTotal;
+        // PTP activations available in total (-1 = N/A, or there's no restriction per lap, or endless)
+        public Int32 PtpNumActivationsTotal;
+
+        // Battery state of charge
+        // Range: 0.0 - 100.0 (-1.0 = N/A)
+        public Single BatterySoC;
+
+        // Brake water tank (-1.0 = N/A)
+        // Unit: Liters (l)
+        public Single WaterLeft;
+
+        // -1.0 = N/A
+        public Int32 AbsSetting;
+
+        // -1 = N/A or dont exist on car, 0 = ignition off or headlights off, 1 = on, 2 = strobing
+        public Int32 HeadLights;
+
         // Reserved data
-        public Int32 VehicleUnused1;
-        public Int32 VehicleUnused2;
-        public Single VehicleUnused3;
-        public Single VehicleUnused4;
-        Orientation<Single> VehicleUnused5;
+        public Single VehicleUnused1;
 
         //////////////////////////////////////////////////////////////////////////
         // Tires
@@ -1020,7 +1080,7 @@ namespace RaceRoom.Structs
         public TireData<Single> TireWear;
         // (-1 = N/A, 0 = false, 1 = true)
         public TireData<Int32> TireFlatspot;
-        // Unit: Kilo-pascals (KPa) (-1.0 = N/A)
+        // Unit: Kilopascals (KPa) (-1.0 = N/A)
         // Note: Not valid for AI or remote players
         public TireData<Single> TirePressure;
         // Percentage of dirt on tire (-1.0 = N/A)
@@ -1056,12 +1116,17 @@ namespace RaceRoom.Structs
         // Note: Not valid for AI or remote players
         public TireData<Single> BrakePressure;
 
-        // Reserved data
-        public Int32 TireUnused1;
-        public Int32 TireUnused2;
-        public Single TireUnused3;
-        public Single TireUnused4;
-        public TireData<Single> TireUnused5;
+        // -1.0 = N/A
+        public Int32 TractionControlSetting;
+        public Int32 EngineMapSetting;
+        public Int32 EngineBrakeSetting;
+
+        // -1.0 = N/A, 0.0 -> 100.0 percent
+        public Single TractionControlPercent;
+
+        // Which type of material under player car tires (tarmac, gravel, etc.)
+        // Note: See the R3E.Constant.MtrlType enum
+        public TireData<Int32> TireOnMtrl;
 
         // Tire load (N)
         // -1.0 = N/A
@@ -1085,18 +1150,6 @@ namespace RaceRoom.Structs
         // Contains name and basic vehicle info for all drivers in place order
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
         public DriverData[] DriverData;
-
-        public static RaceRoomSharedMemory FromBytes(byte[] bytes)
-        {
-            try
-            {
-                GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-                RaceRoomSharedMemory stuff = (RaceRoomSharedMemory)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(RaceRoomSharedMemory));
-                handle.Free();
-                return stuff;
-            }
-            catch { return new RaceRoomSharedMemory(); }
-        }
 
         /// <summary>
         /// Returns length of structure in bytes
