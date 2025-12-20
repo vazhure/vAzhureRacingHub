@@ -1,0 +1,5 @@
+using OpenXR in ACC, AC, rFactor 2 (for motion compensation and performance) 
+Replace (backup first) openvr_api.dll in the folders:
+Assetto Corsa Competizione\Engine\Binaries\ThirdParty\OpenVR\OpenVRv1_5_17\Win64\openvr_api.dll
+assettocorsa\system\x64\openvr_api.dll 
+rFactor 2\Bin64\openvr_api.dl
