@@ -1,0 +1,5 @@
+Download LibOVRRT64_1.dll (64-bit) or LibOVRRT32_1.dll (32-bit) from Releases.
+Copy the dll file to the root folder of game:
+Example: [Drive]:\SteamLibrary\steamapps\common\Automobilista 2\
+Set Oculus as active OpenXR runtime.
+Start the game in SteamVR mode.
