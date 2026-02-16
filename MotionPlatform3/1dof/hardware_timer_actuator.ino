@@ -1,7 +1,9 @@
-// 3DOF by Andrey Zhuravlev - MODIFIED FOR TIMER-BASED STEPPING
+// 3DOF by Andrey Zhuravlev - MODIFIED FOR TIMER-BASED STEPPING by Boss Baby
 // e-mail: v.azhure@gmail.com
 // version from 2025-06-21
 // stm32duino version
+// version from 2026-02-16 by Boss Baby
+// Hardware timer version
 
 // NOTE: select fake STM32F103C8
 // https://www.stm32duino.com/
