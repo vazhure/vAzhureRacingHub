@@ -1,16 +1,20 @@
-// 3DOF by Andrey Zhuravlev - MODIFIED FOR TIMER-BASED STEPPING
+// 3DOF by Andrey Zhuravlev - MODIFIED FOR TIMER-BASED STEPPING 
 // e-mail: v.azhure@gmail.com
-// version from 2025-06-21
+// version from 2026-02-16 by Boss Baby
+// Important!!!
+// Check:
+// LED_PIN 
+// MM_PER_REV - distance in mm per revolution
+// MAX_REVOLUTIONS - total travel distance devided by MM_PER_REV
+// STEPS_PER_REVOLUTIONS - Steps per revolution, decreased from 2000 to 1000 to accomadate slower STM32s
 // stm32duino version
 
-// NOTE: select fake STM32F103C8
-// https://www.stm32duino.com/
+// NOTE: select fake STM32F103C8 or Generik STM32F103C series, CPU Speed 74Mhz, upload method STLink, Optimize Fast (-O1)
 
 //#define INVERTED_DIR
 
 //#define DEBUG
-// Board: STM32F103C8T6 5 pcs (master + 4 slave)
-// Upload: SWD
+
 #define I2C_SDA PB7
 #define I2C_SCL PB6
 #include <Wire_slave.h>
@@ -19,9 +23,8 @@
 // Uncomment this line if you using SF1610
 #define SFU1610 // Used only in SLAVE devices
 
-// Uncomment this line to flash MASTER device
-// Comment this line to flash SLAVE devices
-//#define I2CMASTER
+// Uncomment line below to flash MASTER device
+//#define I2CMASTER //!!!Comment this line to flash SLAVE devices
 
 // Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
@@ -61,7 +64,7 @@ const T& clamp(const T& x, const T& a, const T& b) {
 //#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-//#define SLAVE_ADDR SLAVE_ADDR_FR
+#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -70,7 +73,7 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #define SERIAL_TX_BUFFER_SIZE 512
 #define SERIAL_RX_BUFFER_SIZE 512
 
-#define LED_PIN PC13 // * Check your board. Some have PB2 or another (label near LED).
+#define LED_PIN PB2 //PC13 // * Check your board. Some have PB2 or another (label near LED).
 
 enum MODE : uint8_t { UNKNOWN,
                       CONNECTED,
@@ -103,7 +106,7 @@ enum FLAGS : uint8_t { NONE = 0,
 struct STATE {
   MODE mode;
   FLAGS flags;
-  uint8_t speedMMperSEC;
+  uint8_t speedMMperSEC; // issue: max speed limited by byte (255) -> change to uint16_t
   int32_t currentpos;
   int32_t targetpos;
   int32_t min;
@@ -161,6 +164,7 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
 
   attachInterrupt(ALARM_PIN, OnAlarm, RISING);
+  //Wire.setClock(400000); // ✅ 400 kHz Fast Mode
   Wire.begin();
   delay(1000);
   int nFound = 0;
@@ -326,12 +330,12 @@ const uint8_t limiterPinNC = PA7;
 
 #define ANALOG_INPUT_MAX 4095
 
-uint32_t accel = 25000;  // Acceleration in mm/s² (25000 mm/s² = 2.55 g)
+volatile uint32_t accel = 25000;  // Acceleration in mm/s² (25000 mm/s² = 2.55 g)
 #define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4  // Distance in steps
 
 #ifdef SFU1610
 const float MM_PER_REV = 10.0f;                                // distance in mm per revolution
-const float MAX_REVOLUTIONS = 14.0;                            // maximum revolutions for ballscrew (adjust depending on custom length, 14 = 140mm)
+const float MAX_REVOLUTIONS = 8.5;                            // maximum revolutions for ballscrew (adjust depending on custom length, 14 = 140mm)
 const int32_t STEPS_PER_REVOLUTIONS = 1000;                    // Steps per revolution, decreased from 2000 to 1000 to accomadate slower STM32s
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 4;  // Safe traveling distance in steps
 #define MAX_SPEED_MM_SEC 400  // maximum speed mm/sec
@@ -354,8 +358,8 @@ const uint8_t HOME_DIRECTION = HIGH;
 
 #define MMPERSEC2DELAY(mmps) 1000000 / (STEPS_PER_REVOLUTIONS * mmps / MM_PER_REV)
 
-#define MIN_SPEED_MM_SEC 10
-#define SLOW_SPEED_MM_SEC 10
+#define MIN_SPEED_MM_SEC 15
+#define SLOW_SPEED_MM_SEC 15
 #define DEFAULT_SPEED_MM_SEC 90
 
 #ifndef MAX
@@ -590,7 +594,7 @@ void receiveEvent(int size) {
 void requestEvent() {
   if (mode == MODE::UNKNOWN)
     mode = MODE::CONNECTED;
-  STATE state = { mode, (FLAGS)((limitSwitchState == HIGH ? FLAGS::STATE_ON_LIMIT_SWITCH : 0) | (bHomed ? FLAGS::STATE_HOMED : 0)), (uint8_t)iFastPulseDelayMM, currentPos, targetPos, MIN_POS, MAX_POS };
+  STATE state = { mode, (FLAGS)((limitSwitchState == HIGH ? FLAGS::STATE_ON_LIMIT_SWITCH : 0) | (bHomed ? FLAGS::STATE_HOMED : 0)), (uint8_t)min(255, iFastPulseDelayMM), currentPos, targetPos, MIN_POS, MAX_POS };
   Wire.write((uint8_t*)&state, STATE_LEN);
 }
 
@@ -614,6 +618,7 @@ void setup() {
   // Initialize timer-based stepping
   initStepTimer();
   
+  //Wire.setClock(400000); // ✅ 400 kHz Fast Mode
   Wire.begin(SLAVE_ADDR);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
