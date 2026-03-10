@@ -1201,7 +1201,7 @@ namespace MotionPlatform3
         /// <summary>
         /// Target speed, mm per second
         /// </summary>
-        public byte speedMMperSEC;
+        public ushort speedMMperSEC;
         /// <summary>
         /// Current position, pulses
         /// </summary>
