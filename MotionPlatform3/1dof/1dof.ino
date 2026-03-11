@@ -1,27 +1,29 @@
-// 3DOF by Andrey Zhuravlev
+// 3DOF by Andrey Zhuravlev - MODIFIED FOR TIMER-BASED STEPPING
 // e-mail: v.azhure@gmail.com
-// version from 2025-06-21
+// Mofified for timer-based-stepping using ISR (increases speed/performance) by Laith Wattar (https://github.com/lawattar)
+// modified version from 2026-03-10 : struct STATE speedMMperSEC uint8_t -> uint16_t. Overal length of struct not changed because of alignment
+// Important!!!
+// Check:
+// LED_PIN
+// MM_PER_REV - distance in mm per revolution
+// MAX_REVOLUTIONS - total travel distance devided by MM_PER_REV
+// STEPS_PER_REVOLUTIONS - Steps per revolution, decreased from 2000 to 1000 to accomadate slower STM32s
 // stm32duino version
 
-// NOTE: select fake STM32F103C8
-// https://www.stm32duino.com/
-
-//#define INVERTED_DIR
+// NOTE: select fake STM32F103C8 or Generik STM32F103C series, CPU Speed 74Mhz, upload method STLink, Optimize Fast (-O1)
 
 //#define DEBUG
-// Board: STM32F103C8T6 5 pcs (master + 4 slave)
-// Upload: SWD
+
 #define I2C_SDA PB7
 #define I2C_SCL PB6
 #include <Wire_slave.h>
 #include <stdio.h>
 
 // Uncomment this line if you using SF1610
-#define SFU1610 // Used only in SLAVE devices
+#define SFU1610  // Used only in SLAVE devices
 
-// Uncomment this line to flash MASTER device
-// Comment this line to flash SLAVE devices
-#define I2CMASTER
+// Uncomment line below to flash MASTER device
+//#define I2CMASTER //!!!Comment this line to flash SLAVE devices
 
 // Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
@@ -35,6 +37,10 @@
 
 #define SLAVE_FIRST SLAVE_ADDR_FL
 #define SLAVE_LAST (SLAVE_FIRST + LINEAR_ACTUATORS - 1)
+
+void allPinsPulldown() {
+  for (int pin = PA0; pin <= PC15; pin++) pinMode(pin, INPUT_PULLDOWN);
+}
 
 inline int WireRead(uint8_t* ptr, uint8_t len) {
   int cnt = Wire.available();
@@ -58,10 +64,10 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #ifndef I2CMASTER
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Uncomment a single line with desired Address to flash SLAVE device
-#define SLAVE_ADDR SLAVE_ADDR_FL
+//#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-//#define SLAVE_ADDR SLAVE_ADDR_FR
+#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -70,7 +76,7 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #define SERIAL_TX_BUFFER_SIZE 512
 #define SERIAL_RX_BUFFER_SIZE 512
 
-#define LED_PIN PC13 // * Check your board. Some have PB2 or another (label near LED).
+#define LED_PIN PC13 // PB2 // * Check your board. Some have PB2 or another (label near LED).
 
 enum MODE : uint8_t { UNKNOWN,
                       CONNECTED,
@@ -103,7 +109,7 @@ enum FLAGS : uint8_t { NONE = 0,
 struct STATE {
   MODE mode;
   FLAGS flags;
-  uint8_t speedMMperSEC;
+  uint16_t speedMMperSEC;  // issue: max speed limited by byte (255) -> change to uint16_t
   int32_t currentpos;
   int32_t targetpos;
   int32_t min;
@@ -155,12 +161,15 @@ void OnAlarm() {
 
 void setup() {
 
+  allPinsPulldown();
+
   pinMode(LED_PIN, OUTPUT);
   pinMode(ALARM_PIN, INPUT_PULLDOWN);
-  pinMode(SIGNAL_PIN, INPUT);
+  pinMode(SIGNAL_PIN, INPUT_PULLDOWN);
   digitalWrite(LED_PIN, HIGH);
 
   attachInterrupt(ALARM_PIN, OnAlarm, RISING);
+
   Wire.begin();
   delay(1000);
   int nFound = 0;
@@ -314,30 +323,29 @@ void loop() {
 
 volatile MODE mode;
 
-#ifdef INVERTED_DIR
-const uint32_t dirPin = PA5;
-const uint32_t stepPin = PA4;
-#else
 const uint32_t dirPin = PA4;
 const uint32_t stepPin = PA5;
-#endif
+
+const uint32_t STEP_PIN_BIT = stepPin - PA0;
+const uint32_t DIR_PIN_BIT = dirPin - PA0;
+
 const uint32_t limiterPinNO = PA6;
 const uint8_t limiterPinNC = PA7;
 
 #define ANALOG_INPUT_MAX 4095
 
-uint32_t accel = 10000;
+volatile uint32_t accel = 25000;                               // Acceleration in mm/s² (25000 mm/s² = 2.55 g)
 #define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4  // Distance in steps
 
 #ifdef SFU1610
 const float MM_PER_REV = 10.0f;                                // distance in mm per revolution
-const float MAX_REVOLUTIONS = 8.75;                            // maximum revolutions
-const int32_t STEPS_PER_REVOLUTIONS = 2000;                    // Steps per revolution
+const float MAX_REVOLUTIONS = 9.0f;                            // maximum revolutions for ballscrew (adjust depending on custom length, 14 = 140mm)
+const int32_t STEPS_PER_REVOLUTIONS = 1000;                    // Steps per revolution, decreased from 2000 to 1000 to accomadate slower STM32s
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 4;  // Safe traveling distance in steps
-#define MAX_SPEED_MM_SEC 240  // maximum speed mm/sec
+#define MAX_SPEED_MM_SEC 400  // maximum speed mm/sec
 #else
 const float MM_PER_REV = 5.0f;                                 // distance in mm per revolution
-const float MAX_REVOLUTIONS = 17.5;                            // maximum revolutions
+const float MAX_REVOLUTIONS = 18.0f;                            // maximum revolutions
 const int32_t STEPS_PER_REVOLUTIONS = 1000;                    // Steps per revolution
 const int32_t SAFE_DIST_IN_STEPS = STEPS_PER_REVOLUTIONS / 2;  // Safe traveling distance in steps
 #define MAX_SPEED_MM_SEC 120  // maximum speed mm/sec
@@ -348,14 +356,14 @@ const int32_t MIN_POS = SAFE_DIST_IN_STEPS;                                // mi
 const int32_t MAX_POS = RANGE - SAFE_DIST_IN_STEPS;                        // maximal controlled position, steps
 const uint8_t HOME_DIRECTION = HIGH;
 
-#define MIN_PULSE_DELAY 10  // Minimal pulse interval, us
+#define MIN_PULSE_DELAY 5  // Minimal pulse interval, us, may be limited by hardware.
 
 #define MIN_REVERSE_DELAY 6  // Delay between DIR and STEP signal on direction change, us
 
 #define MMPERSEC2DELAY(mmps) 1000000 / (STEPS_PER_REVOLUTIONS * mmps / MM_PER_REV)
 
-#define MIN_SPEED_MM_SEC 10
-#define SLOW_SPEED_MM_SEC 10
+#define MIN_SPEED_MM_SEC 15
+#define SLOW_SPEED_MM_SEC 15
 #define DEFAULT_SPEED_MM_SEC 90
 
 #ifndef MAX
@@ -372,40 +380,131 @@ const int SLOW_PULSE_DELAY = MAX(FAST_PULSE_DELAY * 2, (int)MMPERSEC2DELAY(SLOW_
 
 volatile int iFastPulseDelay = FAST_PULSE_DELAY;
 volatile int iSlowPulseDelay = SLOW_PULSE_DELAY;
-int iFastPulseDelayMM = MAX_SPEED_MM_SEC;
+int iFastPulseDelayMM = DEFAULT_SPEED_MM_SEC;
 
 volatile int32_t targetPos = (MIN_POS + MAX_POS) / 2;
 uint8_t limitSwitchState = HIGH;
 volatile bool bHomed = false;
-int32_t currentPos = 0;
-uint8_t _oldDir = LOW;  // previous DIR state
+volatile int32_t currentPos = 0;
+volatile uint8_t currentDir = LOW;
 
 volatile bool LimitChanged = true;
-uint32_t last_step_time = 0;
-double pulse = iSlowPulseDelay;
+volatile uint32_t accelStartTime = 0;  // Track when acceleration started
 
-inline void Step(uint8_t dir, int delay) {
-  if (limitSwitchState == HIGH && dir == HOME_DIRECTION)
-    return;  // ON LIMIT SWITCH
+// ========== TIMER-BASED STEPPING VARIABLES ==========
+HardwareTimer stepTimer(2);  // Timer 2 for Roger Clark core
+volatile bool steppingEnabled = false;
+volatile bool stepPinState = false;         // Track STEP pin state for pulse generation
+volatile uint32_t targetFrequency = 1000;   // Target step frequency in Hz
+volatile uint32_t currentFrequency = 1000;  // Current step frequency in Hz
+volatile uint32_t accelStepCount = 0;       // Steps taken for acceleration tracking
+// ====================================================
 
-  digitalWrite(dirPin, dir);
-  if (_oldDir != dir) {
-    last_step_time = 0;
-    delayMicroseconds(MIN_REVERSE_DELAY);
-    _oldDir = dir;
+// Convert mm/sec to step frequency (Hz)
+inline uint32_t mmPerSecToFreq(uint32_t mmPerSec) {
+  return (uint32_t)((float)STEPS_PER_REVOLUTIONS * (float)mmPerSec / MM_PER_REV);
+}
+
+// Convert delay (us) to frequency (Hz)
+inline uint32_t delayToFreq(uint32_t delayUs) {
+  if (delayUs < MIN_PULSE_DELAY) delayUs = MIN_PULSE_DELAY;
+  return 1000000 / (delayUs + MIN_PULSE_DELAY);
+}
+
+// ========== TIMER ISR - GENERATES STEP PULSES ==========
+void timerISR() {
+  // Check if we should stop stepping
+  if (!steppingEnabled || currentPos == targetPos) {
+    steppingEnabled = false;
+    GPIOA->regs->BSRR = (1 << (STEP_PIN_BIT + 16));  // Ensure STEP is LOW
+    stepPinState = false;
+    return;
   }
 
-  double delta = MIN(MAX((micros() - last_step_time), 1), iSlowPulseDelay);
+  // Check limit switch - stop if on limit and moving towards it
+  if (limitSwitchState == HIGH && currentDir == HOME_DIRECTION) {
+    steppingEnabled = false;
+    GPIOA->regs->BSRR = (1 << (STEP_PIN_BIT + 16));  // Ensure STEP is LOW
+    stepPinState = false;
+    return;
+  }
 
-  double acc_pulse = pulse - (double)accel * delta / 1000000.0;
-  pulse = acc_pulse > delay ? acc_pulse : delay;
+  // Alternate between HIGH and LOW to create proper pulse width
+  if (!stepPinState) {
+    // Rising edge - set STEP HIGH
+    GPIOA->regs->BSRR = (1 << STEP_PIN_BIT);
+    stepPinState = true;
+  } else {
+    // Falling edge - set STEP LOW and update position
+    GPIOA->regs->BSRR = (1 << (STEP_PIN_BIT + 16));
+    stepPinState = false;
 
-  last_step_time = micros();
-  digitalWrite(stepPin, HIGH);
-  delayMicroseconds(MIN_PULSE_DELAY);
-  digitalWrite(stepPin, LOW);
-  delayMicroseconds((uint32_t)pulse);
-  currentPos += dir == HIGH ? 1 : -1;
+    // Update position on falling edge (one complete step)
+    if (currentDir == HIGH) {
+      currentPos++;
+    } else {
+      currentPos--;
+    }
+    accelStepCount++;
+  }
+}
+
+// ========== INITIALIZE TIMER ==========
+void initStepTimer() {
+  stepTimer.pause();
+  stepTimer.setPrescaleFactor(1);  // 72MHz / 1 = 72MHz timer clock
+  stepTimer.setOverflow(36000);    // Initial value, will be updated dynamically
+  stepTimer.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
+  stepTimer.attachInterrupt(TIMER_CH1, timerISR);
+  stepTimer.refresh();
+  stepTimer.resume();
+}
+
+// ========== SET STEP FREQUENCY ==========
+void setStepFrequency(uint32_t freqHz) {
+  if (freqHz < 100) freqHz = 100;      // Minimum 100 Hz
+  if (freqHz > 40000) freqHz = 40000;  // Maximum 40 kHz
+
+  currentFrequency = freqHz;
+
+  // Timer must run at 2x frequency since we alternate HIGH/LOW
+  // Each step requires 2 ISR calls: one for HIGH, one for LOW
+  uint32_t timerFreq = freqHz * 2;
+
+  // Calculate overflow value: 72,000,000 / (frequency * 2)
+  uint32_t overflow = 72000000UL / timerFreq;
+  stepTimer.setOverflow(overflow);
+}
+
+// ========== START STEPPING ==========
+void startStepping(uint8_t dir) {
+  if (currentDir != dir) {
+    // Direction change - add delay
+    steppingEnabled = false;
+    GPIOA->regs->BSRR = (1 << (STEP_PIN_BIT + 16));  // Ensure STEP is LOW
+    stepPinState = false;
+    delayMicroseconds(MIN_REVERSE_DELAY);
+
+    // Set direction pin using direct GPIO
+    if (dir == HIGH) {
+      GPIOA->regs->BSRR = (1 << DIR_PIN_BIT);
+    } else {
+      GPIOA->regs->BSRR = (1 << (DIR_PIN_BIT + 16));
+    }
+
+    currentDir = dir;
+    accelStepCount = 0;
+  }
+
+  stepPinState = false;  // Always start with LOW state
+  steppingEnabled = true;
+}
+
+// ========== STOP STEPPING ==========
+void stopStepping() {
+  steppingEnabled = false;
+  GPIOA->regs->BSRR = (1 << (STEP_PIN_BIT + 16));  // Ensure STEP is LOW when stopped
+  stepPinState = false;
 }
 
 // Limit switch event
@@ -420,10 +519,10 @@ void receiveEvent(int size) {
     switch (cmd) {
       case COMMAND::CMD_HOME:
         if (mode != MODE::HOMEING) {
+          bHomed = false;
           mode = MODE::HOMEING;
           currentPos = 0;
           targetPos = RANGE * 1.2;
-          bHomed = false;
         }
         break;
       case COMMAND::CMD_PARK:
@@ -447,6 +546,7 @@ void receiveEvent(int size) {
         break;
       case COMMAND::CMD_DISABLE:
         mode = MODE::DISABLED;
+        stopStepping();
         break;
       case COMMAND::CMD_SET_SPEED:
         iFastPulseDelayMM = data = clamp((int)data, MIN_SPEED_MM_SEC, MAX_SPEED_MM_SEC);
@@ -461,6 +561,7 @@ void receiveEvent(int size) {
       case COMMAND::SET_ALARM:
         bHomed = false;
         mode = MODE::ALARM;
+        stopStepping();
         break;
     }
   }
@@ -469,22 +570,31 @@ void receiveEvent(int size) {
 void requestEvent() {
   if (mode == MODE::UNKNOWN)
     mode = MODE::CONNECTED;
-  STATE state = { mode, (FLAGS)((limiterPinNO == HIGH ? FLAGS::STATE_ON_LIMIT_SWITCH : 0) | (bHomed ? FLAGS::STATE_HOMED : 0)), (uint8_t)iFastPulseDelayMM, currentPos, targetPos, MIN_POS, MAX_POS };
+  STATE state = { mode, (FLAGS)((limitSwitchState == HIGH ? FLAGS::STATE_ON_LIMIT_SWITCH : 0) | (bHomed ? FLAGS::STATE_HOMED : 0)), (uint16_t)iFastPulseDelayMM, currentPos, targetPos, MIN_POS, MAX_POS };
   Wire.write((uint8_t*)&state, STATE_LEN);
 }
 
-// Initializtion
+// Initialization
 void setup() {
+  allPinsPulldown();
+
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
-  pinMode(limiterPinNO, INPUT);
-  pinMode(limiterPinNC, INPUT);
+  pinMode(limiterPinNO, INPUT_PULLDOWN);
+  pinMode(limiterPinNC, INPUT_PULLDOWN);
   pinMode(LED_PIN, OUTPUT);
+
+  digitalWrite(stepPin, LOW);
+  digitalWrite(dirPin, LOW);
+
   targetPos = (MIN_POS + MAX_POS) / 2;
 
   limitSwitchState = digitalRead(limiterPinNO);
 
   attachInterrupt(limiterPinNO, OnLimitSwitch, CHANGE);
+
+  // Initialize timer-based stepping
+  initStepTimer();
 
   Wire.begin(SLAVE_ADDR);
   Wire.onReceive(receiveEvent);
@@ -494,8 +604,6 @@ void setup() {
   LimitChanged = true;
   currentPos = 0;
 }
-
-int inc = -1;
 
 // Main function
 void loop() {
@@ -508,21 +616,52 @@ void loop() {
   switch (mode) {
     case MODE::HOMEING:
       {
-        if (limitSwitchState == HIGH)  // SITTING ON SWITH
+        if (limitSwitchState == HIGH)  // SITTING ON SWITCH
         {
-          for (int32_t t = 0; t < SAFE_DIST_IN_STEPS; t++) {
-            Step(!HOME_DIRECTION, HOMEING_PULSE_DELAY);
+          stopStepping();
+
+          // Move away from switch - set target correctly based on direction
+          if (HOME_DIRECTION == HIGH) {
+            targetPos = currentPos - SAFE_DIST_IN_STEPS;  // Moving negative (away from switch)
+          } else {
+            targetPos = currentPos + SAFE_DIST_IN_STEPS;  // Moving positive (away from switch)
           }
+
+          uint32_t homeFreq = delayToFreq(HOMEING_PULSE_DELAY);
+          setStepFrequency(homeFreq);
+          startStepping(!HOME_DIRECTION);
+
+          // Wait based on direction
+          if (HOME_DIRECTION == HIGH) {
+            while (currentPos > targetPos) {
+              delay(1);
+            }
+          } else {
+            while (currentPos < targetPos) {
+              delay(1);
+            }
+          }
+
+          stopStepping();
+
+          // Re-read limit switch state after backing off
+          limitSwitchState = digitalRead(limiterPinNO);
 
           currentPos = MAX_POS;
           targetPos = (MIN_POS + MAX_POS) / 2;
-          // Moving to the center postion at homing speed
-          while (targetPos != currentPos)
-            Step(targetPos > currentPos ? HIGH : LOW, HOMEING_PULSE_DELAY);
 
+          // Move to center at homing speed
+          setStepFrequency(homeFreq);
+          uint8_t centerDir = (targetPos > currentPos) ? HIGH : LOW;  // Calculate correct direction
+          startStepping(centerDir);
+
+          while (targetPos != currentPos) {
+            delay(1);
+          }
+
+          stopStepping();
           mode = MODE::READY;
           bHomed = true;
-
           break;
         }
 
@@ -532,32 +671,99 @@ void loop() {
         {
           mode = MODE::ALARM;
           bHomed = false;
+          stopStepping();
           break;
         }
-        Step(HOME_DIRECTION, HOMEING_PULSE_DELAY);
+
+        // Continue homing - only start stepping if not already stepping
+        if (!steppingEnabled) {
+          uint32_t homeFreq = delayToFreq(HOMEING_PULSE_DELAY);
+          setStepFrequency(homeFreq);
+          startStepping(HOME_DIRECTION);
+        }
       }
       break;
+
     case MODE::PARKING:
       {
+        stopStepping();
         targetPos = MIN_POS;
-        while (targetPos != currentPos)
-          Step(targetPos > currentPos ? HIGH : LOW, HOMEING_PULSE_DELAY);
+        uint32_t homeFreq = delayToFreq(HOMEING_PULSE_DELAY);
+        setStepFrequency(homeFreq);
+
+        uint8_t dir = (targetPos > currentPos) ? HIGH : LOW;
+        startStepping(dir);
+
+        while (targetPos != currentPos) {
+          delay(1);
+        }
+
+        stopStepping();
         mode = MODE::READY;
       }
       break;
+
     case MODE::READY:
       {
-        if (targetPos != currentPos) {
+        if (bHomed && targetPos != currentPos) {
           long dist = constrain(abs(targetPos - currentPos), 0, STEPS_CONTROL_DIST);
-          int delay = map(dist, 0, STEPS_CONTROL_DIST, iSlowPulseDelay, iFastPulseDelay);
-          Step(targetPos > currentPos ? HIGH : LOW, delay);
+
+          // Map distance to frequency (deceleration profile based on remaining distance)
+          uint32_t minFreq = delayToFreq(iSlowPulseDelay);
+          uint32_t maxFreq = delayToFreq(iFastPulseDelay);
+
+          // Linear interpolation based on distance for deceleration
+          uint32_t mappedFreq = map(dist, 0, STEPS_CONTROL_DIST, minFreq, maxFreq);
+
+          // Apply TRUE time-based acceleration
+          // accel is in mm/s², convert to frequency change over time
+          // v(t) = v0 + a*t  (velocity = initial + accel * time)
+          // freq(t) = freq0 + (accel / MM_PER_REV * STEPS_PER_REV) * t
+          //         = freq0 + (accel * STEPS_PER_REV / MM_PER_REV) * t
+          //         = freq0 + (accel * 100) * t   (for SFU1610: 1000 steps / 10mm = 100)
+
+          uint32_t elapsedMs = millis() - accelStartTime;
+          float elapsedSec = elapsedMs / 1000.0f;
+
+          // Frequency increase = (accel in mm/s²) * (steps per mm) * (time in sec)
+          // For SFU1610: steps_per_mm = 1000/10 = 100
+          float freqIncrease = (float)accel * (STEPS_PER_REVOLUTIONS / MM_PER_REV) * elapsedSec;
+          uint32_t accelFreq = minFreq + (uint32_t)freqIncrease;
+          if (accelFreq > maxFreq) accelFreq = maxFreq;
+
+          // Use the minimum of mapped (decel) and accel frequencies
+          uint32_t finalFreq = (mappedFreq < accelFreq) ? mappedFreq : accelFreq;
+
+          // Only update frequency if it changed significantly (avoid constant resets)
+          if (abs((int32_t)finalFreq - (int32_t)currentFrequency) > 100) {
+            setStepFrequency(finalFreq);
+          }
+
+          uint8_t dir = (targetPos > currentPos) ? HIGH : LOW;
+
+          // Only start stepping if not already stepping, or if direction changed
+          if (!steppingEnabled || currentDir != dir) {
+            accelStartTime = millis();  // Reset acceleration timer
+            startStepping(dir);
+          }
+        } else {
+          stopStepping();
+          accelStepCount = 0;
         }
       }
       break;
+
     case MODE::ALARM:
       digitalWrite(LED_PIN, (millis() % 250) > 125 ? HIGH : LOW);
+      stopStepping();
       break;
-    default: break;
+
+    case MODE::DISABLED:
+      stopStepping();
+      break;
+
+    default:
+      break;
   }
 }
 #endif
