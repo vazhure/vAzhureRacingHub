@@ -19,11 +19,11 @@
 #include <stdio.h>
 
 // Uncomment this line if you using SF1610
-#define SFU1610 // Used only in SLAVE devices
+#define SFU1610  // Used only in SLAVE devices
 
 // Uncomment this line to flash MASTER device
 // Comment this line to flash SLAVE devices
-#define I2CMASTER
+// #define I2CMASTER
 
 // Maximal number of linear actuators
 #define MAX_LINEAR_ACTUATORS 4
@@ -37,6 +37,10 @@
 
 #define SLAVE_FIRST SLAVE_ADDR_FL
 #define SLAVE_LAST (SLAVE_FIRST + LINEAR_ACTUATORS - 1)
+
+void allPinsPulldown() {
+  for (int pin = PA0; pin <= PC15; pin++) pinMode(pin, INPUT_PULLDOWN);
+}
 
 inline int WireRead(uint8_t* ptr, uint8_t len) {
   int cnt = Wire.available();
@@ -60,10 +64,10 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #ifndef I2CMASTER
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Uncomment a single line with desired Address to flash SLAVE device
-#define SLAVE_ADDR SLAVE_ADDR_FL
+//#define SLAVE_ADDR SLAVE_ADDR_FL
 //#define SLAVE_ADDR SLAVE_ADDR_RL
 //#define SLAVE_ADDR SLAVE_ADDR_RR
-//#define SLAVE_ADDR SLAVE_ADDR_FR
+#define SLAVE_ADDR SLAVE_ADDR_FR
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -72,7 +76,7 @@ const T& clamp(const T& x, const T& a, const T& b) {
 #define SERIAL_TX_BUFFER_SIZE 512
 #define SERIAL_RX_BUFFER_SIZE 512
 
-#define LED_PIN PC13 // * Check your board. Some have PB2 or another (label near LED).
+#define LED_PIN PC13  // * Check your board. Some have PB2 or another (label near LED).
 
 enum MODE : uint8_t { UNKNOWN,
                       CONNECTED,
@@ -158,11 +162,15 @@ void OnAlarm() {
   estopLatched = true;
 }
 
+#define RETRY_CNT 3
+
 void setup() {
+
+  allPinsPulldown();
 
   pinMode(LED_PIN, OUTPUT);
   pinMode(ALARM_PIN, INPUT_PULLDOWN);
-  pinMode(SIGNAL_PIN, INPUT);
+  pinMode(SIGNAL_PIN, INPUT_PULLDOWN);
   digitalWrite(LED_PIN, HIGH);
 
   attachInterrupt(ALARM_PIN, OnAlarm, RISING);
@@ -174,13 +182,20 @@ void setup() {
   // Wire.setClock(400000);  // Reverted due to connectivity issues: use default I2C clock
   delay(1000);
   int nFound = 0;
-  // scanning slave devices
-  for (int addr = SLAVE_FIRST; addr <= SLAVE_LAST; addr++) {
-    Wire.beginTransmission(addr);
-    uint8_t err = Wire.endTransmission();
-    SET_SLAVE_STATE(addr - SLAVE_FIRST, err == 0);
-    if (err == 0) nFound++;
+  for (int t = 0; t < RETRY_CNT; t++) {
+    nFound = 0;
+    // scanning slave devices
+    for (int addr = SLAVE_FIRST; addr <= SLAVE_LAST; addr++) {
+      Wire.beginTransmission(addr);
+      uint8_t err = Wire.endTransmission();
+      SET_SLAVE_STATE(addr - SLAVE_FIRST, err == 0);
+      if (err == 0) nFound++;
+    }
+    if (nFound == MAX_LINEAR_ACTUATORS)
+      break;
+    delay(100);
   }
+
   digitalWrite(LED_PIN, nFound == 0 ? HIGH : LOW);
 
   Serial.begin(SERIAL_BAUD_RATE);
@@ -188,7 +203,6 @@ void setup() {
     ;  // whait connected
 
 #ifdef DEBUG
-#define RETRY_CNT 3
   // I2C Devices scan
   Serial.println("Seeking slave devices");
   for (int addr = SLAVE_FIRST; addr <= SLAVE_LAST; addr++)
@@ -362,7 +376,7 @@ const uint8_t limiterPinNC = PA7;
 
 #define ANALOG_INPUT_MAX 4095
 
-volatile uint32_t accel = 25000;  // Acceleration in mm/s² (25000 = 2.5g, 12000 would be gentler for 60Hz buffering --> adjust via desktop app)
+volatile uint32_t accel = 25000;                               // Acceleration in mm/s² (25000 = 2.5g, 12000 would be gentler for 60Hz buffering --> adjust via desktop app)
 #define STEPS_CONTROL_DIST STEPS_PER_REVOLUTIONS / 4  // Distance in steps
 
 #ifdef SFU1610
@@ -423,22 +437,22 @@ volatile uint32_t accelStartTime = 0;  // Track when acceleration started
 // ========== TIMER-BASED STEPPING VARIABLES ==========
 HardwareTimer stepTimer(2);  // Timer 2 for Roger Clark core
 volatile bool steppingEnabled = false;
-volatile bool stepPinState = false;    // Track STEP pin state for pulse generation
-volatile uint32_t targetFrequency = 1000;  // Target step frequency in Hz
-volatile uint32_t currentFrequency = 1000; // Current step frequency in Hz
-volatile uint32_t accelStepCount = 0;      // Steps taken for acceleration tracking
+volatile bool stepPinState = false;         // Track STEP pin state for pulse generation
+volatile uint32_t targetFrequency = 1000;   // Target step frequency in Hz
+volatile uint32_t currentFrequency = 1000;  // Current step frequency in Hz
+volatile uint32_t accelStepCount = 0;       // Steps taken for acceleration tracking
 // ====================================================
 
 // ========== BUFFER + SMOOTHING VARIABLES ==========
-#define MOVE_BUFFER_SIZE 6                     // Buffer for 60 Hz (~100ms lookahead)
-volatile int32_t moveBuffer[MOVE_BUFFER_SIZE]; // Queue for target positions
-volatile uint8_t bufferWriteIdx = 0;           // Index for writing new commands
-volatile uint8_t bufferReadIdx = 0;            // Index for reading next target
-volatile bool bufferHasData = false;           // Flag: is there data in buffer?
+#define MOVE_BUFFER_SIZE 6  // Buffer for 60 Hz (~100ms lookahead)
+volatile int32_t moveBuffer[MOVE_BUFFER_SIZE];  // Queue for target positions
+volatile uint8_t bufferWriteIdx = 0;            // Index for writing new commands
+volatile uint8_t bufferReadIdx = 0;             // Index for reading next target
+volatile bool bufferHasData = false;            // Flag: is there data in buffer?
 
 // Smoothing factor for exponential interpolation (0.1 = very smooth, 0.9 = fast)
-const float SMOOTH_FACTOR = 0.4f;              // Tuned for 60 Hz from SimHub
-volatile float smoothedTargetPos = 0;          // Current smoothed intermediate target
+const float SMOOTH_FACTOR = 0.4f;      // Tuned for 60 Hz from SimHub
+volatile float smoothedTargetPos = 0;  // Current smoothed intermediate target
 // ====================================================
 
 // Convert mm/sec to step frequency (Hz)
@@ -461,7 +475,7 @@ void timerISR() {
     stepPinState = false;
     return;
   }
-  
+
   // Check limit switch - stop if on limit and moving towards it
   if (limitSwitchState == HIGH && currentDir == HOME_DIRECTION) {
     steppingEnabled = false;
@@ -469,7 +483,7 @@ void timerISR() {
     stepPinState = false;
     return;
   }
-  
+
   // Alternate between HIGH and LOW to create proper pulse width
   if (!stepPinState) {
     // Rising edge - set STEP HIGH
@@ -479,7 +493,7 @@ void timerISR() {
     // Falling edge - set STEP LOW and update position
     GPIOA->regs->BSRR = (1 << (STEP_PIN_BIT + 16));
     stepPinState = false;
-    
+
     // Update position on falling edge (one complete step)
     if (currentDir == HIGH) {
       currentPos++;
@@ -505,13 +519,13 @@ void initStepTimer() {
 void setStepFrequency(uint32_t freqHz) {
   if (freqHz < 100) freqHz = 100;      // Minimum 100 Hz
   if (freqHz > 40000) freqHz = 40000;  // Maximum 40 kHz
-  
+
   currentFrequency = freqHz;
-  
+
   // Timer must run at 2x frequency since we alternate HIGH/LOW
   // Each step requires 2 ISR calls: one for HIGH, one for LOW
   uint32_t timerFreq = freqHz * 2;
-  
+
   // Calculate overflow value: 72,000,000 / (frequency * 2)
   uint32_t overflow = 72000000UL / timerFreq;
   stepTimer.setOverflow(overflow);
@@ -525,18 +539,18 @@ void startStepping(uint8_t dir) {
     GPIOA->regs->BSRR = (1 << (STEP_PIN_BIT + 16));  // Ensure STEP is LOW
     stepPinState = false;
     delayMicroseconds(MIN_REVERSE_DELAY);
-    
+
     // Set direction pin using direct GPIO
     if (dir == HIGH) {
       GPIOA->regs->BSRR = (1 << DIR_PIN_BIT);
     } else {
       GPIOA->regs->BSRR = (1 << (DIR_PIN_BIT + 16));
     }
-    
+
     currentDir = dir;
     accelStepCount = 0;
   }
-  
+
   stepPinState = false;  // Always start with LOW state
   steppingEnabled = true;
 }
@@ -633,7 +647,7 @@ void receiveEvent(int size) {
         if (mode == MODE::READY) {
           // ✅ BUFFER IMPLEMENTATION: Write to buffer instead of direct targetPos
           int32_t clampedData = clamp((int32_t)data, (int32_t)MIN_POS, (int32_t)MAX_POS);
-          
+
           // Check if buffer is not full
           uint8_t nextWriteIdx = (bufferWriteIdx + 1) % MOVE_BUFFER_SIZE;
           if (nextWriteIdx != bufferReadIdx) {
@@ -652,7 +666,7 @@ void receiveEvent(int size) {
           bufferReadIdx = 0;
           bufferHasData = false;
           smoothedTargetPos = currentPos;
-          
+
           if (bHomed)
             mode = MODE::READY;
           else
@@ -667,7 +681,7 @@ void receiveEvent(int size) {
           bufferReadIdx = 0;
           bufferHasData = false;
           smoothedTargetPos = currentPos;
-          
+
           if (bHomed)
             mode = MODE::READY;
           else
@@ -706,15 +720,17 @@ void requestEvent() {
 
 // Initialization
 void setup() {
+  allPinsPulldown();
+
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
-  pinMode(limiterPinNO, INPUT);
-  pinMode(limiterPinNC, INPUT);
+  pinMode(limiterPinNO, INPUT_PULLDOWN);
+  pinMode(limiterPinNC, INPUT_PULLDOWN);
   pinMode(LED_PIN, OUTPUT);
-  
+
   digitalWrite(stepPin, LOW);
   digitalWrite(dirPin, LOW);
-  
+
   targetPos = (MIN_POS + MAX_POS) / 2;
 
   limitSwitchState = digitalRead(limiterPinNO);
@@ -723,7 +739,7 @@ void setup() {
 
   // Initialize timer-based stepping
   initStepTimer();
-  
+
   Wire.begin(SLAVE_ADDR);
   // Wire.setClock(400000);  // Reverted due to connectivity issues: use default I2C clock
   Wire.onReceive(receiveEvent);
@@ -749,18 +765,18 @@ void loop() {
         if (limitSwitchState == HIGH)  // SITTING ON SWITCH
         {
           stopStepping();
-          
+
           // Move away from switch - set target correctly based on direction
           if (HOME_DIRECTION == HIGH) {
             targetPos = currentPos - SAFE_DIST_IN_STEPS;  // Moving negative (away from switch)
           } else {
             targetPos = currentPos + SAFE_DIST_IN_STEPS;  // Moving positive (away from switch)
           }
-          
+
           uint32_t homeFreq = delayToFreq(HOMEING_PULSE_DELAY);
           setStepFrequency(homeFreq);
           startStepping(!HOME_DIRECTION);
-          
+
           // Wait based on direction
           if (HOME_DIRECTION == HIGH) {
             while (currentPos > targetPos) {
@@ -789,20 +805,20 @@ void loop() {
               break;
             }
           }
-          
+
           stopStepping();
-          
+
           // Re-read limit switch state after backing off
           limitSwitchState = digitalRead(limiterPinNO);
-          
+
           currentPos = MAX_POS;
           targetPos = (MIN_POS + MAX_POS) / 2;
-          
+
           // Move to center at homing speed
           setStepFrequency(homeFreq);
           uint8_t centerDir = (targetPos > currentPos) ? HIGH : LOW;  // Calculate correct direction
           startStepping(centerDir);
-          
+
           while (targetPos != currentPos) {
             if (mode == MODE::ALARM || !steppingEnabled) {
               break;
@@ -815,7 +831,7 @@ void loop() {
             stopStepping();
             break;
           }
-          
+
           stopStepping();
           smoothedTargetPos = currentPos;
           bufferWriteIdx = 0;
@@ -835,7 +851,7 @@ void loop() {
           stopStepping();
           break;
         }
-        
+
         // Continue homing - only start stepping if not already stepping
         if (!steppingEnabled) {
           uint32_t homeFreq = delayToFreq(HOMEING_PULSE_DELAY);
@@ -844,17 +860,17 @@ void loop() {
         }
       }
       break;
-      
+
     case MODE::PARKING:
       {
         stopStepping();
         targetPos = MIN_POS;
         uint32_t homeFreq = delayToFreq(HOMEING_PULSE_DELAY);
         setStepFrequency(homeFreq);
-        
+
         uint8_t dir = (targetPos > currentPos) ? HIGH : LOW;
         startStepping(dir);
-        
+
         while (targetPos != currentPos) {
           if (mode == MODE::ALARM || !steppingEnabled) {
             break;
@@ -867,20 +883,20 @@ void loop() {
           stopStepping();
           break;
         }
-        
+
         stopStepping();
         smoothedTargetPos = currentPos;
         mode = MODE::READY;
       }
       break;
-      
+
     case MODE::READY:
       {
         // ✅ STEP 1: Buffer Management - Load next point from buffer
         if (bufferHasData && bufferReadIdx != bufferWriteIdx) {
           // Get next target from buffer
           int32_t nextBufferTarget = moveBuffer[bufferReadIdx];
-          
+
           // Check if we are close enough to current target to switch to next
           // This ensures we don't change direction too frequently
           if (abs(targetPos - currentPos) < 100) {  // 100 steps threshold (~1mm)
@@ -889,43 +905,43 @@ void loop() {
             accelStartTime = millis();  // Reset acceleration timer for new segment
           }
         }
-        
+
         // ✅ STEP 2: Exponential Smoothing
         // Blend the targetPos to avoid sudden jumps in velocity calculation
         smoothedTargetPos = smoothedTargetPos + (targetPos - smoothedTargetPos) * SMOOTH_FACTOR;
-        
+
         // ✅ STEP 3: Motion Control Logic
         if (abs((int32_t)smoothedTargetPos - currentPos) > 5) {  // 5 step deadzone
-          
+
           // Calculate remaining distance to smoothed target
           long dist = constrain(abs((int32_t)smoothedTargetPos - currentPos), 0, STEPS_CONTROL_DIST);
-          
+
           // Map distance to frequency (deceleration profile based on remaining distance)
           uint32_t minFreq = delayToFreq(iSlowPulseDelay);
           uint32_t maxFreq = delayToFreq(iFastPulseDelay);
-          
+
           // Linear interpolation based on distance for deceleration
           uint32_t mappedFreq = map(dist, 0, STEPS_CONTROL_DIST, minFreq, maxFreq);
-          
+
           // Apply TRUE time-based acceleration
           uint32_t elapsedMs = millis() - accelStartTime;
           float elapsedSec = elapsedMs / 1000.0f;
-          
+
           // Frequency increase = (accel in mm/s²) * (steps per mm) * (time in sec)
           float freqIncrease = (float)accel * (STEPS_PER_REVOLUTIONS / MM_PER_REV) * elapsedSec;
           uint32_t accelFreq = minFreq + (uint32_t)freqIncrease;
           if (accelFreq > maxFreq) accelFreq = maxFreq;
-          
+
           // Use the minimum of mapped (decel) and accel frequencies
           uint32_t finalFreq = (mappedFreq < accelFreq) ? mappedFreq : accelFreq;
-          
+
           // Only update frequency if it changed significantly (avoid constant resets)
           if (abs((int32_t)finalFreq - (int32_t)currentFrequency) > 100) {
             setStepFrequency(finalFreq);
           }
-          
+
           uint8_t dir = ((int32_t)smoothedTargetPos > currentPos) ? HIGH : LOW;
-          
+
           // Only start stepping if not already stepping, or if direction changed
           if (!steppingEnabled || currentDir != dir) {
             accelStartTime = millis();  // Reset acceleration timer
@@ -935,7 +951,7 @@ void loop() {
           // Target reached
           stopStepping();
           accelStepCount = 0;
-          
+
           // If buffer is empty and we reached target, sync smoothed position
           if (!bufferHasData || bufferReadIdx == bufferWriteIdx) {
             smoothedTargetPos = currentPos;
@@ -943,17 +959,17 @@ void loop() {
         }
       }
       break;
-      
+
     case MODE::ALARM:
       digitalWrite(LED_PIN, (millis() % 250) > 125 ? HIGH : LOW);
       stopStepping();
       break;
-      
+
     case MODE::DISABLED:
       stopStepping();
       break;
-      
-    default: 
+
+    default:
       break;
   }
 }
