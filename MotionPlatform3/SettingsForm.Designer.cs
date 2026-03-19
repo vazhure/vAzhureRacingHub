@@ -100,18 +100,41 @@ namespace MotionPlatform3
             this.chkParkOnQuit = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.btnSpeedSettings = new System.Windows.Forms.Button();
             this.btnSimHub = new System.Windows.Forms.Button();
+            this.chkPIDEnable = new vAzhureRacingAPI.VAzhureSwitchButton();
+            this.label10 = new System.Windows.Forms.Label();
+            this.sliderPIDKp = new vAzhureRacingAPI.VAzhureSliderControl();
+            this.label20 = new System.Windows.Forms.Label();
+            this.sliderPIDGain = new vAzhureRacingAPI.VAzhureSliderControl();
+            this.lblPIDNotApplyed = new System.Windows.Forms.Label();
+            this.lblPIDGain = new System.Windows.Forms.Label();
+            this.lblKs = new System.Windows.Forms.Label();
+            this.lblKd = new System.Windows.Forms.Label();
+            this.lblKi = new System.Windows.Forms.Label();
+            this.lblKp = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.sliderPIDKs = new vAzhureRacingAPI.VAzhureSliderControl();
+            this.sliderPIDKd = new vAzhureRacingAPI.VAzhureSliderControl();
+            this.sliderPIDKi = new vAzhureRacingAPI.VAzhureSliderControl();
+            this.btnWritePID = new System.Windows.Forms.Button();
+            this.btnReadPID = new System.Windows.Forms.Button();
             this.lblGame = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.numFrontRearMM = new System.Windows.Forms.NumericUpDown();
-            this.numLeftRightMM = new System.Windows.Forms.NumericUpDown();
-            this.label3 = new System.Windows.Forms.Label();
-            this.numActuatorTravelMM = new System.Windows.Forms.NumericUpDown();
-            this.label5 = new System.Windows.Forms.Label();
+            this.tabProperties = new System.Windows.Forms.TabControl();
+            this.tabGeometry = new System.Windows.Forms.TabPage();
             this.numSeatOffsetMM = new System.Windows.Forms.NumericUpDown();
-            this.chkMotionCompensation = new vAzhureRacingAPI.VAzhureSwitchButton();
-            this.lblOpenXRStatus = new System.Windows.Forms.Label();
+            this.numActuatorTravelMM = new System.Windows.Forms.NumericUpDown();
+            this.numLeftRightMM = new System.Windows.Forms.NumericUpDown();
+            this.numFrontRearMM = new System.Windows.Forms.NumericUpDown();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tabPID = new System.Windows.Forms.TabPage();
+            this.tabMotionComp = new System.Windows.Forms.TabPage();
             this.lblOpenXRConfigured = new System.Windows.Forms.Label();
+            this.lblOpenXRStatus = new System.Windows.Forms.Label();
+            this.chkMotionCompensation = new vAzhureRacingAPI.VAzhureSwitchButton();
             this.btnPathOpenXRConfig = new System.Windows.Forms.Button();
             this.btnDownloadOpenXR = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbRL)).BeginInit();
@@ -119,10 +142,14 @@ namespace MotionPlatform3
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbRR)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbFRR)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).BeginInit();
+            this.tabProperties.SuspendLayout();
+            this.tabGeometry.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSeatOffsetMM)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).BeginInit();
+            this.tabPID.SuspendLayout();
+            this.tabMotionComp.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbRL
@@ -131,7 +158,7 @@ namespace MotionPlatform3
             this.pbRL.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbRL.Location = new System.Drawing.Point(131, 43);
             this.pbRL.Name = "pbRL";
-            this.pbRL.Size = new System.Drawing.Size(122, 531);
+            this.pbRL.Size = new System.Drawing.Size(122, 561);
             this.pbRL.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRL.TabIndex = 0;
             this.pbRL.TabStop = false;
@@ -174,7 +201,7 @@ namespace MotionPlatform3
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(513, 647);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(513, 677);
             this.tableLayoutPanel1.TabIndex = 8;
             // 
             // lblFrontState
@@ -193,7 +220,7 @@ namespace MotionPlatform3
             this.pbFR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbFR.Location = new System.Drawing.Point(3, 43);
             this.pbFR.Name = "pbFR";
-            this.pbFR.Size = new System.Drawing.Size(122, 531);
+            this.pbFR.Size = new System.Drawing.Size(122, 561);
             this.pbFR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbFR.TabIndex = 0;
             this.pbFR.TabStop = false;
@@ -201,7 +228,7 @@ namespace MotionPlatform3
             // lblName1
             // 
             this.lblName1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName1.Location = new System.Drawing.Point(3, 577);
+            this.lblName1.Location = new System.Drawing.Point(3, 607);
             this.lblName1.Name = "lblName1";
             this.lblName1.Size = new System.Drawing.Size(122, 30);
             this.lblName1.TabIndex = 5;
@@ -211,7 +238,7 @@ namespace MotionPlatform3
             // lblPosFront
             // 
             this.lblPosFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosFront.Location = new System.Drawing.Point(3, 607);
+            this.lblPosFront.Location = new System.Drawing.Point(3, 637);
             this.lblPosFront.Name = "lblPosFront";
             this.lblPosFront.Size = new System.Drawing.Size(122, 20);
             this.lblPosFront.TabIndex = 6;
@@ -221,7 +248,7 @@ namespace MotionPlatform3
             // lblTargetFront
             // 
             this.lblTargetFront.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetFront.Location = new System.Drawing.Point(3, 627);
+            this.lblTargetFront.Location = new System.Drawing.Point(3, 657);
             this.lblTargetFront.Name = "lblTargetFront";
             this.lblTargetFront.Size = new System.Drawing.Size(122, 20);
             this.lblTargetFront.TabIndex = 7;
@@ -241,7 +268,7 @@ namespace MotionPlatform3
             // lblName2
             // 
             this.lblName2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName2.Location = new System.Drawing.Point(131, 577);
+            this.lblName2.Location = new System.Drawing.Point(131, 607);
             this.lblName2.Name = "lblName2";
             this.lblName2.Size = new System.Drawing.Size(122, 30);
             this.lblName2.TabIndex = 1;
@@ -251,7 +278,7 @@ namespace MotionPlatform3
             // lblPosRL
             // 
             this.lblPosRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRL.Location = new System.Drawing.Point(131, 607);
+            this.lblPosRL.Location = new System.Drawing.Point(131, 637);
             this.lblPosRL.Name = "lblPosRL";
             this.lblPosRL.Size = new System.Drawing.Size(122, 20);
             this.lblPosRL.TabIndex = 2;
@@ -261,7 +288,7 @@ namespace MotionPlatform3
             // lblTargetRL
             // 
             this.lblTargetRL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRL.Location = new System.Drawing.Point(131, 627);
+            this.lblTargetRL.Location = new System.Drawing.Point(131, 657);
             this.lblTargetRL.Name = "lblTargetRL";
             this.lblTargetRL.Size = new System.Drawing.Size(122, 20);
             this.lblTargetRL.TabIndex = 3;
@@ -284,7 +311,7 @@ namespace MotionPlatform3
             this.pbRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbRR.Location = new System.Drawing.Point(259, 43);
             this.pbRR.Name = "pbRR";
-            this.pbRR.Size = new System.Drawing.Size(122, 531);
+            this.pbRR.Size = new System.Drawing.Size(122, 561);
             this.pbRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbRR.TabIndex = 0;
             this.pbRR.TabStop = false;
@@ -292,7 +319,7 @@ namespace MotionPlatform3
             // lblName3
             // 
             this.lblName3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName3.Location = new System.Drawing.Point(259, 577);
+            this.lblName3.Location = new System.Drawing.Point(259, 607);
             this.lblName3.Name = "lblName3";
             this.lblName3.Size = new System.Drawing.Size(122, 30);
             this.lblName3.TabIndex = 9;
@@ -302,7 +329,7 @@ namespace MotionPlatform3
             // lblPosRR
             // 
             this.lblPosRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosRR.Location = new System.Drawing.Point(259, 607);
+            this.lblPosRR.Location = new System.Drawing.Point(259, 637);
             this.lblPosRR.Name = "lblPosRR";
             this.lblPosRR.Size = new System.Drawing.Size(122, 20);
             this.lblPosRR.TabIndex = 10;
@@ -312,7 +339,7 @@ namespace MotionPlatform3
             // lblTargetRR
             // 
             this.lblTargetRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetRR.Location = new System.Drawing.Point(259, 627);
+            this.lblTargetRR.Location = new System.Drawing.Point(259, 657);
             this.lblTargetRR.Name = "lblTargetRR";
             this.lblTargetRR.Size = new System.Drawing.Size(122, 20);
             this.lblTargetRR.TabIndex = 11;
@@ -335,7 +362,7 @@ namespace MotionPlatform3
             this.pbFRR.Image = global::MotionPlatform3.Properties.Resources._3dof;
             this.pbFRR.Location = new System.Drawing.Point(387, 43);
             this.pbFRR.Name = "pbFRR";
-            this.pbFRR.Size = new System.Drawing.Size(123, 531);
+            this.pbFRR.Size = new System.Drawing.Size(123, 561);
             this.pbFRR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbFRR.TabIndex = 0;
             this.pbFRR.TabStop = false;
@@ -343,7 +370,7 @@ namespace MotionPlatform3
             // lblName4
             // 
             this.lblName4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblName4.Location = new System.Drawing.Point(387, 577);
+            this.lblName4.Location = new System.Drawing.Point(387, 607);
             this.lblName4.Name = "lblName4";
             this.lblName4.Size = new System.Drawing.Size(123, 30);
             this.lblName4.TabIndex = 9;
@@ -353,7 +380,7 @@ namespace MotionPlatform3
             // lblPosFRR
             // 
             this.lblPosFRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPosFRR.Location = new System.Drawing.Point(387, 607);
+            this.lblPosFRR.Location = new System.Drawing.Point(387, 637);
             this.lblPosFRR.Name = "lblPosFRR";
             this.lblPosFRR.Size = new System.Drawing.Size(123, 20);
             this.lblPosFRR.TabIndex = 10;
@@ -363,7 +390,7 @@ namespace MotionPlatform3
             // lblTargetFRR
             // 
             this.lblTargetFRR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblTargetFRR.Location = new System.Drawing.Point(387, 627);
+            this.lblTargetFRR.Location = new System.Drawing.Point(387, 657);
             this.lblTargetFRR.Name = "lblTargetFRR";
             this.lblTargetFRR.Size = new System.Drawing.Size(123, 20);
             this.lblTargetFRR.TabIndex = 11;
@@ -793,7 +820,7 @@ namespace MotionPlatform3
             // 
             this.btnApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnApply.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnApply.Location = new System.Drawing.Point(827, 674);
+            this.btnApply.Location = new System.Drawing.Point(827, 704);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(147, 38);
             this.btnApply.TabIndex = 48;
@@ -1021,6 +1048,272 @@ namespace MotionPlatform3
             this.btnSimHub.UseVisualStyleBackColor = true;
             this.btnSimHub.Click += new System.EventHandler(this.BtnSimHub_Click);
             // 
+            // chkPIDEnable
+            // 
+            this.chkPIDEnable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkPIDEnable.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.chkPIDEnable.Checked = false;
+            this.chkPIDEnable.Location = new System.Drawing.Point(14, 6);
+            this.chkPIDEnable.MaximumSize = new System.Drawing.Size(80, 32);
+            this.chkPIDEnable.MinimumSize = new System.Drawing.Size(80, 32);
+            this.chkPIDEnable.Name = "chkPIDEnable";
+            this.chkPIDEnable.Size = new System.Drawing.Size(80, 32);
+            this.chkPIDEnable.StateOff = ((System.Drawing.Image)(resources.GetObject("chkPIDEnable.StateOff")));
+            this.chkPIDEnable.StateOn = ((System.Drawing.Image)(resources.GetObject("chkPIDEnable.StateOn")));
+            this.chkPIDEnable.SwitchText = "Enabled";
+            this.chkPIDEnable.TabIndex = 7;
+            this.toolTips.SetToolTip(this.chkPIDEnable, "Enable PID");
+            this.chkPIDEnable.OnSwitch += new System.EventHandler(this.ChkPIDEnable_OnSwitch);
+            // 
+            // label10
+            // 
+            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(11, 82);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(20, 13);
+            this.label10.TabIndex = 18;
+            this.label10.Text = "Kp";
+            this.toolTips.SetToolTip(this.label10, "Kp - Proportional gain (response strength)");
+            // 
+            // sliderPIDKp
+            // 
+            this.sliderPIDKp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sliderPIDKp.BigStep = 5;
+            this.sliderPIDKp.Location = new System.Drawing.Point(47, 74);
+            this.sliderPIDKp.Maximum = 200;
+            this.sliderPIDKp.Minimum = 0;
+            this.sliderPIDKp.MinimumSize = new System.Drawing.Size(16, 16);
+            this.sliderPIDKp.Name = "sliderPIDKp";
+            this.sliderPIDKp.Padding = new System.Windows.Forms.Padding(1);
+            this.sliderPIDKp.Size = new System.Drawing.Size(132, 29);
+            this.sliderPIDKp.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
+            this.sliderPIDKp.SmallStep = 1;
+            this.sliderPIDKp.Steps = 10;
+            this.sliderPIDKp.TabIndex = 19;
+            this.toolTips.SetToolTip(this.sliderPIDKp, "Kp - Proportional gain (response strength)");
+            this.sliderPIDKp.Value = 20;
+            this.sliderPIDKp.Vertical = false;
+            this.sliderPIDKp.OnValueChanged += new System.EventHandler(this.OnPIDValueChanged);
+            // 
+            // label20
+            // 
+            this.label20.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(11, 47);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(29, 13);
+            this.label20.TabIndex = 21;
+            this.label20.Text = "Gain";
+            this.toolTips.SetToolTip(this.label20, "PID Gain %");
+            // 
+            // sliderPIDGain
+            // 
+            this.sliderPIDGain.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sliderPIDGain.BigStep = 5;
+            this.sliderPIDGain.Location = new System.Drawing.Point(52, 39);
+            this.sliderPIDGain.Maximum = 100;
+            this.sliderPIDGain.Minimum = 0;
+            this.sliderPIDGain.MinimumSize = new System.Drawing.Size(16, 16);
+            this.sliderPIDGain.Name = "sliderPIDGain";
+            this.sliderPIDGain.Padding = new System.Windows.Forms.Padding(1);
+            this.sliderPIDGain.Size = new System.Drawing.Size(334, 29);
+            this.sliderPIDGain.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
+            this.sliderPIDGain.SmallStep = 1;
+            this.sliderPIDGain.Steps = 10;
+            this.sliderPIDGain.TabIndex = 22;
+            this.toolTips.SetToolTip(this.sliderPIDGain, "PID Gain %");
+            this.sliderPIDGain.Value = 20;
+            this.sliderPIDGain.Vertical = false;
+            this.sliderPIDGain.OnValueChanged += new System.EventHandler(this.OnPIDValueChanged);
+            // 
+            // lblPIDNotApplyed
+            // 
+            this.lblPIDNotApplyed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPIDNotApplyed.AutoSize = true;
+            this.lblPIDNotApplyed.ForeColor = System.Drawing.Color.DarkOrange;
+            this.lblPIDNotApplyed.Location = new System.Drawing.Point(238, 6);
+            this.lblPIDNotApplyed.Name = "lblPIDNotApplyed";
+            this.lblPIDNotApplyed.Size = new System.Drawing.Size(181, 13);
+            this.lblPIDNotApplyed.TabIndex = 24;
+            this.lblPIDNotApplyed.Text = "Settings not applyed yet. Press Apply";
+            this.toolTips.SetToolTip(this.lblPIDNotApplyed, "Forward/backward");
+            this.lblPIDNotApplyed.Visible = false;
+            // 
+            // lblPIDGain
+            // 
+            this.lblPIDGain.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPIDGain.AutoSize = true;
+            this.lblPIDGain.Location = new System.Drawing.Point(392, 47);
+            this.lblPIDGain.Name = "lblPIDGain";
+            this.lblPIDGain.Size = new System.Drawing.Size(27, 13);
+            this.lblPIDGain.TabIndex = 23;
+            this.lblPIDGain.Text = "20%";
+            this.toolTips.SetToolTip(this.lblPIDGain, "PID Gain %");
+            // 
+            // lblKs
+            // 
+            this.lblKs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblKs.AutoSize = true;
+            this.lblKs.Location = new System.Drawing.Point(392, 117);
+            this.lblKs.Name = "lblKs";
+            this.lblKs.Size = new System.Drawing.Size(27, 13);
+            this.lblKs.TabIndex = 20;
+            this.lblKs.Text = "20%";
+            this.toolTips.SetToolTip(this.lblKs, "Ks - Derivative smoothing ratio (%)");
+            // 
+            // lblKd
+            // 
+            this.lblKd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblKd.AutoSize = true;
+            this.lblKd.Location = new System.Drawing.Point(392, 82);
+            this.lblKd.Name = "lblKd";
+            this.lblKd.Size = new System.Drawing.Size(27, 13);
+            this.lblKd.TabIndex = 20;
+            this.lblKd.Text = "20%";
+            this.toolTips.SetToolTip(this.lblKd, "Kd - Derivative gain (scaled x100, 2 = 0. 02)");
+            // 
+            // lblKi
+            // 
+            this.lblKi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblKi.AutoSize = true;
+            this.lblKi.Location = new System.Drawing.Point(185, 117);
+            this.lblKi.Name = "lblKi";
+            this.lblKi.Size = new System.Drawing.Size(27, 13);
+            this.lblKi.TabIndex = 20;
+            this.lblKi.Text = "20%";
+            this.toolTips.SetToolTip(this.lblKi, "Ki - Integral gain (steady-state correction)\r\n");
+            // 
+            // lblKp
+            // 
+            this.lblKp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblKp.AutoSize = true;
+            this.lblKp.Location = new System.Drawing.Point(185, 82);
+            this.lblKp.Name = "lblKp";
+            this.lblKp.Size = new System.Drawing.Size(27, 13);
+            this.lblKp.TabIndex = 20;
+            this.lblKp.Text = "20%";
+            this.toolTips.SetToolTip(this.lblKp, "Kp - Proportional gain (response strength)");
+            // 
+            // label17
+            // 
+            this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(218, 117);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(19, 13);
+            this.label17.TabIndex = 18;
+            this.label17.Text = "Ks";
+            this.toolTips.SetToolTip(this.label17, "Ks - Derivative smoothing ratio (%)");
+            // 
+            // label15
+            // 
+            this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(218, 82);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(20, 13);
+            this.label15.TabIndex = 18;
+            this.label15.Text = "Kd";
+            this.toolTips.SetToolTip(this.label15, "Kd - Derivative gain (scaled x100, 2 = 0. 02)");
+            // 
+            // label11
+            // 
+            this.label11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(11, 117);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(16, 13);
+            this.label11.TabIndex = 18;
+            this.label11.Text = "Ki";
+            this.toolTips.SetToolTip(this.label11, "Ki - Integral gain (steady-state correction)\r\n");
+            // 
+            // sliderPIDKs
+            // 
+            this.sliderPIDKs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sliderPIDKs.BigStep = 5;
+            this.sliderPIDKs.Location = new System.Drawing.Point(254, 109);
+            this.sliderPIDKs.Maximum = 200;
+            this.sliderPIDKs.Minimum = 0;
+            this.sliderPIDKs.MinimumSize = new System.Drawing.Size(16, 16);
+            this.sliderPIDKs.Name = "sliderPIDKs";
+            this.sliderPIDKs.Padding = new System.Windows.Forms.Padding(1);
+            this.sliderPIDKs.Size = new System.Drawing.Size(132, 29);
+            this.sliderPIDKs.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
+            this.sliderPIDKs.SmallStep = 1;
+            this.sliderPIDKs.Steps = 10;
+            this.sliderPIDKs.TabIndex = 19;
+            this.toolTips.SetToolTip(this.sliderPIDKs, "Ks - Derivative smoothing ratio (%)");
+            this.sliderPIDKs.Value = 20;
+            this.sliderPIDKs.Vertical = false;
+            this.sliderPIDKs.OnValueChanged += new System.EventHandler(this.OnPIDValueChanged);
+            // 
+            // sliderPIDKd
+            // 
+            this.sliderPIDKd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sliderPIDKd.BigStep = 5;
+            this.sliderPIDKd.Location = new System.Drawing.Point(254, 74);
+            this.sliderPIDKd.Maximum = 200;
+            this.sliderPIDKd.Minimum = 0;
+            this.sliderPIDKd.MinimumSize = new System.Drawing.Size(16, 16);
+            this.sliderPIDKd.Name = "sliderPIDKd";
+            this.sliderPIDKd.Padding = new System.Windows.Forms.Padding(1);
+            this.sliderPIDKd.Size = new System.Drawing.Size(132, 29);
+            this.sliderPIDKd.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
+            this.sliderPIDKd.SmallStep = 1;
+            this.sliderPIDKd.Steps = 10;
+            this.sliderPIDKd.TabIndex = 19;
+            this.toolTips.SetToolTip(this.sliderPIDKd, "Kd - Derivative gain (scaled x100, 2 = 0. 02)");
+            this.sliderPIDKd.Value = 20;
+            this.sliderPIDKd.Vertical = false;
+            this.sliderPIDKd.OnValueChanged += new System.EventHandler(this.OnPIDValueChanged);
+            // 
+            // sliderPIDKi
+            // 
+            this.sliderPIDKi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.sliderPIDKi.BigStep = 5;
+            this.sliderPIDKi.Location = new System.Drawing.Point(47, 109);
+            this.sliderPIDKi.Maximum = 50;
+            this.sliderPIDKi.Minimum = 0;
+            this.sliderPIDKi.MinimumSize = new System.Drawing.Size(16, 16);
+            this.sliderPIDKi.Name = "sliderPIDKi";
+            this.sliderPIDKi.Padding = new System.Windows.Forms.Padding(1);
+            this.sliderPIDKi.Size = new System.Drawing.Size(132, 29);
+            this.sliderPIDKi.SliderColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(153)))), ((int)(((byte)(252)))));
+            this.sliderPIDKi.SmallStep = 1;
+            this.sliderPIDKi.Steps = 10;
+            this.sliderPIDKi.TabIndex = 19;
+            this.toolTips.SetToolTip(this.sliderPIDKi, "Ki - Integral gain (steady-state correction)\r\n");
+            this.sliderPIDKi.Value = 20;
+            this.sliderPIDKi.Vertical = false;
+            this.sliderPIDKi.OnValueChanged += new System.EventHandler(this.OnPIDValueChanged);
+            // 
+            // btnWritePID
+            // 
+            this.btnWritePID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnWritePID.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnWritePID.Location = new System.Drawing.Point(14, 148);
+            this.btnWritePID.Name = "btnWritePID";
+            this.btnWritePID.Size = new System.Drawing.Size(92, 27);
+            this.btnWritePID.TabIndex = 25;
+            this.btnWritePID.Text = "Write";
+            this.toolTips.SetToolTip(this.btnWritePID, "Write PID to EEPROM");
+            this.btnWritePID.UseVisualStyleBackColor = true;
+            this.btnWritePID.Click += new System.EventHandler(this.BtnWritePID_Click);
+            // 
+            // btnReadPID
+            // 
+            this.btnReadPID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnReadPID.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnReadPID.Location = new System.Drawing.Point(112, 148);
+            this.btnReadPID.Name = "btnReadPID";
+            this.btnReadPID.Size = new System.Drawing.Size(92, 27);
+            this.btnReadPID.TabIndex = 25;
+            this.btnReadPID.Text = "Read";
+            this.toolTips.SetToolTip(this.btnReadPID, "Read PID from EEPROM");
+            this.btnReadPID.UseVisualStyleBackColor = true;
+            this.btnReadPID.Click += new System.EventHandler(this.BtnReadPID_Click);
+            // 
             // lblGame
             // 
             this.lblGame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -1031,146 +1324,46 @@ namespace MotionPlatform3
             this.lblGame.TabIndex = 41;
             this.lblGame.Text = "Active Game";
             // 
-            // label1
+            // tabProperties
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(531, 515);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(181, 13);
-            this.label1.TabIndex = 44;
-            this.label1.Text = "Distance between front and rear, mm";
+            this.tabProperties.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabProperties.Controls.Add(this.tabGeometry);
+            this.tabProperties.Controls.Add(this.tabPID);
+            this.tabProperties.Controls.Add(this.tabMotionComp);
+            this.tabProperties.Location = new System.Drawing.Point(534, 491);
+            this.tabProperties.Name = "tabProperties";
+            this.tabProperties.SelectedIndex = 0;
+            this.tabProperties.Size = new System.Drawing.Size(440, 207);
+            this.tabProperties.TabIndex = 50;
             // 
-            // label2
+            // tabGeometry
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(531, 547);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(176, 13);
-            this.label2.TabIndex = 46;
-            this.label2.Text = "Distance between left and right, mm";
-            // 
-            // numFrontRearMM
-            // 
-            this.numFrontRearMM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numFrontRearMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numFrontRearMM.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.numFrontRearMM.Location = new System.Drawing.Point(724, 513);
-            this.numFrontRearMM.Maximum = new decimal(new int[] {
-            2000,
-            0,
-            0,
-            0});
-            this.numFrontRearMM.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numFrontRearMM.Name = "numFrontRearMM";
-            this.numFrontRearMM.Size = new System.Drawing.Size(89, 20);
-            this.numFrontRearMM.TabIndex = 45;
-            this.numFrontRearMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.numFrontRearMM.Value = new decimal(new int[] {
-            500,
-            0,
-            0,
-            0});
-            // 
-            // numLeftRightMM
-            // 
-            this.numLeftRightMM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numLeftRightMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numLeftRightMM.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.numLeftRightMM.Location = new System.Drawing.Point(724, 545);
-            this.numLeftRightMM.Maximum = new decimal(new int[] {
-            2000,
-            0,
-            0,
-            0});
-            this.numLeftRightMM.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numLeftRightMM.Name = "numLeftRightMM";
-            this.numLeftRightMM.Size = new System.Drawing.Size(89, 20);
-            this.numLeftRightMM.TabIndex = 47;
-            this.numLeftRightMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.numLeftRightMM.Value = new decimal(new int[] {
-            500,
-            0,
-            0,
-            0});
-            // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(531, 577);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(141, 13);
-            this.label3.TabIndex = 46;
-            this.label3.Text = "Actuator travel distance, mm";
-            // 
-            // numActuatorTravelMM
-            // 
-            this.numActuatorTravelMM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numActuatorTravelMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numActuatorTravelMM.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.numActuatorTravelMM.Location = new System.Drawing.Point(724, 575);
-            this.numActuatorTravelMM.Maximum = new decimal(new int[] {
-            2000,
-            0,
-            0,
-            0});
-            this.numActuatorTravelMM.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numActuatorTravelMM.Name = "numActuatorTravelMM";
-            this.numActuatorTravelMM.Size = new System.Drawing.Size(89, 20);
-            this.numActuatorTravelMM.TabIndex = 47;
-            this.numActuatorTravelMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.numActuatorTravelMM.Value = new decimal(new int[] {
-            80,
-            0,
-            0,
-            0});
-            // 
-            // label5
-            // 
-            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(531, 607);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(133, 13);
-            this.label5.TabIndex = 46;
-            this.label5.Text = "Seat offset (from front), mm";
+            this.tabGeometry.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.tabGeometry.Controls.Add(this.numSeatOffsetMM);
+            this.tabGeometry.Controls.Add(this.numActuatorTravelMM);
+            this.tabGeometry.Controls.Add(this.numLeftRightMM);
+            this.tabGeometry.Controls.Add(this.numFrontRearMM);
+            this.tabGeometry.Controls.Add(this.label5);
+            this.tabGeometry.Controls.Add(this.label3);
+            this.tabGeometry.Controls.Add(this.label2);
+            this.tabGeometry.Controls.Add(this.label1);
+            this.tabGeometry.Location = new System.Drawing.Point(4, 22);
+            this.tabGeometry.Name = "tabGeometry";
+            this.tabGeometry.Padding = new System.Windows.Forms.Padding(3);
+            this.tabGeometry.Size = new System.Drawing.Size(432, 181);
+            this.tabGeometry.TabIndex = 0;
+            this.tabGeometry.Text = "Geometry";
             // 
             // numSeatOffsetMM
             // 
-            this.numSeatOffsetMM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.numSeatOffsetMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.numSeatOffsetMM.Increment = new decimal(new int[] {
             10,
             0,
             0,
             0});
-            this.numSeatOffsetMM.Location = new System.Drawing.Point(724, 605);
+            this.numSeatOffsetMM.Location = new System.Drawing.Point(337, 104);
             this.numSeatOffsetMM.Maximum = new decimal(new int[] {
             2000,
             0,
@@ -1183,7 +1376,7 @@ namespace MotionPlatform3
             0});
             this.numSeatOffsetMM.Name = "numSeatOffsetMM";
             this.numSeatOffsetMM.Size = new System.Drawing.Size(89, 20);
-            this.numSeatOffsetMM.TabIndex = 47;
+            this.numSeatOffsetMM.TabIndex = 53;
             this.numSeatOffsetMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numSeatOffsetMM.Value = new decimal(new int[] {
             400,
@@ -1191,12 +1384,196 @@ namespace MotionPlatform3
             0,
             0});
             // 
+            // numActuatorTravelMM
+            // 
+            this.numActuatorTravelMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numActuatorTravelMM.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numActuatorTravelMM.Location = new System.Drawing.Point(337, 74);
+            this.numActuatorTravelMM.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.numActuatorTravelMM.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numActuatorTravelMM.Name = "numActuatorTravelMM";
+            this.numActuatorTravelMM.Size = new System.Drawing.Size(89, 20);
+            this.numActuatorTravelMM.TabIndex = 54;
+            this.numActuatorTravelMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.numActuatorTravelMM.Value = new decimal(new int[] {
+            80,
+            0,
+            0,
+            0});
+            // 
+            // numLeftRightMM
+            // 
+            this.numLeftRightMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numLeftRightMM.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numLeftRightMM.Location = new System.Drawing.Point(337, 44);
+            this.numLeftRightMM.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.numLeftRightMM.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numLeftRightMM.Name = "numLeftRightMM";
+            this.numLeftRightMM.Size = new System.Drawing.Size(89, 20);
+            this.numLeftRightMM.TabIndex = 55;
+            this.numLeftRightMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.numLeftRightMM.Value = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+            // 
+            // numFrontRearMM
+            // 
+            this.numFrontRearMM.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numFrontRearMM.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numFrontRearMM.Location = new System.Drawing.Point(337, 12);
+            this.numFrontRearMM.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.numFrontRearMM.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numFrontRearMM.Name = "numFrontRearMM";
+            this.numFrontRearMM.Size = new System.Drawing.Size(89, 20);
+            this.numFrontRearMM.TabIndex = 49;
+            this.numFrontRearMM.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.numFrontRearMM.Value = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(18, 106);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(133, 13);
+            this.label5.TabIndex = 50;
+            this.label5.Text = "Seat offset (from front), mm";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(18, 76);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(141, 13);
+            this.label3.TabIndex = 51;
+            this.label3.Text = "Actuator travel distance, mm";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(18, 46);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(176, 13);
+            this.label2.TabIndex = 52;
+            this.label2.Text = "Distance between left and right, mm";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(18, 14);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(181, 13);
+            this.label1.TabIndex = 48;
+            this.label1.Text = "Distance between front and rear, mm";
+            // 
+            // tabPID
+            // 
+            this.tabPID.AutoScroll = true;
+            this.tabPID.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.tabPID.Controls.Add(this.btnReadPID);
+            this.tabPID.Controls.Add(this.btnWritePID);
+            this.tabPID.Controls.Add(this.lblPIDNotApplyed);
+            this.tabPID.Controls.Add(this.lblPIDGain);
+            this.tabPID.Controls.Add(this.label20);
+            this.tabPID.Controls.Add(this.sliderPIDGain);
+            this.tabPID.Controls.Add(this.lblKs);
+            this.tabPID.Controls.Add(this.lblKd);
+            this.tabPID.Controls.Add(this.lblKi);
+            this.tabPID.Controls.Add(this.lblKp);
+            this.tabPID.Controls.Add(this.label17);
+            this.tabPID.Controls.Add(this.label15);
+            this.tabPID.Controls.Add(this.label11);
+            this.tabPID.Controls.Add(this.label10);
+            this.tabPID.Controls.Add(this.sliderPIDKs);
+            this.tabPID.Controls.Add(this.sliderPIDKd);
+            this.tabPID.Controls.Add(this.sliderPIDKi);
+            this.tabPID.Controls.Add(this.sliderPIDKp);
+            this.tabPID.Controls.Add(this.chkPIDEnable);
+            this.tabPID.Location = new System.Drawing.Point(4, 22);
+            this.tabPID.Name = "tabPID";
+            this.tabPID.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPID.Size = new System.Drawing.Size(432, 181);
+            this.tabPID.TabIndex = 1;
+            this.tabPID.Text = "PID";
+            // 
+            // tabMotionComp
+            // 
+            this.tabMotionComp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
+            this.tabMotionComp.Controls.Add(this.lblOpenXRConfigured);
+            this.tabMotionComp.Controls.Add(this.lblOpenXRStatus);
+            this.tabMotionComp.Controls.Add(this.chkMotionCompensation);
+            this.tabMotionComp.Controls.Add(this.btnPathOpenXRConfig);
+            this.tabMotionComp.Controls.Add(this.btnDownloadOpenXR);
+            this.tabMotionComp.Location = new System.Drawing.Point(4, 22);
+            this.tabMotionComp.Name = "tabMotionComp";
+            this.tabMotionComp.Size = new System.Drawing.Size(432, 181);
+            this.tabMotionComp.TabIndex = 2;
+            this.tabMotionComp.Text = "Motion Compensation";
+            // 
+            // lblOpenXRConfigured
+            // 
+            this.lblOpenXRConfigured.AutoSize = true;
+            this.lblOpenXRConfigured.Location = new System.Drawing.Point(10, 81);
+            this.lblOpenXRConfigured.Name = "lblOpenXRConfigured";
+            this.lblOpenXRConfigured.Size = new System.Drawing.Size(171, 13);
+            this.lblOpenXRConfigured.TabIndex = 45;
+            this.lblOpenXRConfigured.Text = "OpenXR Compensation configured";
+            // 
+            // lblOpenXRStatus
+            // 
+            this.lblOpenXRStatus.AutoSize = true;
+            this.lblOpenXRStatus.Location = new System.Drawing.Point(10, 53);
+            this.lblOpenXRStatus.Name = "lblOpenXRStatus";
+            this.lblOpenXRStatus.Size = new System.Drawing.Size(159, 13);
+            this.lblOpenXRStatus.TabIndex = 46;
+            this.lblOpenXRStatus.Text = "OpenXR Compensation installed";
+            // 
             // chkMotionCompensation
             // 
-            this.chkMotionCompensation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkMotionCompensation.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.chkMotionCompensation.Checked = true;
-            this.chkMotionCompensation.Location = new System.Drawing.Point(534, 634);
+            this.chkMotionCompensation.Location = new System.Drawing.Point(13, 13);
             this.chkMotionCompensation.MaximumSize = new System.Drawing.Size(148, 32);
             this.chkMotionCompensation.MinimumSize = new System.Drawing.Size(148, 32);
             this.chkMotionCompensation.Name = "chkMotionCompensation";
@@ -1204,52 +1581,28 @@ namespace MotionPlatform3
             this.chkMotionCompensation.StateOff = ((System.Drawing.Image)(resources.GetObject("chkMotionCompensation.StateOff")));
             this.chkMotionCompensation.StateOn = ((System.Drawing.Image)(resources.GetObject("chkMotionCompensation.StateOn")));
             this.chkMotionCompensation.SwitchText = "Motion Compensation";
-            this.chkMotionCompensation.TabIndex = 8;
-            this.chkMotionCompensation.OnSwitch += new System.EventHandler(this.OnMotionCompensation);
-            // 
-            // lblOpenXRStatus
-            // 
-            this.lblOpenXRStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblOpenXRStatus.AutoSize = true;
-            this.lblOpenXRStatus.Location = new System.Drawing.Point(531, 669);
-            this.lblOpenXRStatus.Name = "lblOpenXRStatus";
-            this.lblOpenXRStatus.Size = new System.Drawing.Size(159, 13);
-            this.lblOpenXRStatus.TabIndex = 41;
-            this.lblOpenXRStatus.Text = "OpenXR Compensation installed";
-            // 
-            // lblOpenXRConfigured
-            // 
-            this.lblOpenXRConfigured.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblOpenXRConfigured.AutoSize = true;
-            this.lblOpenXRConfigured.Location = new System.Drawing.Point(531, 697);
-            this.lblOpenXRConfigured.Name = "lblOpenXRConfigured";
-            this.lblOpenXRConfigured.Size = new System.Drawing.Size(171, 13);
-            this.lblOpenXRConfigured.TabIndex = 41;
-            this.lblOpenXRConfigured.Text = "OpenXR Compensation configured";
+            this.chkMotionCompensation.TabIndex = 44;
             // 
             // btnPathOpenXRConfig
             // 
-            this.btnPathOpenXRConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnPathOpenXRConfig.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPathOpenXRConfig.Location = new System.Drawing.Point(724, 691);
+            this.btnPathOpenXRConfig.Location = new System.Drawing.Point(329, 79);
             this.btnPathOpenXRConfig.Name = "btnPathOpenXRConfig";
             this.btnPathOpenXRConfig.Size = new System.Drawing.Size(89, 27);
-            this.btnPathOpenXRConfig.TabIndex = 43;
+            this.btnPathOpenXRConfig.TabIndex = 47;
             this.btnPathOpenXRConfig.Text = "Fix";
             this.btnPathOpenXRConfig.UseVisualStyleBackColor = true;
             this.btnPathOpenXRConfig.Click += new System.EventHandler(this.BtnPathOpenXRConfig);
             // 
             // btnDownloadOpenXR
             // 
-            this.btnDownloadOpenXR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnDownloadOpenXR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDownloadOpenXR.Location = new System.Drawing.Point(724, 662);
+            this.btnDownloadOpenXR.Location = new System.Drawing.Point(329, 46);
             this.btnDownloadOpenXR.Name = "btnDownloadOpenXR";
             this.btnDownloadOpenXR.Size = new System.Drawing.Size(89, 27);
-            this.btnDownloadOpenXR.TabIndex = 43;
+            this.btnDownloadOpenXR.TabIndex = 47;
             this.btnDownloadOpenXR.Text = "Download";
             this.btnDownloadOpenXR.UseVisualStyleBackColor = true;
-            this.btnDownloadOpenXR.Click += new System.EventHandler(this.OnDownloadOpenXRCompensation);
             // 
             // SettingsForm
             // 
@@ -1257,15 +1610,10 @@ namespace MotionPlatform3
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(46)))), ((int)(((byte)(46)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(984, 724);
+            this.ClientSize = new System.Drawing.Size(984, 754);
             this.ControlBox = false;
+            this.Controls.Add(this.tabProperties);
             this.Controls.Add(this.btnSimHub);
-            this.Controls.Add(this.numSeatOffsetMM);
-            this.Controls.Add(this.numActuatorTravelMM);
-            this.Controls.Add(this.numLeftRightMM);
-            this.Controls.Add(this.numFrontRearMM);
-            this.Controls.Add(this.lblOpenXRConfigured);
-            this.Controls.Add(this.lblOpenXRStatus);
             this.Controls.Add(this.lblGame);
             this.Controls.Add(this.comboComPort);
             this.Controls.Add(this.label7);
@@ -1289,12 +1637,8 @@ namespace MotionPlatform3
             this.Controls.Add(this.sliderPitch);
             this.Controls.Add(this.lblGearEffect);
             this.Controls.Add(this.lblSmooth);
-            this.Controls.Add(this.label5);
             this.Controls.Add(this.lblSpeed);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.label9);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.sliderGearEffect);
             this.Controls.Add(this.label4);
@@ -1306,7 +1650,6 @@ namespace MotionPlatform3
             this.Controls.Add(this.chkInvertRoll);
             this.Controls.Add(this.chkInvertPitch);
             this.Controls.Add(this.chkCollect);
-            this.Controls.Add(this.chkMotionCompensation);
             this.Controls.Add(this.chkParkOnQuit);
             this.Controls.Add(this.chkParkOnIdle);
             this.Controls.Add(this.chkEnabled);
@@ -1314,8 +1657,6 @@ namespace MotionPlatform3
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.btnSpeedSettings);
             this.Controls.Add(this.btnTestSpeed);
-            this.Controls.Add(this.btnDownloadOpenXR);
-            this.Controls.Add(this.btnPathOpenXRConfig);
             this.Controls.Add(this.btnTune);
             this.Controls.Add(this.btnAlarmReset);
             this.Controls.Add(this.btnPark);
@@ -1325,7 +1666,7 @@ namespace MotionPlatform3
             this.ForeColor = System.Drawing.Color.White;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(1000, 740);
+            this.MinimumSize = new System.Drawing.Size(1000, 770);
             this.Name = "SettingsForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -1336,10 +1677,17 @@ namespace MotionPlatform3
             ((System.ComponentModel.ISupportInitialize)(this.pbFR)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbRR)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbFRR)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).EndInit();
+            this.tabProperties.ResumeLayout(false);
+            this.tabGeometry.ResumeLayout(false);
+            this.tabGeometry.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSeatOffsetMM)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numActuatorTravelMM)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numLeftRightMM)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numFrontRearMM)).EndInit();
+            this.tabPID.ResumeLayout(false);
+            this.tabPID.PerformLayout();
+            this.tabMotionComp.ResumeLayout(false);
+            this.tabMotionComp.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1415,20 +1763,43 @@ namespace MotionPlatform3
         private vAzhureRacingAPI.VAzhureSwitchButton chkParkOnIdle;
         private vAzhureRacingAPI.VAzhureSwitchButton chkParkOnQuit;
         private System.Windows.Forms.Label lblGame;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.NumericUpDown numFrontRearMM;
-        private System.Windows.Forms.NumericUpDown numLeftRightMM;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.NumericUpDown numActuatorTravelMM;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.NumericUpDown numSeatOffsetMM;
         private System.Windows.Forms.Button btnSpeedSettings;
         private System.Windows.Forms.Button btnSimHub;
-        private vAzhureRacingAPI.VAzhureSwitchButton chkMotionCompensation;
-        private System.Windows.Forms.Label lblOpenXRStatus;
+        private System.Windows.Forms.TabControl tabProperties;
+        private System.Windows.Forms.TabPage tabGeometry;
+        private System.Windows.Forms.NumericUpDown numSeatOffsetMM;
+        private System.Windows.Forms.NumericUpDown numActuatorTravelMM;
+        private System.Windows.Forms.NumericUpDown numLeftRightMM;
+        private System.Windows.Forms.NumericUpDown numFrontRearMM;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TabPage tabPID;
+        private System.Windows.Forms.TabPage tabMotionComp;
         private System.Windows.Forms.Label lblOpenXRConfigured;
+        private System.Windows.Forms.Label lblOpenXRStatus;
+        private vAzhureRacingAPI.VAzhureSwitchButton chkMotionCompensation;
         private System.Windows.Forms.Button btnPathOpenXRConfig;
         private System.Windows.Forms.Button btnDownloadOpenXR;
+        private System.Windows.Forms.Label lblKp;
+        private System.Windows.Forms.Label label10;
+        private vAzhureRacingAPI.VAzhureSwitchButton chkPIDEnable;
+        private System.Windows.Forms.Label lblPIDGain;
+        private System.Windows.Forms.Label label20;
+        private vAzhureRacingAPI.VAzhureSliderControl sliderPIDGain;
+        private System.Windows.Forms.Label lblKs;
+        private System.Windows.Forms.Label lblKd;
+        private System.Windows.Forms.Label lblKi;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label11;
+        private vAzhureRacingAPI.VAzhureSliderControl sliderPIDKs;
+        private vAzhureRacingAPI.VAzhureSliderControl sliderPIDKd;
+        private vAzhureRacingAPI.VAzhureSliderControl sliderPIDKi;
+        private vAzhureRacingAPI.VAzhureSliderControl sliderPIDKp;
+        private System.Windows.Forms.Label lblPIDNotApplyed;
+        private System.Windows.Forms.Button btnReadPID;
+        private System.Windows.Forms.Button btnWritePID;
     }
 }

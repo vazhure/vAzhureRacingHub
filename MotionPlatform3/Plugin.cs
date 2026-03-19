@@ -340,6 +340,7 @@ namespace MotionPlatform3
                 SetSpeed(settings.LowSpeedOverride, true);
                 SetAcceleration(settings.Acceleration);
                 RequestState();
+                RequestPID();
 
                 OnConnected?.Invoke(this, new EventArgs());
             }
@@ -367,6 +368,28 @@ namespace MotionPlatform3
                 if (h.IsAllocated)
                 {
                     h.Free();
+                }
+            }
+        }
+
+        public void RequestPID()
+        {
+            if (!IsConnected)
+                return;
+
+            lock (serialPort)
+            {
+                try
+                {
+                    byte[] data = GenerateCommand(COMMAND.CMD_GET_PID_STATE, 1, 1, 1, 1);
+                    serialPort.Write(data, 0, PCCMD_SIZE);
+#if DEBUG
+                    Console.WriteLine($"PID state requested at: {DateTime.UtcNow:hhMMss.f}");
+#endif
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
                 }
             }
         }
@@ -789,7 +812,7 @@ namespace MotionPlatform3
 
                 (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
 
-                if (_lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
+                if (true) // _lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
                 {
                     Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
 
@@ -805,6 +828,10 @@ namespace MotionPlatform3
 
         // ACTUAL STATES
         private readonly AXIS_STATE[] states = new AXIS_STATE[cMaxAxesCount];
+        private PID_STATE pid_state = new PID_STATE();
+
+        public bool IsPIDAvailable { get; private set; } = false;
+        public PID_STATE PidState => pid_state;
 
         public AXIS_STATE FrontAxisState
         {
@@ -838,6 +865,7 @@ namespace MotionPlatform3
         }
 
         public event EventHandler<AxisStateChanged> OnAxisStateChanged;
+        public event EventHandler<PID_STATE> OnPidState;
 
         //const int AXIS_STATE_SIZE = 20;
         //const int PCCMD_SIZE = 16;
@@ -846,12 +874,34 @@ namespace MotionPlatform3
 
         const int cFirstAddr = 10;
         const int cLastAddr = 13; // 15 if 6 axis
+        const int cPIDAddr = 255;
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             while (serialPort.BytesToRead >= AXIS_STATE_SIZE + 2)
             {
                 int addr = serialPort.ReadByte();
+                if (addr == cPIDAddr)
+                {
+                    if (serialPort.ReadByte() == AXIS_STATE_SIZE)
+                    {
+                        if (serialPort.Read(data, 0, AXIS_STATE_SIZE) == AXIS_STATE_SIZE)
+                        {
+                            try
+                            {
+                                pid_state = Marshalizable<PID_STATE>.FromBytes(data);
+                                IsPIDAvailable = true;
+                                OnPidState?.Invoke(this, pid_state);
+                            }
+                            catch
+                            {
+
+                            }
+                            continue;
+                        }
+                    }
+                }
+
                 if (addr >= cFirstAddr && addr <= cLastAddr)
                 {
                     if (serialPort.ReadByte() == AXIS_STATE_SIZE)
@@ -868,7 +918,7 @@ namespace MotionPlatform3
 
                                 if (state.mode != DEVICE_MODE.UNKNOWN)
                                     devMap[addr] = true;
-                                
+
                                 OnAxisStateChanged?.Invoke(this, new AxisStateChanged(addr, state));
 #if DEBUG
                                 Console.WriteLine($"SerialPort_DataReceived at addr: {addr} {DateTime.UtcNow:hhMMss.f}");
@@ -879,6 +929,60 @@ namespace MotionPlatform3
                                 //Console.WriteLine(ex.Message);
                             }
                     }
+                }
+            }
+        }
+
+        internal void SetPIDValue(int value, COMMAND cmd)
+        {
+            if (!IsConnected)
+                return;
+            lock (serialPort)
+            {
+                try
+                {
+                    byte[] data = GenerateCommand(cmd, value, 1, 1, 1);
+                    serialPort.Write(data, 0, PCCMD_SIZE);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
+            }
+        }
+
+        internal void WritePID()
+        {
+            if (!IsConnected)
+                return;
+            lock (serialPort)
+            {
+                try
+                {
+                    byte[] data = GenerateCommand(COMMAND.CMD_STORE_PID, 1, 1, 1, 1);
+                    serialPort.Write(data, 0, PCCMD_SIZE);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                }
+            }
+        }
+
+        internal void ReadPID()
+        {
+            if (!IsConnected)
+                return;
+            lock (serialPort)
+            {
+                try
+                {
+                    byte[] data = GenerateCommand(COMMAND.CMD_RESTORE_PID, 1, 1, 1, 1);
+                    serialPort.Write(data, 0, PCCMD_SIZE);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
                 }
             }
         }
@@ -1220,6 +1324,19 @@ namespace MotionPlatform3
         public int max;
     }
 
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PID_STATE
+    {
+        public byte version;
+        public PID_FLAGS flags;
+        public ushort masterPidBlend;
+        public float masterPidKp;
+        public float masterPidKi;
+        public float masterPidKd;
+        public float masterPidKs;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct PCCMD
     {
@@ -1243,7 +1360,17 @@ namespace MotionPlatform3
         CMD_PARK,
         SET_ALARM,
         CMD_SET_LOW_SPEED,
-        CMD_SET_ACCEL
+        CMD_SET_ACCEL,
+        CMD_MOVE_SH,
+        CMD_SET_PID_KP,      // 0x0C
+        CMD_SET_PID_KI,      // 0x0D
+        CMD_SET_PID_KD,      // 0x0E
+        CMD_SET_PID_KS,      // 0x0F
+        CMD_SET_PID_ENABLE,  // 0x10
+        CMD_SET_PID_BLEND,   // 0x11
+        CMD_GET_PID_STATE,   // 0x12
+        CMD_STORE_PID,       // 0x13
+        CMD_RESTORE_PID      // 0x14
     };
 
     public enum DEVICE_MODE : byte
@@ -1263,5 +1390,14 @@ namespace MotionPlatform3
         NONE = 0,
         STATE_ON_LIMIT_SWITCH = 1,
         STATE_HOMED = 1 << 1,
+    };
+
+    [Flags]
+    public enum PID_FLAGS : byte
+    {
+        PID_NONE = 0,
+        PID_ENABLED = 1,
+        PID_MASTER_SYNC = 1 << 1,
+        PID_DIAG_ENABLED = 1 << 2,  // Diagnostics: set false after validation if SimHub parsing is affected.
     };
 }

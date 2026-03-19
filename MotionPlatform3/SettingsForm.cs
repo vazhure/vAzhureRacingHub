@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
@@ -10,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MotionPlatform3
 {
@@ -100,6 +98,7 @@ namespace MotionPlatform3
             _plugin.App.OnDeviceRemoveComplete -= Application_OnDeviceRemoveComplete;
             _plugin.App.OnGameStarted -= App_OnGameStarted;
             _plugin.App.OnGameStopped -= App_OnGameStopped;
+            _plugin.OnPidState -= Plugin_OnPidState;
 
             cancellationToken.Cancel();
             stateWorker.Wait(100);
@@ -107,14 +106,96 @@ namespace MotionPlatform3
 
         MODE oldMode = MODE.Run;
 
+        private void EnableControls(Control.ControlCollection controlCollection, bool bEnable)
+        {
+            foreach (Control control in controlCollection)
+            {
+                control.Enabled = bEnable;
+            }
+        }
+
+        const int PID_KP_MAX = 20;
+        const int PID_KI_MAX = 5;
+        const int PID_KD_MAX = 5;
+        const int PID_KS_MAX = 1;
+
+        const int PID_KP_COEFF = 10;
+        const int PID_KI_COEFF = 10;
+        const int PID_KD_COEFF = 100;
+        const int PID_KS_COEFF = 100;
+
+
+        private bool IsPIDChanged()
+        {
+            PID_STATE state = new PID_STATE()
+            {
+                flags = chkPIDEnable.Checked ? PID_FLAGS.PID_ENABLED : PID_FLAGS.PID_NONE,
+                masterPidBlend = (ushort)sliderPIDGain.Value,
+                masterPidKd = (float)sliderPIDKd.Value / PID_KD_COEFF,
+                masterPidKs = (float)sliderPIDKs.Value / PID_KS_COEFF,
+                masterPidKi = (float)sliderPIDKi.Value / PID_KI_COEFF,
+                masterPidKp = (float)sliderPIDKp.Value / PID_KP_COEFF,
+            };
+
+            return state.flags != _plugin.PidState.flags ||
+                Math.Abs(state.masterPidKp - _plugin.PidState.masterPidKp) > float.Epsilon ||
+                Math.Abs(state.masterPidKi - _plugin.PidState.masterPidKi) > float.Epsilon ||
+                Math.Abs(state.masterPidKs - _plugin.PidState.masterPidKs) > float.Epsilon ||
+                Math.Abs(state.masterPidKd - _plugin.PidState.masterPidKd) > float.Epsilon ||
+                Math.Abs(state.masterPidBlend - _plugin.PidState.masterPidBlend) > 0;
+        }
+
+        private void UpdatePIDTab()
+        {
+            BeginInvoke((Action)delegate ()
+            {
+                tabPID.Text = _plugin.IsPIDAvailable ? "PID" : "PID (Update Firmware)";
+                EnableControls(tabPID.Controls, _plugin.IsPIDAvailable);
+
+                if (_plugin.IsPIDAvailable)
+                {
+                    sliderPIDGain.Value = _plugin.PidState.masterPidBlend;
+                    sliderPIDKp.Value = (int)Math2.Clamp((_plugin.PidState.masterPidKp * PID_KP_COEFF), 0, PID_KP_MAX * PID_KP_COEFF);
+                    sliderPIDKs.Value = (int)Math2.Clamp((_plugin.PidState.masterPidKs * PID_KS_COEFF), 0, PID_KS_MAX * PID_KS_COEFF);
+                    sliderPIDKi.Value = (int)Math2.Clamp((_plugin.PidState.masterPidKi * PID_KI_COEFF), 0, PID_KI_MAX * PID_KI_COEFF);
+                    sliderPIDKd.Value = (int)Math2.Clamp((_plugin.PidState.masterPidKd * PID_KD_COEFF), 0, PID_KD_MAX * PID_KD_COEFF);
+
+                    lblKp.Text = $"{_plugin.PidState.masterPidKp * PID_KP_COEFF:0}";
+                    lblKi.Text = $"{_plugin.PidState.masterPidKi * PID_KI_COEFF:0}";
+                    lblKs.Text = $"{_plugin.PidState.masterPidKs * PID_KS_COEFF:0}";
+                    lblKd.Text = $"{_plugin.PidState.masterPidKd * PID_KD_COEFF:0}";
+
+                    chkPIDEnable.Checked = _plugin.PidState.flags.HasFlag(PID_FLAGS.PID_ENABLED);
+
+                    lblPIDGain.Text = $"{_plugin.PidState.masterPidBlend:0}%";
+
+                    lblPIDNotApplyed.Visible = false;
+                }
+            });
+        }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+
+            UpdatePIDTab();
 
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(10, _plugin.FrontAxisState));
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(11, _plugin.RearLeftAxisState));
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(12, _plugin.RearRightAxisState));
             Plugin_OnAxisStateChanged(_plugin, new Plugin.AxisStateChanged(13, _plugin.FrontRightAxisState));
+
+            sliderPIDGain.Minimum = 0;
+            sliderPIDKd.Minimum = 0;
+            sliderPIDKp.Minimum = 0;
+            sliderPIDKi.Minimum = 0;
+            sliderPIDKs.Minimum = 0;
+
+            sliderPIDGain.Maximum = 100;
+            sliderPIDKd.Maximum = PID_KD_MAX * PID_KD_COEFF;
+            sliderPIDKp.Maximum = PID_KP_MAX * PID_KP_COEFF;
+            sliderPIDKi.Maximum = PID_KI_MAX * PID_KI_COEFF;
+            sliderPIDKs.Maximum = PID_KS_MAX * PID_KS_COEFF;
 
             chkInvertHeave.Checked = _plugin.settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave);
             chkInvertRoll.Checked = _plugin.settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll);
@@ -172,7 +253,9 @@ namespace MotionPlatform3
             _plugin.OnDisconnected += Plugin_OnDisconnected;
             _plugin.App.OnDeviceArrival += Application_OnDeviceArrival;
             _plugin.App.OnDeviceRemoveComplete += Application_OnDeviceRemoveComplete;
+            _plugin.OnPidState += Plugin_OnPidState;
 
+            _plugin.RequestPID();
 
             stateWorker = Task.Run(() =>
             {
@@ -182,12 +265,19 @@ namespace MotionPlatform3
                     {
                         if (_plugin.Status == DeviceStatus.Connected)
                             _plugin.RequestState();
+
+
                     }
                     catch { }
                     Thread.Sleep(100);
 
                 }
             }, cancellationToken.Token);
+        }
+
+        private void Plugin_OnPidState(object sender, PID_STATE e)
+        {
+            UpdatePIDTab();
         }
 
         private void InitComPorts()
@@ -307,6 +397,22 @@ namespace MotionPlatform3
 
         private void ButtonApply_Click(object sender, EventArgs e)
         {
+            if (_plugin.IsPIDAvailable && IsPIDChanged())
+            {
+                _plugin.SetPIDValue(0, COMMAND.CMD_SET_PID_ENABLE);
+
+                _plugin.SetPIDValue(sliderPIDGain.Value, COMMAND.CMD_SET_PID_BLEND);
+                _plugin.SetPIDValue(sliderPIDKp.Value, COMMAND.CMD_SET_PID_KP);
+                _plugin.SetPIDValue(sliderPIDKs.Value, COMMAND.CMD_SET_PID_KS);
+                _plugin.SetPIDValue(sliderPIDKi.Value, COMMAND.CMD_SET_PID_KI);
+                _plugin.SetPIDValue(sliderPIDKd.Value, COMMAND.CMD_SET_PID_KD);
+
+                if (chkPIDEnable.Checked)
+                    _plugin.SetPIDValue(1, COMMAND.CMD_SET_PID_ENABLE);
+
+                _plugin.RequestPID();
+            }
+
             int speed = sliderSpeed.Value;
             _plugin.SetSpeed(speed);
             _plugin.settings.SpeedOverride = speed;
@@ -464,13 +570,125 @@ namespace MotionPlatform3
             string sHome = FormatSimHubCommand(_plugin.GenerateCommand(COMMAND.CMD_HOME, 1, 1, 1, 1));
             string sState = FormatSimHubCommand(_plugin.GenerateCommand(COMMAND.CMD_GET_STATE, 1, 1, 1, 1));
 
+            motionsettings.Output.Settings.GenericProtocolDefinition.SettingsBuilder.Settings = new SimHub.ProtocolSetting[]
+            {
+                new SimHub.ProtocolSetting()
+                {
+                    TypeName = "GroupEntry",
+                    Label = "PID Mode Controls",
+                    Id = "31266265-e4a8-44c7-a44d-646b9560fcdc",
+                    Name = null,
+                    Settings = new SimHub.ProtocolSetting[]
+                    {
+                        new SimHub.ProtocolSetting()
+                        {
+                            TypeName = "BoolEntry",
+                            Label = "Enable STM32 PID mode (Warning: has significant effect on motion feel.)",
+                            PropertyName = "pid_enable",
+                            CurrentValue = false,
+                            Id = "c0a818c4-c579-4576-997d-3e2b5f0887a0",
+                            Name = null
+                        },
+                        new SimHub.ProtocolSetting()
+                        {
+                            TypeName = "BoolEntry",
+                            Label = "Synchronized trajectory execution (align target updates to avoid desync)",
+                            PropertyName = "experimental_sync_exec",
+                            CurrentValue = false,
+                            Id = "18c2f2af-302f-4e1d-ad0d-1c6f52dd4541",
+                            Name = null
+                        },
+                        new SimHub.ProtocolSetting()
+                        {
+                            TypeName = "SliderEntry",
+                            Label = "Global PID Gain (%)\nScales STM32 PID output strength (0 = minimal, 100 = maximum).",
+                            PropertyName = "pid_blend",
+                            CurrentValue = 35,
+                            Minimum = 0,
+                            Maximum = 100,
+                            Id = "4b292a99-f6c0-4bfc-80e1-2828af748d86",
+                            Name = null
+                        }
+                    }
+                },
+                new SimHub.ProtocolSetting()
+                {
+                    TypeName = "GroupEntry",
+                    Label = "PID Tuning Parameters",
+                    Id = "f4ed35d0-c372-46da-a970-593fe8de3b5a",
+                    Name = null,
+                    Settings = new SimHub.ProtocolSetting[]
+                    {
+                        new SimHub.ProtocolSetting()
+                        {
+                            TypeName = "SliderEntry",
+                            Label = "Kp - Proportional gain (response strength)\nHigher = faster, more aggressive response.",
+                            PropertyName = "pid_kp",
+                            CurrentValue = 15,
+                            Minimum = 0,
+                            Maximum = 30,
+                            Id = "1611dd26-c478-4ecf-8fae-b5e4166a81f2",
+                            Name = null
+                        },
+                        new SimHub.ProtocolSetting()
+                        {
+                            TypeName = "SliderEntry",
+                            Label = "Ki - Integral gain (steady-state correction)\nWARNING: Keep at 0. Servo controller likely has internal integral.\nNon-zero value may cause desync between actuators.\nChange only if you understand cascade control and accept desync risk.",
+                            PropertyName = "pid_ki",
+                            CurrentValue = 0,
+                            Minimum = 0,
+                            Maximum = 10,
+                            Id = "e263fd79-a803-4786-a473-8e969e7b3548",
+                            Name = null
+                        },
+                        new SimHub.ProtocolSetting()
+                        {
+                            TypeName = "SliderEntry",
+                            Label = "Kd - Derivative gain (scaled x100, 2 = 0.02)\nHigher = more damping, smoother deceleration.",
+                            PropertyName = "pid_kd",
+                            CurrentValue = 2,
+                            Minimum = 0,
+                            Maximum = 100,
+                            Id = "46e81266-97d8-4ea4-8615-b21945af1f2b",
+                            Name = null
+                        },
+                        new SimHub.ProtocolSetting()
+                        {
+                            TypeName = "SliderEntry",
+                            Label = "Ks - Derivative smoothing ratio (%)\nHigher = smoother derivative filtering (less noise, more lag).",
+                            PropertyName = "pid_ks",
+                            CurrentValue = 50,
+                            Minimum = 0,
+                            Maximum = 100,
+                            Id = "39df4aa0-f9ad-4994-bae4-2fce8b127039",
+                            Name = null
+                        }
+                    }
+                }
+            };
+
             motionsettings.Output.Settings.GenericProtocolDefinition.StartCommands = new SimHub.StartCommand[]
             {
                 new SimHub.StartCommand() { Command = sAcc },
                 new SimHub.StartCommand() { Command = sSpeedLow },
                 new SimHub.StartCommand() { Command = sSpeed },
                 new SimHub.StartCommand() { Command = sHome, CommandDelay = 3000 },
-                new SimHub.StartCommand() { Command = sState }
+                new SimHub.StartCommand() { Command = sState },
+                new SimHub.StartCommand() { Command = "PIDEN=<Setting,pid_enable,0><13><10>", CommandDelay = 50 },
+                new SimHub.StartCommand() { Command = "PIDBLEND=<Setting,pid_blend,0><13><10>", CommandDelay = 50 },
+                new SimHub.StartCommand() { Command = "SYNCEXEC=<Setting,experimental_sync_exec,0><13><10>", CommandDelay = 50 },
+                new SimHub.StartCommand() { Command = "KP=<Setting,pid_kp,0.00><13><10>", CommandDelay = 50 },
+                new SimHub.StartCommand() { Command = "KI=<Setting,pid_ki,0.00><13><10>", CommandDelay = 50 },
+                new SimHub.StartCommand() { Command = "KD=<Setting,pid_kd,0><13><10>", CommandDelay = 50 },
+                new SimHub.StartCommand() { Command = "KS=<Setting,pid_ks,0><13><10>", CommandDelay = 50 }
+            };
+
+            var baseUpdateCommand = motionsettings.Output.Settings.GenericProtocolDefinition.UpdateCommands?.FirstOrDefault() ?? new SimHub.UpdateCommand();
+            motionsettings.Output.Settings.GenericProtocolDefinition.UpdateCommands = new SimHub.UpdateCommand[]
+            {
+                new SimHub.UpdateCommand() { Command = baseUpdateCommand.Command, CommandDelay = baseUpdateCommand.CommandDelay },
+                new SimHub.UpdateCommand() { Command = "PIDCFG=<Setting,pid_enable,0>,<Setting,pid_blend,0><13><10>", CommandDelay = 0 },
+                new SimHub.UpdateCommand() { Command = "SYNCEXEC=<Setting,experimental_sync_exec,0><13><10>", CommandDelay = 0 }
             };
 
             using (SaveFileDialog saveFileDialog = new SaveFileDialog()
@@ -509,6 +727,58 @@ namespace MotionPlatform3
         {
             System.Diagnostics.Process.Start("https://github.com/BuzzteeBear/OpenXR-MotionCompensation/releases/latest");
         }
+
+        private void OnPIDValueChanged(object sender, EventArgs e)
+        {
+            if (sender is VAzhureSliderControl slider)
+            {
+                switch (slider.Name)
+                {
+                    case "sliderPIDGain":
+                        {
+                            lblPIDGain.Text = $"{slider.Value:0}%";
+                        }
+                        break;
+                    case "sliderPIDKs":
+                        {
+                            lblKs.Text = $"{slider.Value:0}";
+                        }
+                        break;
+                    case "sliderPIDKd":
+                        {
+                            lblKd.Text = $"{slider.Value:0}";
+                        }
+                        break;
+                    case "sliderPIDKi":
+                        {
+                            lblKi.Text = $"{slider.Value:0}";
+                        }
+                        break;
+                    case "sliderPIDKp":
+                        {
+                            lblKp.Text = $"{slider.Value:0}";
+                        }
+                        break;                       
+                }
+            }
+            lblPIDNotApplyed.Visible = IsPIDChanged();
+        }
+
+        private void ChkPIDEnable_OnSwitch(object sender, EventArgs e)
+        {
+            lblPIDNotApplyed.Visible = IsPIDChanged();
+        }
+
+        private void BtnWritePID_Click(object sender, EventArgs e)
+        {
+            _plugin.WritePID();
+        }
+
+        private void BtnReadPID_Click(object sender, EventArgs e)
+        {
+            _plugin.ReadPID();
+            _plugin.RequestPID();
+        }
     }
 
     public static class SimHub
@@ -529,8 +799,21 @@ namespace MotionPlatform3
 
         public class SettingsBuilder
         {
-            public Settings[] Settings { get; set; } = { };
+            public ProtocolSetting[] Settings { get; set; } = { };
             public bool IsEditMode { get; set; } = false;
+        }
+
+        public class ProtocolSetting
+        {
+            public int? Maximum { get; set; } = null;
+            public int? Minimum { get; set; } = null;
+            public string PropertyName { get; set; } = null;
+            public object CurrentValue { get; set; } = null;
+            public string Name { get; set; } = null;
+            public string TypeName { get; set; } = null;
+            public string Label { get; set; } = null;
+            public string Id { get; set; } = null;
+            public ProtocolSetting[] Settings { get; set; } = null;
         }
 
         public class GenericProtocolDefinition
@@ -551,7 +834,7 @@ namespace MotionPlatform3
             public bool UseParkPosition { get; set; } = false;
             public int ParkDuration { get; set; } = 5516;
             public bool UseParkPositionEx { get; set; } = false;
-            public ActuatorRole[] Roles { get; set; } = new ActuatorRole[] { new ActuatorRole() { Role = 1}, new ActuatorRole() { Role = 3 }, new ActuatorRole() { Role = 4 }, new ActuatorRole() { Role = 2 } };
+            public ActuatorRole[] Roles { get; set; } = new ActuatorRole[] { new ActuatorRole() { Role = 1 }, new ActuatorRole() { Role = 3 }, new ActuatorRole() { Role = 4 }, new ActuatorRole() { Role = 2 } };
         }
 
         public class ActuatorRole

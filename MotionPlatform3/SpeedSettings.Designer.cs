@@ -205,7 +205,7 @@ namespace MotionPlatform3
             0});
             this.numMaxSpeed.Location = new System.Drawing.Point(205, 85);
             this.numMaxSpeed.Maximum = new decimal(new int[] {
-            300,
+            400,
             0,
             0,
             0});

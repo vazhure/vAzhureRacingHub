@@ -85,6 +85,7 @@
     <Compile Include="SpeedSettings.Designer.cs">
       <DependentUpon>SpeedSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="WashoutFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="GameTuneDlg.resx">

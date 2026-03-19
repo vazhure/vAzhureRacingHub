@@ -284,15 +284,15 @@ namespace MotionPlatform3
             TimeSpan ts = DateTime.Now - _prevTime;
             _prevTime = DateTime.Now;
 
-            if (Math.Abs(_target - _position) < double.Epsilon)
+            double delta = (_target - _position);
+
+            if (Math.Abs(delta) < double.Epsilon)
             {
                 _target = target;
                 return _position;
             }
             else
             {
-                double delta = (_target - _position);
-
                 double elapsed = ts.TotalSeconds;
                 double maxTime = Math.Abs(delta) / _speed;
 
