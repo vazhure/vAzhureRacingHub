@@ -58,6 +58,7 @@
       <DependentUpon>GameTuneDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="IniFile.cs" />
+    <Compile Include="LowPassFilter.cs" />
     <Compile Include="ManualControlForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -65,7 +66,6 @@
       <DependentUpon>ManualControlForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MotionRigPose.cs" />
-    <Compile Include="NoiseFilter.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

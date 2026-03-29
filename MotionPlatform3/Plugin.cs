@@ -1,6 +1,5 @@
-﻿// Ignore Spelling: app
+﻿// Plugin.cs - 2026-03-27 Updated with LowPassFilter integration and Thread Safety fixes
 
-using NoiseFilters;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,25 +18,17 @@ namespace MotionPlatform3
     public class Plugin : ICustomPlugin, ICustomDevicePlugin
     {
         public string Name => "3DOF Motion Platform";
-
         public string Description => "3DOF Motion Platform";
-
-        public ulong Version => 1UL;
-
+        public ulong Version => 2UL; // Version bump for filter update
         public string DeviceName => "3DOF Motion Platform";
-
         public string DeviceDescription => "3DOF Motion Platform";
-
         public string DeviceID => "vAZHURE3DOF";
 
         private DeviceStatus status = DeviceStatus.Unknown;
         public DeviceStatus Status
         {
             get => status;
-            set
-            {
-                status = value;
-            }
+            set => status = value;
         }
 
         public bool DeviceEnabled
@@ -66,65 +57,50 @@ namespace MotionPlatform3
 
         internal SerialPort serialPort;
         internal MotionPlatformSettings settings = new MotionPlatformSettings();
-
         private IVAzhureRacingApp vAzhureRacingApp;
+        public IVAzhureRacingApp App => vAzhureRacingApp;
 
-        public IVAzhureRacingApp App { get => vAzhureRacingApp; }
+        public static string AssemblyPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        /// <summary>
-        /// Полный путь к DLL сборки
-        /// </summary>
-        public static string AssemblyPath
-        {
-            get
-            {
-                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            }
-        }
+        public bool CanClose(IVAzhureRacingApp app) => true;
 
-        public bool CanClose(IVAzhureRacingApp app)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Motion compensation rig pose
-        /// </summary>
         private MotionRigPose rigPose;
+
+        // =====================================================================
+        // FILTERING INTEGRATION
+        // =====================================================================
+        // Sample rate determined by Thread.Sleep(5) in MainTread -> ~200Hz
+        private const double UPDATE_RATE_HZ = 200.0;
+        private MotionFilterSet motionFilters;
+
+        // OpenXR Filters (kept separate as per original logic)
+        private PosFilter posPitchFilter;
+        private PosFilter posRollFilter;
+        private PosFilter posHeaveFilter;
 
         public bool Initialize(IVAzhureRacingApp app)
         {
             vAzhureRacingApp = app;
-
             rigPose = new MotionRigPose();
-
-#if DEBUG
-            //rigPose.SetPose(Math.PI / 4.0, Math.PI / 8.0, 10.0);
-
-            //PosFilter posFilter = new PosFilter(0, 10);
-            //posFilter.Test(Path.Combine(AssemblyPath, "filter.csv"));
-#endif
 
             settings = MotionPlatformSettings.LoadSettings(Path.Combine(AssemblyPath, "settings.json"));
 
-            posPitchFilter = new PosFilter(0, settings.OpenXRMotionCompensationAngularSpeed * Math.PI / 180f); // rad / sec
-            posRollFilter = new PosFilter(0, settings.OpenXRMotionCompensationAngularSpeed * Math.PI / 180f); // rad / sec
-            posHeaveFilter = new PosFilter(0, settings.OpenXRMotionCompensationLinearSpeed); // mm / sec
+            // Initialize new Low-Pass Filters
+            motionFilters = new MotionFilterSet(
+                sampleRateHz: UPDATE_RATE_HZ,
+                pitchRollCutoff: 8.0,   // 8Hz for fast response
+                heaveCutoff: 4.0,       // 4Hz for smoothness
+                swaySurgeCutoff: 5.0    // 5Hz intermediate
+            );
 
-            //CalculateLegPos(1f, 1f, 0f);
+            // OpenXR Filters Initialization
+            posPitchFilter = new PosFilter(0, settings.OpenXRMotionCompensationAngularSpeed * Math.PI / 180f);
+            posRollFilter = new PosFilter(0, settings.OpenXRMotionCompensationAngularSpeed * Math.PI / 180f);
+            posHeaveFilter = new PosFilter(0, settings.OpenXRMotionCompensationLinearSpeed);
 
             app.RegisterDevice(this);
-            app.OnDeviceArrival += delegate (object sender, DeviceChangeEventsArgs e)
-            {
-                if ($"COM{settings.ComPort}" == e.Port.ToUpper())
-                    ReConnect();
-            };
-
-            app.OnDeviceRemoveComplete += delegate (object sender, DeviceChangeEventsArgs e)
-            {
-                if ($"COM{settings.ComPort}" == e.Port.ToUpper())
-                    Disconnect();
-            };
+            app.OnDeviceArrival += (sender, e) => { if ($"COM{settings.ComPort}" == e.Port.ToUpper()) ReConnect(); };
+            app.OnDeviceRemoveComplete += (sender, e) => { if ($"COM{settings.ComPort}" == e.Port.ToUpper()) Disconnect(); };
 
             serialPort = new SerialPort
             {
@@ -136,17 +112,10 @@ namespace MotionPlatform3
                 DtrEnable = settings.DtrEnable
             };
 
-            swayFilter = new KalmanFilter(settings.FilterSettings.Sway[0], settings.FilterSettings.Sway[1], settings.FilterSettings.Sway[2], settings.FilterSettings.Sway[3], settings.FilterSettings.Sway[4], settings.FilterSettings.Sway[5]);
-            surgeFilter = new KalmanFilter(settings.FilterSettings.Surge[0], settings.FilterSettings.Surge[1], settings.FilterSettings.Surge[2], settings.FilterSettings.Surge[3], settings.FilterSettings.Surge[4], settings.FilterSettings.Surge[5]);
-            heaveFilter = new KalmanFilter(settings.FilterSettings.Heave[0], settings.FilterSettings.Heave[1], settings.FilterSettings.Heave[2], settings.FilterSettings.Heave[3], settings.FilterSettings.Heave[4], settings.FilterSettings.Heave[5]);
-            pitchFilter = new NoiseFilter(settings.FilterSettings.Pitch, settings.FilterSettings.MaxInputData);
-            rollFilter = new NoiseFilter(settings.FilterSettings.Roll, settings.FilterSettings.MaxInputData);
-
             serialPort.DataReceived += SerialPort_DataReceived;
+
             mainLoop = new Task(MainTread, this, tokenSource.Token);
-
             mainLoop.Start();
-
             ReConnect();
 
             return true;
@@ -154,8 +123,7 @@ namespace MotionPlatform3
 
         internal void Park()
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
@@ -163,17 +131,13 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_PARK, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         internal void Move(int fl, int rl, int rr, int fr = 0)
         {
-            if (!IsConnected || !IsDeviceReady)
-                return;
+            if (!IsConnected || !IsDeviceReady) return;
 
             lock (serialPort)
             {
@@ -186,17 +150,17 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_MOVE, fl, rl, rr, fr);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         internal void Home()
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
+
+            // Reset filters when homing to prevent stale state
+            motionFilters.Reset();
+
             lock (serialPort)
             {
                 try
@@ -204,17 +168,13 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_HOME, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         internal void AlarmReset()
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
@@ -222,43 +182,30 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_CLEAR_ALARM, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
-        internal void ReConnect()
-        {
-            Disconnect();
-            Connect();
-        }
+        internal void ReConnect() { Disconnect(); Connect(); }
 
         internal void SetSpeed(int speed, bool bLow = false)
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
                 {
                     speed = Math2.Clamp(speed, settings.MinSpeed, settings.MaxSpeed);
                     byte[] data = GenerateCommand(bLow ? COMMAND.CMD_SET_LOW_SPEED : COMMAND.CMD_SET_SPEED, speed, speed, speed, speed);
-
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         internal void SetAcceleration(int acc)
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
@@ -266,10 +213,7 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_SET_ACCEL, acc, acc, acc, acc);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
@@ -301,14 +245,12 @@ namespace MotionPlatform3
         }
 
         readonly Dictionary<int, bool> devMap = new Dictionary<int, bool>();
-        int ConnectedLinearAxes { get => devMap.Count; }
+        int ConnectedLinearAxes => devMap.Count;
 
         private void Connect()
         {
             Status = DeviceStatus.Unknown;
-
-            if (settings.ComPort == 0)
-                return;
+            if (settings.ComPort == 0) return;
 
             devMap.Clear();
 
@@ -327,7 +269,6 @@ namespace MotionPlatform3
                 catch
                 {
                     Status = DeviceStatus.ConnectionError;
-                    //OnConnected?.Invoke(this, new EventArgs());
                     return;
                 }
             }
@@ -341,7 +282,6 @@ namespace MotionPlatform3
                 SetAcceleration(settings.Acceleration);
                 RequestState();
                 RequestPID();
-
                 OnConnected?.Invoke(this, new EventArgs());
             }
         }
@@ -349,135 +289,84 @@ namespace MotionPlatform3
         internal byte[] GenerateCommand(COMMAND cmd, int par1, int par2, int par3, int par4 = 0)
         {
             byte[] arr = new byte[PCCMD_SIZE];
-
             GCHandle h = default;
-
             try
             {
                 h = GCHandle.Alloc(arr, GCHandleType.Pinned);
                 PCCMD cpmd = new PCCMD() { header = 0, cmd = cmd, len = (byte)PCCMD_SIZE, data = new int[] { par1, par2, par3, par4 } };
-                Marshal.StructureToPtr<PCCMD>(cpmd, h.AddrOfPinnedObject(), false);
+                Marshal.StructureToPtr(cpmd, h.AddrOfPinnedObject(), false);
                 return arr;
             }
-            catch
-            {
-                return arr;
-            }
-            finally
-            {
-                if (h.IsAllocated)
-                {
-                    h.Free();
-                }
-            }
+            catch { return arr; }
+            finally { if (h.IsAllocated) h.Free(); }
         }
 
         public void RequestPID()
         {
-            if (!IsConnected)
-                return;
-
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
                 {
                     byte[] data = GenerateCommand(COMMAND.CMD_GET_PID_STATE, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
-#if DEBUG
-                    Console.WriteLine($"PID state requested at: {DateTime.UtcNow:hhMMss.f}");
-#endif
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         public void RequestState()
         {
-            if (!IsConnected)
-                return;
-
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
                 {
                     byte[] data = GenerateCommand(COMMAND.CMD_GET_STATE, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
-#if DEBUG
-                    Console.WriteLine($"State requested at: {DateTime.UtcNow:hhMMss.f}");
-#endif
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         private TelemetryDataSet tds = new TelemetryDataSet(null);
-
-        public TelemetryDataSet Telemetry
-        {
-            get => tds;
-            internal set => tds = value;
-        }
+        public TelemetryDataSet Telemetry { get => tds; internal set => tds = value; }
 
         public void OnTelemetry(IVAzhureRacingApp _, TelemetryDataSet data)
         {
             tds = data;
-
             if (settings.mode == MODE.CollectingGameData)
             {
                 if (data.CarData?.MotionData != null)
                 {
                     string name = data.GamePlugin.Name;
-                    if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
-                    {
-                        gd.Update(data.CarData.MotionData);
-                    }
-                    else
-                    {
-                        settings.gamesData.Add(new GameData(name));
-                    }
+                    if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd) gd.Update(data.CarData.MotionData);
+                    else settings.gamesData.Add(new GameData(name));
                 }
             }
-            else
-            {
-                bDataArrived = true;
-            }
+            else bDataArrived = true;
         }
 
         public void Quit(IVAzhureRacingApp _)
         {
             settings?.SaveSettings(Path.Combine(AssemblyPath, "settings.json"));
-
             bTaskRunning = false;
             mainLoop.Wait();
-
-            if (settings.ParkOnQuit)
-                Park();
+            if (settings.ParkOnQuit) Park();
         }
 
         public void ShowProperties(IVAzhureRacingApp app)
         {
-            using (SettingsForm form = new SettingsForm(this))
-            {
-                form.ShowDialog(app.MainForm);
-            }
+            using (SettingsForm form = new SettingsForm(this)) form.ShowDialog(app.MainForm);
         }
 
-        void ICustomDevicePlugin.Initialize(IVAzhureRacingApp app)
-        {
-        }
+        void ICustomDevicePlugin.Initialize(IVAzhureRacingApp app) { }
 
         internal volatile bool bDataArrived = true;
 
         readonly Action<object> MainTread = (object obj) =>
         {
             DateTime _tm = DateTime.Now;
-
             if (obj is Plugin plugin)
             {
                 plugin.bTaskRunning = true;
@@ -495,69 +384,43 @@ namespace MotionPlatform3
                             }
                             else
                             {
-                                if (plugin.Telemetry?.GamePlugin is IGamePlugin gamePlugin)
+                                if (plugin.Telemetry?.GamePlugin is IGamePlugin gamePlugin && gamePlugin.IsRunning)
                                 {
-                                    if (gamePlugin.IsRunning)
-                                    {
-                                        TimeSpan ts = DateTime.Now - _tm;
-                                        if (ts.TotalSeconds > 1 && plugin.settings.ParkOnIdle)
-                                        {
-                                            plugin.ProcessIdle();
-                                        }
-                                        else
-                                        {
-                                            plugin.ProcessTelemetry2();
-                                        }
-                                    }
-                                    else
-                                        plugin.Telemetry = null;
+                                    TimeSpan ts = DateTime.Now - _tm;
+                                    if (ts.TotalSeconds > 1 && plugin.settings.ParkOnIdle) plugin.ProcessIdle();
+                                    else plugin.ProcessTelemetry2();
                                 }
+                                else plugin.Telemetry = null;
                             }
                         }
                     }
-                    catch
-                    {
-
-                    }
-                    finally
-                    {
-                        Thread.Sleep(5);
-                    }
+                    catch { }
+                    finally { Thread.Sleep(5); } // Determines UPDATE_RATE_HZ (200Hz)
                 }
             }
         };
 
         private void ProcessIdle()
         {
-            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
-                return;
+            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run) return;
 
-            // getting current state
-            float pitch = pitchFilter;
-            float roll = rollFilter;
-            float heave = heaveFilter;
-            float sway = swayFilter;
-            float surge = surgeFilter;
-
-            pitchFilter.Filter(pitch - 0.05f * pitch);
-            rollFilter.Filter(roll - 0.05f * roll);
-            heaveFilter.Filter(heave - 0.05f * heave);
-            swayFilter.Filter(sway - 0.05f * sway);
-            surgeFilter.Filter(surge - 0.05f * surge);
+            // Feed 0 to filters to smoothly return platform to center
+            // The filter will naturally decay towards 0 based on its physics
+            float filteredPitch = motionFilters.Pitch.Filter(0);
+            float filteredRoll = motionFilters.Roll.Filter(0);
+            float filteredHeave = motionFilters.Heave.Filter(0);
+            float filteredSway = motionFilters.Sway.Filter(0);
+            float filteredSurge = motionFilters.Surge.Filter(0);
 
             float overal = settings.OveralCoefficient / 100.0f;
 
-            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(
+                (filteredPitch + filteredSurge) * overal,
+                (filteredRoll + filteredSway) * overal,
+                -filteredHeave * overal
+            );
 
-            if (_lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
-            {
-                Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
-
-                _lastPosFront = (int)posFL;
-                _lastPosRL = (int)posRL;
-                _lastPosRR = (int)posRR;
-                _lastPosFR = (int)posFR;
-            }
+            Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
         internal void ResetActiveGameData()
@@ -565,14 +428,8 @@ namespace MotionPlatform3
             if (App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault() is IGamePlugin activeGame)
             {
                 string name = activeGame.Name;
-                if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
-                    gd.Reset();
-                else
-                {
-                    gd = new GameData(name);
-                    gd.Reset();
-                    settings.gamesData.Add(gd);
-                }
+                if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd) gd.Reset();
+                else { gd = new GameData(name); gd.Reset(); settings.gamesData.Add(gd); }
             }
         }
 
@@ -583,14 +440,8 @@ namespace MotionPlatform3
                 if (App.GamePlugins.Where(game => game.IsRunning).FirstOrDefault() is IGamePlugin activeGame)
                 {
                     string name = activeGame.Name;
-                    if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
-                        return gd;
-                    else
-                    {
-                        gd = new GameData(name);
-                        settings.gamesData.Add(gd);
-                        return gd;
-                    }
+                    if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd) return gd;
+                    else { gd = new GameData(name); settings.gamesData.Add(gd); return gd; }
                 }
                 return new GameData();
             }
@@ -599,90 +450,55 @@ namespace MotionPlatform3
         internal void RestoreActiveGameData()
         {
             string name = tds?.GamePlugin?.Name;
-            if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd)
-                settings.gamesData.Remove(gd);
+            if (settings.gamesData.FirstOrDefault(o => o.GameName == name) is GameData gd) settings.gamesData.Remove(gd);
         }
-
-        KalmanFilter swayFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        KalmanFilter surgeFilter = new KalmanFilter(1, 1, 0.02f, 1, 0.02f, 0.0f);
-        KalmanFilter heaveFilter = new KalmanFilter(1, 1, 0.05f, 1, 0.05f, 0.0f);
-        NoiseFilter pitchFilter = new NoiseFilter(3);
-        NoiseFilter rollFilter = new NoiseFilter(3);
-        //readonly NoiseFilter yawFilter = new NoiseFilter(3);
-
-        int _lastPosFront = 0;
-        int _lastPosRL = 0;
-        int _lastPosRR = 0;
-        int _lastPosFR = 0;
 
         internal void DoHeave(float delta)
         {
-            if (!settings.Enabled)
-                return;
-            float pitch = 0;
-            float roll = 0;
+            if (!settings.Enabled) return;
             float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
-
-            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, roll, -heave);
-
+            heave = motionFilters.Heave.Filter(heave);
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(0, 0, -heave);
             Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
         internal void DoRoll(float delta)
         {
-            if (!settings.Enabled)
-                return;
-            float pitch = 0;
+            if (!settings.Enabled) return;
             float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
-            float heave = 0;
-
-            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, roll, -heave);
-
+            roll = motionFilters.Roll.Filter(roll);
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(0, roll, 0);
             Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
         internal void DoPitch(float delta)
         {
-            if (!settings.Enabled)
-                return;
+            if (!settings.Enabled) return;
             float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * Math2.Mapf(delta, -1, 1, -1.0f, 1.0f);
-            float roll = 0;
-            float heave = 0;
-
-            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, roll, -heave);
-
+            pitch = motionFilters.Pitch.Filter(pitch);
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos(pitch, 0, 0);
             Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
-
-        PosFilter posPitchFilter, posRollFilter, posHeaveFilter;
-
         /// <summary>
-        /// 
+        /// Calculate leg positions based on pitch/roll/heave [-1..1]
         /// </summary>
-        /// <param name="pitch">[-1..1]</param>
-        /// <param name="roll"> [-1..1]</param>
-        /// <param name="heave">[-1..1]</param>
-        /// <returns></returns>
         internal (float, float, float, float) CalculateLegPos(float pitch, float roll, float heave)
         {
             float y = 0.5f * settings.DistanceFrontRearMM;
             float x = 0.5f * settings.DistanceLeftRightMM;
             float z = settings.ActuatorTravelMM;
             float heaveMM = z * 0.5f * Math.Abs(heave);
-            //z = heaveMM; // reducing z for max angle math
 
             pitch = Math2.Clamp(pitch, -1, 1);
             roll = Math2.Clamp(roll, -1, 1);
 
             Vector3 vHeave = new Vector3(0, 0, z * (0.5f + heave * 0.5f));
 
-            // Calculating combined pitch/roll lengths and angles
             float fpitch = new Vector3(settings.DistanceFrontRearMM, settings.DistanceLeftRightMM * roll, 0).Length();
             float froll = new Vector3(settings.DistanceFrontRearMM * pitch, settings.DistanceLeftRightMM, 0).Length();
-            // Max calculated pitch angle, radians
+
             float pitchAngle = (float)Math.Atan2(z - heaveMM * 2f, fpitch) * settings.LimitPitchAngle;
-            // Max calculated roll angle, radians
             float rollAngle = (float)Math.Atan2(z - heaveMM * 2f, froll) * settings.LimitRollAngle;
 
             if (settings.OpenXRMotionCompensation && DeviceEnabled && IsConnected && IsDeviceReady)
@@ -691,33 +507,20 @@ namespace MotionPlatform3
             }
 
             Vector3[] cornersZero = {
-                    new Vector3(-x, y, 0),  // FL
-                    new Vector3(x, y, 0),   // FR
-                    new Vector3(-x, -y,0),  // RL
-                    new Vector3(x, -y, 0),  // RR
+                new Vector3(-x, y, 0), new Vector3(x, y, 0),
+                new Vector3(-x, -y,0), new Vector3(x, -y, 0),
             };
 
-            if (ConnectedLinearAxes < 4) // 1 FRONT and 2 REAR, or 2 REAR
-            {
-                cornersZero[0] = cornersZero[1] = new Vector3(0f, y, 0);
-            }
+            if (ConnectedLinearAxes < 4) cornersZero[0] = cornersZero[1] = new Vector3(0f, y, 0);
 
             Matrix4x4 m = Matrix4x4.CreateRotationX(pitch * pitchAngle) * Matrix4x4.CreateRotationY(roll * rollAngle);
 
-            float[] Lengths = { 0, 0, 0, 0 };
-
+            float[] Lengths = new float[4];
             for (int t = 0; t < cornersZero.Length; t++)
             {
                 var v = Vector3.Transform(cornersZero[t], m) + vHeave;
                 Lengths[t] = (v - cornersZero[t]).Length() / z;
             }
-
-            //var max = Lengths.Max();
-
-            //if (max > 1) // out of limits
-            //{
-            //    Console.WriteLine("Math error");
-            //}
 
             int posFL = (int)Math2.Mapf(Math2.Clamp(Lengths[0], 0, 1), 0, 1, FrontAxisState.min, FrontAxisState.max);
             int posFR = (int)Math2.Mapf(Math2.Clamp(Lengths[1], 0, 1), 0, 1, FrontRightAxisState.min, FrontRightAxisState.max);
@@ -727,135 +530,94 @@ namespace MotionPlatform3
             return (posFL, posFR, posRL, posRR);
         }
 
-        int _oldGear = int.MinValue;
-        float _gearSign = 1;
-        DateTime _gearSwitched = DateTime.Now;
-
+        int _oldGear = int.MinValue; float _gearSign = 1; DateTime _gearSwitched = DateTime.Now;
         GameData gd = null;
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void ProcessTelemetry2()
         {
-            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run)
-                return;
+            if (!settings.Enabled || !IsConnected || settings.mode != MODE.Run) return;
 
             string name = tds?.GamePlugin?.Name;
+            if (gd == null || gd.GameName != name) gd = settings.gamesData.FirstOrDefault(o => o.GameName == name) ?? new GameData(name);
 
-            if (gd == null || gd.GameName != name)
+            float absPitch = Math.Max(Math.Abs(gd.minPitch), Math.Abs(gd.maxPitch));
+            float absRoll = Math.Max(Math.Abs(gd.minRoll), Math.Abs(gd.maxRoll));
+            float absHeave = Math.Max(Math.Abs(gd.minHeave), Math.Abs(gd.maxHeave));
+            float absSway = Math.Max(Math.Abs(gd.minSway), Math.Abs(gd.maxSway));
+            float absSurge = Math.Max(Math.Abs(gd.minSurge), Math.Abs(gd.maxSurge));
+
+            if (absPitch <= float.Epsilon) absPitch = 1;
+            if (absRoll <= float.Epsilon) absRoll = 1;
+            if (absHeave <= float.Epsilon) absHeave = 1;
+            if (absSway <= float.Epsilon) absSway = 1;
+            if (absSurge <= float.Epsilon) absSurge = 1;
+
+            float gearEffect = settings.GearChangeEffect / 100.0f;
+            float overal = settings.OveralCoefficient / 100.0f;
+            float pitchAmount = settings.PitchCoefficient / 100.0f;
+            float rollAmount = settings.RollCoefficient / 100.0f;
+            float heavAmount = settings.HeaveCoefficient / 100.0f;
+            float swayAmoun = settings.SwayCoefficient / 100.0f;
+            float surgeAmount = settings.SurgeCoefficient / 100.0f;
+
+            if (_oldGear != tds.CarData.Gear && tds.CarData.Clutch < 0.99)
             {
-                gd = settings.gamesData.FirstOrDefault(o => o.GameName == name) ?? new GameData(name);
+                if (Math.Abs(tds.CarData.Speed) > settings.GearChangeMinSpeed) _gearSwitched = DateTime.Now;
+                _gearSign = tds.CarData.Gear == 1 ? 0 : -1;
+                _oldGear = tds.CarData.Gear;
+            }
+            gearEffect *= (float)(1 - tds.CarData.Clutch);
+
+            // 1. Calculate RAW values
+            float rawPitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, false, settings.ClipByRange);
+            float rawRoll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, false, settings.ClipByRange);
+            float rawHeave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, false, settings.ClipByRange);
+            float rawSway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, false, settings.ClipByRange);
+            float rawSurge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, false, settings.ClipByRange);
+
+            // Gear switch effect on raw pitch
+            float gearTS = (float)(DateTime.Now - _gearSwitched).TotalMilliseconds;
+            if (gearTS < (settings.GearChangeRampUp + settings.GearChangeRampDown + settings.GearChangePulse))
+            {
+                float up = settings.GearChangeRampUp + settings.GearChangePulse;
+                if (gearTS <= up) rawPitch += _gearSign * Math2.Mapf(gearTS, 0f, settings.GearChangeRampUp, 0, gearEffect, true);
+                else rawPitch += _gearSign * Math2.Mapf(gearTS, up, up + settings.GearChangeRampDown, gearEffect, 0f, true);
             }
 
-            {
-                float absPitch = Math.Max(Math.Abs(gd.minPitch), Math.Abs(gd.maxPitch));
-                float absRoll = Math.Max(Math.Abs(gd.minRoll), Math.Abs(gd.maxRoll));
-                float absHeave = Math.Max(Math.Abs(gd.minHeave), Math.Abs(gd.maxHeave));
-                float absSway = Math.Max(Math.Abs(gd.minSway), Math.Abs(gd.maxSway));
-                float absSurge = Math.Max(Math.Abs(gd.minSurge), Math.Abs(gd.maxSurge));
+            // 2. Apply Filtering (using new LowPassFilter)
+            float filteredPitch = motionFilters.Pitch.Filter(rawPitch);
+            float filteredRoll = motionFilters.Roll.Filter(rawRoll);
+            float filteredHeave = motionFilters.Heave.Filter(rawHeave);
+            float filteredSway = motionFilters.Sway.Filter(rawSway);
+            float filteredSurge = motionFilters.Surge.Filter(rawSurge);
 
-                absPitch = absPitch <= float.Epsilon ? 1 : absPitch;
-                absRoll = absRoll <= float.Epsilon ? 1 : absRoll;
-                absHeave = absHeave <= float.Epsilon ? 1 : absHeave;
-                absSway = absSway <= float.Epsilon ? 1 : absSway;
-                absSurge = absSurge <= float.Epsilon ? 1 : absSurge;
+            // 3. Blend Raw vs Filtered (SmoothCoefficient)
+            float coeff = settings.SmoothCoefficient / 100.0f;
+            float pitch = Math2.Mapf(coeff, 0.0f, 1.0f, rawPitch, filteredPitch);
+            float roll = Math2.Mapf(coeff, 0.0f, 1.0f, rawRoll, filteredRoll);
+            float heave = Math2.Mapf(coeff, 0.0f, 1.0f, rawHeave, filteredHeave);
+            float sway = Math2.Mapf(coeff, 0.0f, 1.0f, rawSway, filteredSway);
+            float surge = Math2.Mapf(coeff, 0.0f, 1.0f, rawSurge, filteredSurge);
 
-                float gearEffect = settings.GearChangeEffect / 100.0f;
-                float overal = settings.OveralCoefficient / 100.0f;
-                float pitchAmount = settings.PitchCoefficient / 100.0f;
-                float rollAmount = settings.RollCoefficient / 100.0f;
-                float heavAmount = settings.HeaveCoefficient / 100.0f;
-                float swayAmoun = settings.SwayCoefficient / 100.0f;
-                float surgeAmount = settings.SurgeCoefficient / 100.0f;
+            (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
 
-                // Gear 0 - R, 1 - N
-                if (_oldGear != tds.CarData.Gear && tds.CarData.Clutch < 0.99) // Clutch should be released
-                {
-                    if (Math.Abs(tds.CarData.Speed) > settings.GearChangeMinSpeed)
-                        _gearSwitched = DateTime.Now;
-
-                    _gearSign = tds.CarData.Gear == 1 ? 0 : -1; // Switching to Neutral = no effect
-                    _oldGear = tds.CarData.Gear;
-                }
-
-                gearEffect *= (float)(1 - tds.CarData.Clutch);
-
-                float pitch = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertPitch) ? -1.0f : 1.0f) * pitchAmount * Math2.Mapf(tds.CarData.MotionData.Pitch + gd.offsetPitch, -absPitch, absPitch, -1.0f, 1.0f, false, settings.ClipByRange);
-                float roll = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertRoll) ? -1.0f : 1.0f) * rollAmount * Math2.Mapf(tds.CarData.MotionData.Roll + gd.offsetRoll, -absRoll, absRoll, -1.0f, 1.0f, false, settings.ClipByRange);
-                float heave = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertHeave) ? -1.0f : 1.0f) * heavAmount * Math2.Mapf(tds.CarData.MotionData.Heave + gd.offsetHeave, -absHeave, absHeave, -1.0f, 1.0f, false, settings.ClipByRange);
-                float sway = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSway) ? -1.0f : 1.0f) * swayAmoun * Math2.Mapf(tds.CarData.MotionData.Sway + gd.offsetSway, -absSway, absSway, -1.0f, 1.0f, false, settings.ClipByRange);
-                float surge = (settings.Invert.HasFlag(MotionPlatformSettings.InvertFlags.InvertSurge) ? -1.0f : 1.0f) * surgeAmount * Math2.Mapf(tds.CarData.MotionData.Surge + gd.offsetSurge, -absSurge, absSurge, -1.0f, 1.0f, false, settings.ClipByRange);
-
-                // Gear switch effect routine
-                float gearTS = (float)(DateTime.Now - _gearSwitched).TotalMilliseconds;
-                if (gearTS < (settings.GearChangeRampUp + settings.GearChangeRampDown + settings.GearChangePulse))
-                {
-                    float up = settings.GearChangeRampUp + settings.GearChangePulse;
-                    if (gearTS <= up)
-                        pitch += _gearSign * Math2.Mapf(gearTS, 0f, settings.GearChangeRampUp, 0, gearEffect, true);
-                    else
-                        pitch += _gearSign * Math2.Mapf(gearTS, up, up + settings.GearChangeRampDown, gearEffect, 0f, true);
-                }
-
-                // Deprecated
-                //pitch = (float)(Math.Sign(pitch) * Math.Pow(Math2.Clamp(Math.Abs(pitch), 0, 1.0f), settings.Linearity));
-                //roll = (float) (Math.Sign(roll) * Math.Pow(Math2.Clamp(Math.Abs(roll), 0, 1.0f), settings.Linearity));
-                //heave = (float)(Math.Sign(heave) * Math.Pow(Math2.Clamp(Math.Abs(heave), 0, 1.0f), settings.Linearity));
-                //sway = (float) (Math.Sign(sway) * Math.Pow(Math2.Clamp(Math.Abs(sway), 0, 1.0f), settings.Linearity));
-                //surge = (float)(Math.Sign(surge) * Math.Pow(Math2.Clamp(Math.Abs(surge), 0, 1.0f), settings.Linearity));
-
-                float coeff = settings.SmoothCoefficient / 100.0f;
-
-                pitch = Math2.Mapf(coeff, 0.0f, 1.0f, pitch, pitchFilter.Filter(pitch));
-                roll = Math2.Mapf(coeff, 0.0f, 1.0f, roll, rollFilter.Filter(roll));
-                heave = Math2.Mapf(coeff, 0.0f, 1.0f, heave, heaveFilter.Filter(heave));
-                sway = Math2.Mapf(coeff, 0.0f, 1.0f, sway, swayFilter.Filter(sway));
-                surge = Math2.Mapf(coeff, 0.0f, 1.0f, surge, surgeFilter.Filter(surge));
-
-                (float posFL, float posFR, float posRL, float posRR) = CalculateLegPos((pitch + surge) * overal, (roll + sway) * overal, -heave * overal);
-
-                if (true) // _lastPosFront != posFL || _lastPosRL != posRL || _lastPosRR != posRR || _lastPosFR != posFR)
-                {
-                    Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
-
-                    _lastPosFront = (int)posFL;
-                    _lastPosRL = (int)posRL;
-                    _lastPosRR = (int)posRR;
-                    _lastPosFR = (int)posFR;
-                }
-            }
+            // Always send to prevent drift between game and reality
+            Move((int)posFL, (int)posRL, (int)posRR, (int)posFR);
         }
 
-        public const int cMaxAxesCount = 4; // Change for more axis
-
-        // ACTUAL STATES
+        public const int cMaxAxesCount = 4;
         private readonly AXIS_STATE[] states = new AXIS_STATE[cMaxAxesCount];
         private PID_STATE pid_state = new PID_STATE();
-
         public bool IsPIDAvailable { get; private set; } = false;
         public PID_STATE PidState => pid_state;
 
-        public AXIS_STATE FrontAxisState
-        {
-            get => states[0];
-            private set => states[0] = value;
-        }
-
-        public AXIS_STATE RearLeftAxisState
-        {
-            get => states[1];
-            private set => states[1] = value;
-        }
-
-        public AXIS_STATE RearRightAxisState
-        {
-            get => states[2];
-            private set => states[2] = value;
-        }
-
-        public AXIS_STATE FrontRightAxisState
-        {
-            get => states[3];
-            private set => states[3] = value;
-        }
+        public AXIS_STATE FrontAxisState { get => states[0]; private set => states[0] = value; }
+        public AXIS_STATE RearLeftAxisState { get => states[1]; private set => states[1] = value; }
+        public AXIS_STATE RearRightAxisState { get => states[2]; private set => states[2] = value; }
+        public AXIS_STATE FrontRightAxisState { get => states[3]; private set => states[3] = value; }
 
         public class AxisStateChanged : EventArgs
         {
@@ -863,80 +625,75 @@ namespace MotionPlatform3
             public int Addr { get; private set; }
             public AXIS_STATE State { get; private set; }
         }
-
         public event EventHandler<AxisStateChanged> OnAxisStateChanged;
         public event EventHandler<PID_STATE> OnPidState;
 
-        //const int AXIS_STATE_SIZE = 20;
-        //const int PCCMD_SIZE = 16;
-
         private readonly byte[] data = new byte[20];
-
         const int cFirstAddr = 10;
-        const int cLastAddr = 13; // 15 if 6 axis
+        const int cLastAddr = 13;
         const int cPIDAddr = 255;
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            while (serialPort.BytesToRead >= AXIS_STATE_SIZE + 2)
+            // CRITICAL: Lock the port to prevent conflict with Write operations in other threads
+            lock (serialPort)
             {
-                int addr = serialPort.ReadByte();
-                if (addr == cPIDAddr)
-                {
-                    if (serialPort.ReadByte() == AXIS_STATE_SIZE)
-                    {
-                        if (serialPort.Read(data, 0, AXIS_STATE_SIZE) == AXIS_STATE_SIZE)
-                        {
-                            try
-                            {
-                                pid_state = Marshalizable<PID_STATE>.FromBytes(data);
-                                IsPIDAvailable = true;
-                                OnPidState?.Invoke(this, pid_state);
-                            }
-                            catch
-                            {
+                // Double check if port is still open (can close between event trigger and handler)
+                if (!serialPort.IsOpen) return;
 
+                try
+                {
+                    while (serialPort.BytesToRead >= AXIS_STATE_SIZE + 2)
+                    {
+                        int addr = serialPort.ReadByte();
+                        if (addr == cPIDAddr)
+                        {
+                            if (serialPort.ReadByte() == AXIS_STATE_SIZE)
+                            {
+                                if (serialPort.Read(data, 0, AXIS_STATE_SIZE) == AXIS_STATE_SIZE)
+                                {
+                                    try
+                                    {
+                                        pid_state = Marshalizable<PID_STATE>.FromBytes(data);
+                                        IsPIDAvailable = true;
+                                        OnPidState?.Invoke(this, pid_state);
+                                    }
+                                    catch { }
+                                    continue;
+                                }
                             }
-                            continue;
+                        }
+
+                        if (addr >= cFirstAddr && addr <= cLastAddr)
+                        {
+                            if (serialPort.ReadByte() == AXIS_STATE_SIZE)
+                            {
+                                if (serialPort.Read(data, 0, AXIS_STATE_SIZE) == AXIS_STATE_SIZE)
+                                {
+                                    try
+                                    {
+                                        AXIS_STATE state = Marshalizable<AXIS_STATE>.FromBytes(data);
+                                        states[addr - cFirstAddr] = state;
+
+                                        if (state.mode != DEVICE_MODE.UNKNOWN)
+                                            devMap[addr] = true;
+
+                                        OnAxisStateChanged?.Invoke(this, new AxisStateChanged(addr, state));
+                                    }
+                                    catch { }
+                                }
+                            }
                         }
                     }
                 }
-
-                if (addr >= cFirstAddr && addr <= cLastAddr)
-                {
-                    if (serialPort.ReadByte() == AXIS_STATE_SIZE)
-                    {
-                        if (serialPort.Read(data, 0, AXIS_STATE_SIZE) == AXIS_STATE_SIZE)
-                            try
-                            {
-                                AXIS_STATE state = Marshalizable<AXIS_STATE>.FromBytes(data);
-                                //GCHandle h = GCHandle.Alloc(data, GCHandleType.Pinned);
-                                //AXIS_STATE state = (AXIS_STATE)Marshal.PtrToStructure(h.AddrOfPinnedObject(), typeof(AXIS_STATE));
-                                //h.Free();
-
-                                states[addr - cFirstAddr] = state;
-
-                                if (state.mode != DEVICE_MODE.UNKNOWN)
-                                    devMap[addr] = true;
-
-                                OnAxisStateChanged?.Invoke(this, new AxisStateChanged(addr, state));
-#if DEBUG
-                                Console.WriteLine($"SerialPort_DataReceived at addr: {addr} {DateTime.UtcNow:hhMMss.f}");
-#endif
-                            }
-                            catch
-                            {
-                                //Console.WriteLine(ex.Message);
-                            }
-                    }
-                }
+                catch (IOException) { /* Port closed during read */ }
+                catch (Exception ex) { Console.WriteLine($"Serial Error: {ex.Message}"); }
             }
         }
 
         internal void SetPIDValue(int value, COMMAND cmd)
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
@@ -944,17 +701,13 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(cmd, value, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         internal void WritePID()
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
@@ -962,17 +715,13 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_STORE_PID, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
         internal void ReadPID()
         {
-            if (!IsConnected)
-                return;
+            if (!IsConnected) return;
             lock (serialPort)
             {
                 try
@@ -980,42 +729,25 @@ namespace MotionPlatform3
                     byte[] data = GenerateCommand(COMMAND.CMD_RESTORE_PID, 1, 1, 1, 1);
                     serialPort.Write(data, 0, PCCMD_SIZE);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{e.Message}");
-                }
+                catch (Exception e) { Console.WriteLine($"{e.Message}"); }
             }
         }
 
-        internal bool IsDeviceReady
-        {
-            get
-            {
-                return ConnectedLinearAxes > 1;
-            }
-        }
+        internal bool IsDeviceReady => ConnectedLinearAxes > 1;
 
-        internal bool IsDeviceHomed
-        {
-            get
-            {
-                return states[0].flags.HasFlag(DEVICE_FLAGS.STATE_HOMED) &&
-                    states[1].flags.HasFlag(DEVICE_FLAGS.STATE_HOMED) &&
-                    states[2].flags.HasFlag(DEVICE_FLAGS.STATE_HOMED);
-            }
-        }
+        internal bool IsDeviceHomed => states[0].flags.HasFlag(DEVICE_FLAGS.STATE_HOMED) &&
+                                       states[1].flags.HasFlag(DEVICE_FLAGS.STATE_HOMED) &&
+                                       states[2].flags.HasFlag(DEVICE_FLAGS.STATE_HOMED);
 
+        // THREAD SAFE properties
         internal bool IsConnected
         {
             get
             {
-                try
+                lock (serialPort)
                 {
-                    return serialPort != null && serialPort.IsOpen;
-                }
-                catch
-                {
-                    return false;
+                    try { return serialPort != null && serialPort.IsOpen; }
+                    catch { return false; }
                 }
             }
         }
@@ -1024,11 +756,11 @@ namespace MotionPlatform3
         {
             get
             {
-                try
+                lock (serialPort)
                 {
-                    return serialPort?.BytesToWrite == 0;
+                    try { return serialPort?.BytesToWrite == 0; }
+                    catch { return false; }
                 }
-                catch { return false; }
             }
         }
 
