@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 
 namespace BusBound
@@ -6,131 +7,123 @@ namespace BusBound
     {
         public static readonly int BusGameTelemetrySize = Marshal.SizeOf(typeof(Game));
 
-        /// <summary>
-        /// Shared memory name
-        /// </summary>
-        public const string BUS_BOUND_SHARED_MEMORY_NAME = "{6E432EA0-2E71-42A2-AD36-1B946D1CE1A6}";
+        public static class BusBoundConstants
+        {
+            public const string SharedMemoryName = "{6E432EA0-2E71-42A2-AD36-1B946D1CE1A6}";
+            public const int MaxNumWheels = 10;
+            public const int MaxNumDoors = 10;
+            public const int MaxNumBendyParts = 10;
+            public const int MaxNumRamps = 10;
+            public const int MaxNumLineStops = 250;
+            public const int MaxNumIncidents = 100;
+            public const int MaxNumPerks = 100;
+            public const int MaxNumDistricts = 100;
 
-        public const int MAX_NUM_WHEELS = 10;
-        public const int MAX_NUM_DOORS = 10;
-        public const int MAX_NUM_BENDY_PARTS = 10;
-        public const int MAX_NUM_RAMPS = 10;
-        public const int MAX_NUM_LINE_STOPS = 250;
-        public const int MAX_NUM_INCIDENTS = 100;
-        public const int MAX_NUM_PERKS = 100;
-        public const int MAX_NUM_DISTRICTS = 100;
+            public const int RadioTrackMaxCharCount = 250;
+            public const int BusModelMaxCharCount = 250;
+            public const int BusLedMaxCharCount = 250;
+            public const int PlayerNameMaxCharCount = 250;
+            public const int WeatherNameMaxCharCount = 250;
+            public const int StopNameMaxCharCount = 250;
+            public const int LineNameMaxCharCount = 250;
+            public const int LineNumberNameMaxCharCount = 16;
+            public const int IncidentNameMaxCharCount = 250;
+            public const int PerkNameMaxCharCount = 250;
+            public const int DistrictIdMaxCharCount = 250;
+            public const int DistrictNameMaxCharCount = 250;
 
-        public const int RADIO_TRACK_MAX_CHAR_COUNT = 250;
-        public const int BUS_MODEL_MAX_CHAR_COUNT = 250;
-        public const int BUS_LED_MAX_CHAR_COUNT = 250;
-        public const int PLAYER_NAME_MAX_CHAR_COUNT = 250;
-        public const int WEATHER_NAME_MAX_CHAR_COUNT = 250;
-        public const int STOP_NAME_MAX_CHAR_COUNT = 250;
-        public const int LINE_NAME_MAX_CHAR_COUNT = 250;
-        public const int LINE_NUMBER_NAME_MAX_CHAR_COUNT = 16;
-        public const int INCIDENT_NAME_MAX_CHAR_COUNT = 250;
-        public const int PERK_NAME_MAX_CHAR_COUNT = 250;
-        public const int DISTRICT_Id_MAX_CHAR_COUNT = 250;
-        public const int DISTRICT_NAME_MAX_CHAR_COUNT = 250;
+            public const byte TelemetryMajorVersion = 0;
+            public const byte TelemetryMinorVersion = 6;
+        }
 
-        // Обновлена версия с 5 на 6
-        public const int BUS_BOUND_TELEMETRY_MAJOR_VERSION = 0;
-        public const int BUS_BOUND_TELEMETRY_MINOR_VERSION = 6;
+        #region Basic Types
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Vector3
         {
-            public double x;
-            public double y;
-            public double z;
+            public double X;
+            public double Y;
+            public double Z;
+
+            public Vector3(double x, double y, double z)
+            {
+                X = x;
+                Y = y;
+                Z = z;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Color
         {
-            public byte r;
-            public byte g;
-            public byte b;
-            public byte a;
+            public byte R;
+            public byte G;
+            public byte B;
+            public byte A;
+
+            public Color(byte r, byte g, byte b, byte a)
+            {
+                R = r;
+                G = g;
+                B = b;
+                A = a;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Vector2
         {
-            public double x;
-            public double y;
+            public double X;
+            public double Y;
+
+            public Vector2(double x, double y)
+            {
+                X = x;
+                Y = y;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Quaternion
         {
-            public double x;
-            public double y;
-            public double z;
-            public double w;
+            public double X;
+            public double Y;
+            public double Z;
+            public double W;
+
+            public Quaternion(double x, double y, double z, double w)
+            {
+                X = x;
+                Y = y;
+                Z = z;
+                W = w;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct EulerAngles
         {
-            public double roll;
-            public double pitch;
-            public double yaw;
+            public double Roll;
+            public double Pitch;
+            public double Yaw;
+
+            public EulerAngles(double roll, double pitch, double yaw)
+            {
+                Roll = roll;
+                Pitch = pitch;
+                Yaw = yaw;
+            }
         }
+
+        #endregion
+
+        #region Enums
 
         public enum GroundType : byte
         {
             Street,
             OffRoad,
             Sidewalk
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct Wheel
-        {
-            public Vector3 RelativePosition;
-            public Vector3 RelativeRestingPosition;
-            public Vector3 AxleDirection;
-            public Vector3 SuspensionAxis;
-            public Vector3 SuspensionForceOffset;
-
-            public float SpringRate;
-            public float SpringPreload;
-            public float SuspensionDampingRatio;
-            public float SuspensionMaxRaise;
-            public float SuspensionMaxDrop;
-            public float SuspensionOffset;
-
-            public float SteeringAngleInDeg;
-            public float MaxSteeringAngleInDeg;
-            public float RadiusCM;
-            public float AngleInDeg;
-            public float AngularVelocityCMS;
-            [MarshalAs(UnmanagedType.U1)]
-            public bool IsInAir;
-            public GroundType Ground;
-
-            public float SpringForce;
-            public float BrakeTorque;
-            public float DriveTorque;
-
-            [MarshalAs(UnmanagedType.U1)]
-            public bool IsSkidding;
-            public float SkidMagnitude;
-            public Vector3 SkidNormal;
-
-            [MarshalAs(UnmanagedType.U1)]
-            public bool IsSlipping;
-            public float SlipMagnitude;
-            public float SlipAngle;
-
-            [MarshalAs(UnmanagedType.U1)]
-            public bool HasABS;
-            [MarshalAs(UnmanagedType.U1)]
-            public bool IsABSActivated;
-            public float ABSFactor;
-            [MarshalAs(UnmanagedType.U1)]
-            public bool IsLocked;
         }
 
         public enum Gear : byte
@@ -186,6 +179,177 @@ namespace BusBound
             EngineStarter
         }
 
+        public enum Shift : byte
+        {
+            Early,
+            Mid,
+            Late
+        }
+
+        public enum GameState : byte
+        {
+            Office,
+            Drive
+        }
+
+        public enum DriveState : byte
+        {
+            OutOfDrive,
+            LineDrive,
+            OtherDrive
+        }
+
+        #endregion
+
+        #region FixSized Wrapper Structures
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedWheel
+        {
+            public Wheel Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 35)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedEngine
+        {
+            public Engine Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 246)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedDoor
+        {
+            public Door Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 257)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedRamp
+        {
+            public Ramp Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 249)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedLine
+        {
+            public Line Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 979054)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedIncident
+        {
+            public Incident Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 232)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedShiftData
+        {
+            public ShiftData Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 737)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedPlayerData
+        {
+            public PlayerData Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 770)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedDistrict
+        {
+            public District Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 523)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedOffice
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedLineDrive
+        {
+            public LineDrive Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 972344)]
+            public byte[] Padding;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct FixSizedPlayerBus
+        {
+            public PlayerBus Data;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1038525)]
+            public byte[] Padding;
+        }
+
+        #endregion
+
+        #region Data Structures
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct Wheel
+        {
+            public Vector3 RelativePosition;
+            public Vector3 RelativeRestingPosition;
+            public Vector3 AxleDirection;
+            public Vector3 SuspensionAxis;
+            public Vector3 SuspensionForceOffset;
+
+            public float SpringRate;
+            public float SpringPreload;
+            public float SuspensionDampingRatio;
+            public float SuspensionMaxRaise;
+            public float SuspensionMaxDrop;
+            public float SuspensionOffset;
+
+            public float SteeringAngleInDeg;
+            public float MaxSteeringAngleInDeg;
+            public float RadiusCM;
+            public float AngleInDeg;
+            public float AngularVelocityCMS;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsInAir;
+            public GroundType Ground;
+
+            public float SpringForce;
+            public float BrakeTorque;
+            public float DriveTorque;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsSkidding;
+            public float SkidMagnitude;
+            public Vector3 SkidNormal;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsSlipping;
+            public float SlipMagnitude;
+            public float SlipAngle;
+
+            [MarshalAs(UnmanagedType.U1)]
+            public bool HasABS;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsABSActivated;
+            public float ABSFactor;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsLocked;
+        }
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Engine
         {
@@ -205,10 +369,10 @@ namespace BusBound
             public bool IsOpen;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct Radio
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = RADIO_TRACK_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.RadioTrackMaxCharCount)]
             public string TrackName;
             [MarshalAs(UnmanagedType.U1)]
             public bool IsOn;
@@ -232,140 +396,47 @@ namespace BusBound
             public byte FreeSitting;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct DestinationData
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = STOP_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.StopNameMaxCharCount)]
             public string DestinationStopName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = DISTRICT_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.DistrictNameMaxCharCount)]
             public string DestinationDistrictName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = LINE_NUMBER_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.LineNumberNameMaxCharCount)]
             public string LineId;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = LINE_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.LineNameMaxCharCount)]
             public string LineName;
             public Color LineColor;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructWheels
-        {
-            public Wheel Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 258 - 226)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructEngine
-        {
-            public Engine Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 258 - 18)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructDoor
-        {
-            public Door Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 258 - 1)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructRamp
-        {
-            public Ramp Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 258 - 9)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructLine
-        {
-            public Line Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 * 1024 - 69522)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructBus
-        {
-            public PlayerBus Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 * 1024 - 10066)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructLineDrive
-        {
-            public LineDrive Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 * 1024 * 2 - 1124808)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructIncident
-        {
-            public Incident Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512 - 280)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructShiftData
-        {
-            public ShiftData Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 - 290)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructPlayerData
-        {
-            public PlayerData Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 - 254)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructDistrict
-        {
-            public District Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024 - 501)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct FixSizedStructOffice
-        {
-            public Office Data;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
-            public byte[] reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct PlayerBus
         {
             public Vector3 Position;
             public EulerAngles Rotation;
 
             public sbyte BendyPartCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_BENDY_PARTS)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumBendyParts)]
             public Vector3[] Bendy_Position;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_BENDY_PARTS)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumBendyParts)]
             public EulerAngles[] Bendy_Rotation;
 
             public sbyte WheelCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_WHEELS)]
-            public FixSizedStructWheels[] Wheels;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumWheels)]
+            public FixSizedWheel[] Wheels;
 
-            public FixSizedStructEngine Engine;
+            public FixSizedEngine Engine;
             public Gear CurrentAutomaticGear;
+
             public float SpeedCMS;
 
             public Vector3 Velocity;
             public Vector3 Acceleration;
+
             public Vector3 LocalVelocity;
             public Vector3 LocalAcceleration;
+
             public Vector3 RotationalAcceleration;
 
             public float Throttle;
@@ -374,20 +445,20 @@ namespace BusBound
             public float MaxSteeringAngle;
 
             public sbyte DoorCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_DOORS)]
-            public FixSizedStructDoor[] Doors;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumDoors)]
+            public FixSizedDoor[] Doors;
 
             public Seating Seating;
 
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BUS_MODEL_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.BusModelMaxCharCount)]
             public string BusModelName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BUS_LED_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.BusLedMaxCharCount)]
             public string BusLEDCustomText;
             public DestinationData Destination;
 
             public sbyte RampCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_RAMPS)]
-            public FixSizedStructRamp[] Ramps;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumRamps)]
+            public FixSizedRamp[] Ramps;
 
             public BusStopBrakeState BusStopBrake;
             [MarshalAs(UnmanagedType.U1)]
@@ -401,6 +472,7 @@ namespace BusBound
             public bool IsSpeedLimiterActive;
 
             public IndicatorState IndicatorLightState;
+
             public MainLightState MainLightState;
             [MarshalAs(UnmanagedType.U1)]
             public bool IsFarLightOn;
@@ -513,18 +585,18 @@ namespace BusBound
             public WheelModeState ActiveWheelMode;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct PlayerData
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = PLAYER_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.PlayerNameMaxCharCount)]
             public string Name;
             public uint DistanceDrivenCM;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct Weather
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = WEATHER_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.WeatherNameMaxCharCount)]
             public string Name;
             public float Wetness;
             public float Puddle;
@@ -536,13 +608,6 @@ namespace BusBound
             public int WeatherTheme;
         }
 
-        public enum Shift : byte
-        {
-            Early,
-            Mid,
-            Late
-        }
-
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct ShiftData
         {
@@ -551,27 +616,28 @@ namespace BusBound
             public Weather Weather;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct LineStop
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = STOP_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.StopNameMaxCharCount)]
             public string Name;
             public Vector3 Position;
             public sbyte Platform;
+
             public sbyte Boarding;
-            public sbyte Alighting; // Исправлена опечатка
+            public sbyte Alighting;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct Line
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = LINE_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.LineNameMaxCharCount)]
             public string Name;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = LINE_NUMBER_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.LineNumberNameMaxCharCount)]
             public string Number;
             public Color Color;
             public ushort StopCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_LINE_STOPS)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumLineStops)]
             public LineStop[] Stops;
         }
 
@@ -584,61 +650,53 @@ namespace BusBound
             public sbyte MaxMoodLevel;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct Incident
         {
             public float TimeStampS;
             public Vector3 Position;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = INCIDENT_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.IncidentNameMaxCharCount)]
             public string Name;
             public short MoodValueChange;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct Perk
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = PERK_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.PerkNameMaxCharCount)]
             public string Name;
-        }
-
-        public enum GameState : byte
-        {
-            Office,
-            Drive
-        }
-
-        public enum DriveState : byte
-        {
-            OutOfDrive,
-            LineDrive,
-            OtherDrive
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct LineDrive
         {
             public float TimeStampS;
-            public FixSizedStructLine Line;
+            public FixSizedLine Line;
+
             public short PreviousStop;
             public short NextStop;
             public float TimeToNextStopS;
             public double DistanceToNextStopCM;
+
             public float ParkingScore;
+
             public Mood Mood;
+
             public sbyte IncidentHistoryCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_INCIDENTS)]
-            public FixSizedStructIncident[] IncidentHistory;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumIncidents)]
+            public FixSizedIncident[] IncidentHistory;
+
             public byte PerkCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_PERKS)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumPerks)]
             public Perk[] ActivePerks;
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
         public struct District
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = DISTRICT_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.DistrictNameMaxCharCount)]
             public string Id;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = DISTRICT_NAME_MAX_CHAR_COUNT)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = BusBoundConstants.DistrictNameMaxCharCount)]
             public string Name;
             public byte DistrictLevel;
         }
@@ -646,37 +704,60 @@ namespace BusBound
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Office
         {
-            // Пустая структура, как в C++
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Game
         {
-            // Добавлены поля версии, отсутствовавшие в предыдущей версии C#
-            [MarshalAs(UnmanagedType.U1)]
             public byte TelemetryMajorVersion;
-            [MarshalAs(UnmanagedType.U1)]
             public byte TelemetryMinorVersion;
 
             [MarshalAs(UnmanagedType.U1)]
             public bool IsGameActive;
             public double TimeStampMS;
 
-            public FixSizedStructShiftData ShiftData;
-            public FixSizedStructPlayerData PlayerData;
+            public FixSizedShiftData ShiftData;
+            public FixSizedPlayerData PlayerData;
             public sbyte DistrictCount;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = MAX_NUM_DISTRICTS)]
-            public FixSizedStructDistrict[] Districts;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BusBoundConstants.MaxNumDistricts)]
+            public FixSizedDistrict[] Districts;
 
             public GameState State;
-            public FixSizedStructOffice Office;
+            public FixSizedOffice Office;
 
             public DriveState DriveState;
-            public FixSizedStructLineDrive LineDrive;
+            public FixSizedLineDrive LineDrive;
 
             [MarshalAs(UnmanagedType.U1)]
             public bool IsPlayerPossessingBus;
-            public FixSizedStructBus Bus;
+            public FixSizedPlayerBus Bus;
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        public static class TelemetryHelpers
+        {
+            public static Game ReadFromPtr(IntPtr ptr)
+            {
+                return Marshal.PtrToStructure<Game>(ptr);
+            }
+
+            public static Game ReadFromBytes(byte[] bytes)
+            {
+                GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                try
+                {
+                    return Marshal.PtrToStructure<Game>(handle.AddrOfPinnedObject());
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+        }
+
+        #endregion
     }
 }

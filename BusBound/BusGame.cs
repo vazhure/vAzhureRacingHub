@@ -8,9 +8,9 @@ namespace BusBound
 {
     public class BusGame : IGamePlugin
     {
-        public string Name => "Bus Bound";
+        public string Name => "Bus Bound Demo";
 
-        public uint SteamGameID => 2095420U;
+        public uint SteamGameID => 4010830U;// 2095420U;
 
         public string[] ExecutableProcessName => new [] { "BusGame" };
 
@@ -61,16 +61,16 @@ namespace BusBound
             monitor = new ProcessMonitor(ExecutableProcessName);
 
             customSharedMemClient = new CustomSharedMemClient();
+            customSharedMemClient.OnUserFunc += delegate (object sender, EventArgs ea)
+            {
+                ProcessSharedMemory();
+            };
 
             monitor.OnProcessRunningStateChanged += (process, bRunning) =>
             {
                 if (bRunning)
                 {
                     customSharedMemClient.StartThread();
-                    customSharedMemClient.OnUserFunc += delegate (object sender, EventArgs ea)
-                    {
-                        ProcessSharedMemory();
-                    };
                 }
                 else
                 {
@@ -90,7 +90,7 @@ namespace BusBound
         {
             try
             {
-                using (var mmf = MemoryMappedFile.OpenExisting(BusGameTelemetry.BUS_BOUND_SHARED_MEMORY_NAME, MemoryMappedFileRights.ReadWrite))
+                using (var mmf = MemoryMappedFile.OpenExisting(BusGameTelemetry.BusBoundConstants.SharedMemoryName, MemoryMappedFileRights.ReadWrite))
                 using (var mmfView = mmf.CreateViewStream(0L, dataStatic.Length, MemoryMappedFileAccess.ReadWrite))
                 {
                     mmfView.ReadAsync(dataStatic, 0, dataStatic.Length).Wait();
@@ -136,12 +136,12 @@ namespace BusBound
 
                             carData.MotionData = new AMMotionData()
                             {
-                                Sway = -(float)telemetry.Bus.Data.LocalAcceleration.y / 1000f,
-                                Surge = (float)telemetry.Bus.Data.LocalAcceleration.x / 1000f,
-                                Heave = (float)telemetry.Bus.Data.LocalAcceleration.z / 1000f,
-                                Yaw = (float)(telemetry.Bus.Data.Rotation.yaw / 180.0f),
-                                Pitch = (float)(telemetry.Bus.Data.Rotation.pitch / 180.0f),
-                                Roll = (float)(telemetry.Bus.Data.Rotation.roll / 180.0f),
+                                Sway = -(float)telemetry.Bus.Data.LocalAcceleration.Y / 1000f,
+                                Surge = (float)telemetry.Bus.Data.LocalAcceleration.X / 1000f,
+                                Heave = (float)telemetry.Bus.Data.LocalAcceleration.Z / 1000f,
+                                Yaw = (float)(telemetry.Bus.Data.Rotation.Yaw / 180.0f),
+                                Pitch = (float)(telemetry.Bus.Data.Rotation.Pitch / 180.0f),
+                                Roll = (float)(telemetry.Bus.Data.Rotation.Roll / 180.0f),
                             };
                         }
                         else
