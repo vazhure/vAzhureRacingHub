@@ -69,8 +69,8 @@ namespace MotionPlatform3
         // =====================================================================
         // FILTERING INTEGRATION
         // =====================================================================
-        // Sample rate determined by Thread.Sleep(5) in MainTread -> ~200Hz
-        private const double UPDATE_RATE_HZ = 200.0;
+        private const double UPDATE_RATE_HZ = 200.0; // SAFE FOR SERIAL PORT VALUE
+        private const int UPDATE_SLEEP_MS = (int)(1000.0 / UPDATE_RATE_HZ);
         private MotionFilterSet motionFilters;
 
         // OpenXR Filters (kept separate as per original logic)
@@ -88,9 +88,9 @@ namespace MotionPlatform3
             // Initialize new Low-Pass Filters
             motionFilters = new MotionFilterSet(
                 sampleRateHz: UPDATE_RATE_HZ,
-                pitchRollCutoff: 8.0,   // 8Hz for fast response
-                heaveCutoff: 4.0,       // 4Hz for smoothness
-                swaySurgeCutoff: 5.0    // 5Hz intermediate
+                pitchRollCutoff: settings.PitchRollCutoff,
+                heaveCutoff: settings.HeaveCutoff,        
+                swaySurgeCutoff: settings.SwaySurgeCutoff 
             );
 
             // OpenXR Filters Initialization
@@ -395,7 +395,10 @@ namespace MotionPlatform3
                         }
                     }
                     catch { }
-                    finally { Thread.Sleep(5); } // Determines UPDATE_RATE_HZ (200Hz)
+                    finally 
+                    { 
+                        Thread.Sleep(UPDATE_SLEEP_MS); 
+                    }
                 }
             }
         };
@@ -880,16 +883,6 @@ namespace MotionPlatform3
         }
     }
 
-    public class FilterSettings
-    {
-        public float[] Sway { get; set; } = { 1, 1, 0.02f, 1, 0.02f, 0.0f };
-        public float[] Surge { get; set; } = { 1, 1, 0.02f, 1, 0.02f, 0.0f };
-        public float[] Heave { get; set; } = { 1, 1, 0.02f, 1, 0.02f, 0.0f };
-        public int Pitch { get; set; } = 3;
-        public int Roll { get; set; } = 3;
-        public float MaxInputData { get; set; } = 1f;
-    }
-
     public enum MODE { Run, CollectingGameData, Test };
 
     public class MotionPlatformSettings : ICloneable
@@ -970,8 +963,10 @@ namespace MotionPlatform3
         {
             get { return (float)Math.Atan2(ActuatorTravelMM, DistanceLeftRightMM); }
         }
+        public float PitchRollCutoff { get; set; } = 8.0f;   // 8Hz for fast response
+        public float HeaveCutoff { get; set; } = 8.0f;       // 4Hz for smoothness
+        public float SwaySurgeCutoff { get; set; } = 8.0f;    // 5Hz intermediate
 
-        public FilterSettings FilterSettings { get; set; } = new FilterSettings();
         public float StepsPerMM { get; set; } = 200;
         /// <summary>
         /// Inversion flags
