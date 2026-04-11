@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>vAzhureRacing Dash v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a28;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888aa;
+            --accent-red: #ff2244;
+            --accent-green: #00dd44;
+            --accent-orange: #ff8800;
+            --accent-blue: #2288ff;
+            --accent-yellow: #ffcc00;
+            --border-color: #2a2a3a;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* ═══ CONNECTION SCREEN ═══ */
+        .connect-screen {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0f0f24 50%, #0a0a1a 100%);
+        }
+
+        .connect-container { width: 100%; max-width: 380px; }
+        .connect-logo { text-align: center; margin-bottom: 40px; }
+        .connect-logo .icon { font-size: 48px; margin-bottom: 12px; }
+        .connect-logo h1 { font-size: 22px; font-weight: bold; letter-spacing: 3px; color: #e8e8f0; }
+        .connect-logo p { font-size: 11px; margin-top: 8px; color: #6666aa; }
+
+        .connect-form {
+            background: rgba(26, 26, 40, 0.9);
+            border: 1px solid #2a2a4a;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block; font-size: 11px; font-weight: 500;
+            margin-bottom: 8px; color: #8888bb; letter-spacing: 1px;
+        }
+        .form-group input {
+            width: 100%; background: #12121e; border: 1px solid #2a2a4a;
+            border-radius: 10px; padding: 12px 16px; font-size: 14px;
+            font-family: monospace; color: #e8e8f0; outline: none;
+            caret-color: #ff2244; transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: #ff2244; }
+
+        .form-row { display: flex; gap: 12px; }
+        .form-row .form-group { flex: 1; }
+
+        .btn-connect {
+            width: 100%; border: none; border-radius: 10px; padding: 14px;
+            font-size: 14px; font-weight: bold; font-family: monospace;
+            letter-spacing: 2px; color: #ffffff;
+            background: linear-gradient(135deg, #ff2244 0%, #cc0033 100%);
+            box-shadow: 0 4px 20px rgba(255, 34, 68, 0.3);
+            cursor: pointer; transition: transform 0.1s, opacity 0.2s; margin-top: 8px;
+        }
+        .btn-connect:active { transform: scale(0.97); }
+        .btn-connect:disabled { opacity: 0.4; box-shadow: none; }
+
+        .btn-demo {
+            width: 100%; border: 1px solid #2a4466; border-radius: 10px;
+            padding: 14px; font-size: 14px; font-weight: bold; font-family: monospace;
+            letter-spacing: 2px; color: #6699dd;
+            background: linear-gradient(135deg, #1a2a44 0%, #0f1a33 100%);
+            cursor: pointer; transition: transform 0.1s; margin-top: 12px;
+        }
+        .btn-demo:active { transform: scale(0.97); }
+
+        .or-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+        .or-divider .line { flex: 1; height: 1px; background: #2a2a3a; }
+        .or-divider span { font-size: 11px; color: #555577; }
+
+        .auto-detect-info {
+            text-align: center; font-size: 10px; color: #44aa66;
+            margin-top: 10px; padding: 6px 10px; border-radius: 8px;
+            background: rgba(0, 221, 68, 0.05); border: 1px solid rgba(0, 221, 68, 0.15);
+        }
+
+        .connect-footer { text-align: center; font-size: 11px; margin-top: 24px; color: #444466; }
+
+        /* ═══ DASHBOARD ═══ */
+        .dashboard {
+            display: none;
+            height: 100vh;
+            height: 100dvh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .dashboard.active { display: flex; }
+
+        /* Status bar */
+        .status-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 4px 10px; background: rgba(10, 10, 20, 0.95);
+            border-bottom: 1px solid #1a1a2a; flex-shrink: 0;
+        }
+        .status-left { display: flex; align-items: center; gap: 6px; }
+        .status-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .status-dot.connected { background: #00dd44; box-shadow: 0 0 8px #00dd44; }
+        .status-dot.connecting { background: #ffcc00; }
+        .status-dot.disconnected { background: #ff2244; }
+        .status-label { font-size: 9px; font-family: monospace; color: #666688; }
+        .status-right { display: flex; align-items: center; gap: 8px; }
+        .status-track { font-size: 9px; font-family: monospace; color: #666688; }
+        .btn-disconnect {
+            font-size: 9px; font-family: monospace; padding: 2px 6px;
+            border-radius: 4px; color: #ff4466;
+            background: rgba(255, 34, 68, 0.1); border: 1px solid rgba(255, 34, 68, 0.2);
+            cursor: pointer;
+        }
+
+        /* Session bar */
+        .session-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 3px 10px; background: rgba(15, 15, 25, 0.8); flex-shrink: 0;
+        }
+        .session-left { display: flex; align-items: center; gap: 8px; }
+        .session-type { font-size: 10px; font-weight: bold; letter-spacing: 2px; color: #cc88ff; }
+        .flag-badge { font-size: 10px; font-weight: bold; padding: 1px 5px; border-radius: 3px; }
+        .flag-yellow {
+            color: #ffcc00; background: rgba(255, 204, 0, 0.15);
+            border: 1px solid rgba(255, 204, 0, 0.3);
+            animation: blink-warning 0.8s ease-in-out infinite;
+        }
+        .flag-green {
+            color: #00dd44; background: rgba(0, 221, 68, 0.1);
+            border: 1px solid rgba(0, 221, 68, 0.2);
+        }
+        .session-right {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 10px; font-family: monospace;
+        }
+        .session-remain { color: #8888aa; }
+        .session-pos { color: #ffffff; }
+        .session-lap { color: #8888aa; }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  ZONE 1: LED SHIFT LIGHTS — TOP, FULL WIDTH     */
+        /* ═══════════════════════════════════════════════ */
+        .led-bar {
+            flex-shrink: 0;
+            padding: 4px 10px 5px;
+            background: rgba(8, 8, 16, 0.9);
+            border-bottom: 1px solid #1a1a2a;
+        }
+        .led-bar-inner {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .shift-light {
+            flex: 1;
+            max-width: 36px;
+            height: 16px;
+            border-radius: 3px;
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.075s, box-shadow 0.075s;
+        }
+        .shift-light.active { border: none; }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  RPM BAR — BELOW LEDS, OUTSIDE TACHOMETER        */
+        /* ═══════════════════════════════════════════════ */
+        .rpm-bar {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 1px 10px 2px;
+            background: rgba(8, 8, 16, 0.6);
+        }
+        .rpm-bar-label {
+            font-size: 8px;
+            font-family: monospace;
+            letter-spacing: 3px;
+            color: #555577;
+            display: block;
+            line-height: 1;
+        }
+        .rpm-bar-value {
+            font-size: 18px;
+            font-weight: bold;
+            font-family: monospace;
+            font-variant-numeric: tabular-nums;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  ZONE 2: CENTER — ALWAYS FLEX-COLUMN             */
+        /* ═══════════════════════════════════════════════ */
+        .center-zone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 0;
+            overflow: hidden;
+            padding: 0 8px;
+            gap: 3px;
+        }
+
+        /* Tachometer wrapper — sized by JS */
+        .tacho-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .tacho-wrapper canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Gear + Speed overlay — positioned in the bottom gap of the arc */
+        .tacho-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            pointer-events: none;
+            z-index: 2;
+            padding-bottom: 2%;
+        }
+        .gear-display {
+            font-weight: 900;
+            font-family: monospace;
+            color: #ffffff;
+            line-height: 1;
+            /* font-size set by JS */
+        }
+        .speed-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .speed-value {
+            font-weight: bold;
+            font-family: monospace;
+            font-variant-numeric: tabular-nums;
+            color: #ffffff;
+            line-height: 1.1;
+            /* font-size set by JS */
+        }
+        .speed-unit {
+            font-family: monospace;
+            letter-spacing: 2px;
+            color: #666688;
+            /* font-size set by JS */
+        }
+
+        /* Data card base */
+        .data-card {
+            background: rgba(20, 20, 35, 0.7);
+            border: 1px solid #1e1e30;
+            border-radius: 10px;
+            padding: 5px 10px;
+            flex-shrink: 0;
+        }
+
+        /* ═══ PEDALS — UNDER TACHOMETER, FULL WIDTH ═══ */
+        .pedals-card {
+            width: 100%;
+            max-width: 500px;
+            flex-shrink: 1;
+            min-height: 0;
+        }
+        .pedal-row { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+        .pedal-row:last-child { margin-bottom: 0; }
+        .pedal-label {
+            font-size: 8px; font-family: monospace; width: 22px;
+            text-align: right; color: #555577;
+        }
+        .pedal-bar-bg {
+            flex: 1; height: 8px; border-radius: 4px;
+            background: rgba(20, 20, 35, 0.8); overflow: hidden;
+        }
+        .pedal-bar-fill { height: 100%; border-radius: 4px; transition: width 0.075s; width: 0%; }
+        .pedal-pct {
+            font-size: 8px; font-family: monospace; width: 26px;
+            font-variant-numeric: tabular-nums; color: #444466;
+        }
+
+        /* ═══ DATA ROW — FUEL/ELEC + TEMPS ═══ */
+        .data-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            max-width: 600px;
+            flex-shrink: 1;
+            flex-wrap: wrap;
+        }
+
+        /* Fuel + Electronics card */
+        .fuel-elec-card {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .fuel-section { display: flex; align-items: center; gap: 6px; }
+        .fuel-label { font-size: 14px; font-family: monospace; color: #ff8800; }
+        .fuel-value {
+            font-size: 22px; font-weight: bold; font-family: monospace;
+            font-variant-numeric: tabular-nums; color: #ffffff;
+        }
+
+        /* Electronics badges — always visible */
+        .elec-sep {
+            width: 1px;
+            height: 20px;
+            background: #2a2a3a;
+        }
+        .elec-badges { display: flex; align-items: center; gap: 4px; }
+        .elec-badge {
+            font-size: 13px; font-weight: bold; font-family: monospace;
+            padding: 1px 7px; border-radius: 3px; color: #555577;
+            background: rgba(30, 30, 50, 0.5); border: 1px solid rgba(50, 50, 70, 0.5);
+        }
+        .elec-badge.active {
+            color: #ffcc00; background: rgba(255, 204, 0, 0.15);
+            border: 1px solid rgba(255, 204, 0, 0.4);
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
+            animation: blink-warning 1.5s ease-in-out infinite;
+        }
+
+        /* Temperatures card */
+        .temps-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .temp-item { display: flex; align-items: center; gap: 3px; }
+        .temp-label {
+            font-size: 14px; font-family: monospace; color: #555577;
+        }
+        .temp-value {
+            font-size: 20px; font-family: monospace;
+            font-variant-numeric: tabular-nums; color: #aaaacc;
+        }
+        .temp-value.warn { color: #ff4466; }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  ZONE 3: TIMING BLOCK — BOTTOM                  */
+        /* ═══════════════════════════════════════════════ */
+        .timing-zone {
+            flex-shrink: 0;
+            padding: 2px 8px;
+        }
+        .timing-row {
+            display: flex;
+            align-items: stretch;
+            gap: 4px;
+        }
+        .timing-card {
+            background: rgba(20, 20, 35, 0.7);
+            border: 1px solid #1e1e30;
+            border-radius: 10px;
+            padding: 5px 10px;
+            flex: 1;
+        }
+
+        /* Lap times */
+        .lap-times-inner { display: flex; justify-content: space-between; }
+        .lap-time-item { flex: 1; text-align: center; }
+        .lap-time-label {
+            font-size: 14px; font-family: monospace; letter-spacing: 1px;
+            color: #555577; margin-bottom: 2px;
+        }
+        .lap-time-value {
+            font-size: 26px; font-weight: bold; font-family: monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        .lap-time-current { color: #ffffff; }
+        .lap-time-last { color: #aaaacc; }
+        .lap-time-best { color: #00dd44; text-shadow: 0 0 6px rgba(0, 221, 68, 0.2); }
+        .lap-time-separator { width: 1px; background: #2a2a3a; margin: 0 10px; }
+
+        /* Delta + Sectors */
+        .delta-sectors-inner {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px;
+        }
+        .delta-section { display: flex; align-items: center; gap: 5px; }
+        .delta-label { font-size: 14px; font-family: monospace; color: #555577; }
+        .delta-value {
+            font-size: 24px; font-weight: bold; font-family: monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        .sector-group { display: flex; align-items: center; gap: 10px; }
+        .sector-item { display: flex; align-items: center; gap: 3px; }
+        .sector-label { font-size: 14px; font-family: monospace; color: #555577; }
+        .sector-value {
+            font-size: 20px; font-family: monospace;
+            font-variant-numeric: tabular-nums; color: #aaaacc;
+        }
+        .sector-value.green { color: #00dd44; }
+        .sector-value.purple { color: #bc00bc; }
+
+        /* Driver info */
+        .driver-bar {
+            flex-shrink: 0; padding: 3px 10px 5px;
+            background: rgba(10, 10, 18, 0.9);
+            border-top: 1px solid #1a1a2a;
+        }
+        .driver-inner { display: flex; align-items: center; justify-content: space-between; }
+        .driver-left { display: flex; align-items: center; gap: 8px; }
+        .car-number {
+            font-size: 22px; font-weight: bold; font-family: monospace;
+            padding: 1px 7px; border-radius: 3px; color: #ff4466;
+            background: rgba(255, 34, 68, 0.15); border: 1px solid rgba(255, 34, 68, 0.2);
+        }
+        .driver-name { font-size: 20px; font-weight: bold; color: #ccccee; }
+        .car-name { font-size: 16px; font-family: monospace; color: #555577; }
+        .driver-temps { font-size: 14px; font-family: monospace; color: #444466; }
+
+        /* ═══════════════════════════════════════════════════════ */
+        /*  PORTRAIT — narrow screen adjustments (< 420px)      */
+        /* ═══════════════════════════════════════════════════════ */
+        @media (orientation: portrait) and (max-width: 420px) {
+            .fuel-label { font-size: 11px; }
+            .fuel-value { font-size: 17px; }
+            .elec-badge { font-size: 10px; padding: 1px 4px; gap: 2px; }
+            .elec-badges { gap: 2px; }
+            .elec-sep { height: 16px; }
+            .temp-label { font-size: 11px; }
+            .temp-value { font-size: 15px; }
+            .data-row { gap: 4px; }
+            .fuel-elec-card { gap: 4px; }
+            .fuel-section { gap: 4px; }
+            .temps-card { gap: 5px; }
+            .lap-time-label { font-size: 11px; }
+            .lap-time-value { font-size: 20px; }
+            .timing-card { padding: 4px 6px; }
+        }
+
+        /* ═══════════════════════════════════════════════════════ */
+        /*          LANDSCAPE — compact, same column layout    */
+        /* ═══════════════════════════════════════════════════════ */
+        @media (orientation: landscape) {
+            .led-bar { padding: 2px 10px 3px; }
+            .shift-light { max-width: 30px; height: 12px; }
+
+            .rpm-bar { padding: 0 10px 1px; }
+            .rpm-bar-label { font-size: 7px; }
+            .rpm-bar-value { font-size: 14px; }
+
+            .center-zone { padding: 0 8px; gap: 2px; }
+
+            .pedals-card { max-width: 400px; }
+
+            /* Compact timing for landscape */
+            .lap-time-label { font-size: 10px; margin-bottom: 1px; }
+            .lap-time-value { font-size: 18px; }
+            .lap-time-separator { margin: 0 6px; }
+
+            .delta-label { font-size: 10px; }
+            .delta-value { font-size: 16px; }
+            .sector-label { font-size: 10px; }
+            .sector-value { font-size: 14px; }
+
+            .driver-bar { padding: 2px 10px 3px; }
+            .driver-name { font-size: 14px; }
+            .car-name { font-size: 11px; }
+            .car-number { font-size: 16px; }
+            .driver-temps { font-size: 10px; }
+
+            .fuel-label { font-size: 10px; }
+            .fuel-value { font-size: 16px; }
+            .temp-label { font-size: 10px; }
+            .temp-value { font-size: 14px; }
+            .elec-badge { font-size: 10px; padding: 1px 5px; }
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        @keyframes blink-warning {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--              CONNECTION SCREEN              -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="connectScreen" class="connect-screen">
+    <div class="connect-container">
+        <div class="connect-logo">
+            <div class="icon">🏎️</div>
+            <h1>vAzhureRacing Dash</h1>
+            <p>Mobile Telemetry Dashboard v2</p>
+        </div>
+
+        <div class="connect-form">
+            <div class="form-group">
+                <label>SERVER IP ADDRESS</label>
+                <input type="text" id="inputIP" placeholder="192.168.1.14" />
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>PORT</label>
+                    <input type="text" id="inputPort" placeholder="8080" value="8080" />
+                </div>
+                <div class="form-group">
+                    <label>MAX RPM</label>
+                    <input type="text" id="inputMaxRPM" placeholder="8500" value="8500" />
+                </div>
+            </div>
+            <button class="btn-connect" id="btnConnect">CONNECT</button>
+            <div class="or-divider">
+                <div class="line"></div>
+                <span>OR</span>
+                <div class="line"></div>
+            </div>
+            <button class="btn-demo" id="btnDemo">DEMO MODE</button>
+            <div id="autoDetectInfo" class="auto-detect-info" style="display:none"></div>
+        </div>
+
+        <div class="connect-footer">
+            vAzhureRacingHub WebSocket Telemetry
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--               DASHBOARD SCREEN              -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="dashboard" class="dashboard">
+
+    <!-- Status bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <div id="statusDot" class="status-dot disconnected"></div>
+            <span id="statusLabel" class="status-label">OFFLINE</span>
+        </div>
+        <div class="status-right">
+            <span id="trackName" class="status-track"></span>
+            <button class="btn-disconnect" id="btnDisconnect">DISCONNECT</button>
+        </div>
+    </div>
+
+    <!-- Session bar -->
+    <div class="session-bar">
+        <div class="session-left">
+            <span id="sessionType" class="session-type"></span>
+            <span id="flagBadge" class="flag-badge" style="display:none"></span>
+        </div>
+        <div class="session-right">
+            <span id="sessionRemain" class="session-remain"></span>
+            <span id="sessionPos" class="session-pos"></span>
+            <span id="sessionLap" class="session-lap"></span>
+        </div>
+    </div>
+
+    <!-- ═══ ZONE 1: LED SHIFT LIGHTS — TOP, FULL WIDTH ═══ -->
+    <div class="led-bar">
+        <div class="led-bar-inner" id="shiftLights"></div>
+    </div>
+
+    <!-- ═══ RPM BAR — OUTSIDE TACHOMETER ═══ -->
+    <div class="rpm-bar">
+        <span class="rpm-bar-label">RPM</span>
+        <span class="rpm-bar-value" id="rpmValue">0</span>
+    </div>
+
+    <!-- ═══ ZONE 2: CENTER — TACHOMETER + DATA (always column) ═══ -->
+    <div class="center-zone" id="centerZone">
+        <!-- Tachometer (Gear + Speed inside bottom gap) -->
+        <div class="tacho-wrapper" id="tachoWrapper">
+            <canvas id="tachoCanvas"></canvas>
+            <div class="tacho-center" id="tachoCenter">
+                <div id="gearDisplay" class="gear-display">N</div>
+                <div class="speed-block">
+                    <div id="speedValue" class="speed-value">000</div>
+                    <div class="speed-unit" id="speedUnit">KM/H</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pedals — UNDER tachometer, separate card -->
+        <div class="data-card pedals-card">
+            <div class="pedal-row">
+                <span class="pedal-label" id="thrLabel" style="color:#555577">THR</span>
+                <div class="pedal-bar-bg"><div id="thrBar" class="pedal-bar-fill" style="background:linear-gradient(90deg,#00dd4488,#00dd44)"></div></div>
+                <span id="thrPct" class="pedal-pct">0%</span>
+            </div>
+            <div class="pedal-row">
+                <span class="pedal-label" id="brkLabel" style="color:#555577">BRK</span>
+                <div class="pedal-bar-bg"><div id="brkBar" class="pedal-bar-fill" style="background:linear-gradient(90deg,#ff224488,#ff2244)"></div></div>
+                <span id="brkPct" class="pedal-pct">0%</span>
+            </div>
+            <div class="pedal-row">
+                <span class="pedal-label" id="cltLabel" style="color:#555577">CLT</span>
+                <div class="pedal-bar-bg"><div id="cltBar" class="pedal-bar-fill" style="background:linear-gradient(90deg,#4488ff88,#4488ff)"></div></div>
+                <span id="cltPct" class="pedal-pct">0%</span>
+            </div>
+        </div>
+
+        <!-- Data row: Fuel+Electronics + Temps -->
+        <div class="data-row">
+            <div class="data-card fuel-elec-card">
+                <div class="fuel-section">
+                    <span class="fuel-label">FUEL</span>
+                    <span id="fuelValue" class="fuel-value">0.00l</span>
+                </div>
+                <div class="elec-sep"></div>
+                <div class="elec-badges">
+                    <span class="elec-badge" id="elecTC">TC</span>
+                    <span class="elec-badge" id="elecTC2">TC2</span>
+                    <span class="elec-badge" id="elecABS">ABS</span>
+                    <span class="elec-badge" id="elecMAP">MAP</span>
+                </div>
+            </div>
+            <div class="data-card temps-card">
+                <div class="temp-item">
+                    <span class="temp-label">OIL</span>
+                    <span id="oilTemp" class="temp-value"></span>
+                </div>
+                <div class="temp-item">
+                    <span class="temp-label">WAT</span>
+                    <span id="waterTemp" class="temp-value"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ZONE 3: TIMING BLOCK — BOTTOM ═══ -->
+    <div class="timing-zone">
+        <div class="timing-row">
+            <div class="timing-card">
+                <div class="lap-times-inner">
+                    <div class="lap-time-item">
+                        <div class="lap-time-label">CURRENT</div>
+                        <div id="lapCurrent" class="lap-time-value lap-time-current">0:00.000</div>
+                    </div>
+                    <div class="lap-time-separator"></div>
+                    <div class="lap-time-item">
+                        <div class="lap-time-label">LAST</div>
+                        <div id="lapLast" class="lap-time-value lap-time-last">0:00.000</div>
+                    </div>
+                    <div class="lap-time-separator"></div>
+                    <div class="lap-time-item">
+                        <div class="lap-time-label">BEST</div>
+                        <div id="lapBest" class="lap-time-value lap-time-best">0:00.000</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timing-card" id="deltaSectorsCard" style="display:none">
+                <div class="delta-sectors-inner">
+                    <div id="deltaSection" class="delta-section" style="display:none">
+                        <span class="delta-label">DELTA</span>
+                        <span id="deltaValue" class="delta-value" style="color:#ffffff"></span>
+                    </div>
+                    <div id="sectorGroup" class="sector-group"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Driver info -->
+    <div id="driverBar" class="driver-bar" style="display:none">
+        <div class="driver-inner">
+            <div class="driver-left">
+                <span id="carNumber" class="car-number"></span>
+                <div>
+                    <div id="driverName" class="driver-name"></div>
+                    <div id="carName" class="car-name"></div>
+                </div>
+            </div>
+            <div id="driverTemps" class="driver-temps"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    /* ── State ── */
+    var ws = null;
+    var demoMode = false;
+    var demoInterval = null;
+    var maxRPM = 8500;
+    var currentSmoothRPM = 0;
+    var animFrame = 0;
+    var oldBestLap = '';
+    var autoConnected = false;
+
+    /* ── DOM Elements ── */
+    var $connectScreen = document.getElementById('connectScreen');
+    var $dashboard = document.getElementById('dashboard');
+    var $inputIP = document.getElementById('inputIP');
+    var $inputPort = document.getElementById('inputPort');
+    var $inputMaxRPM = document.getElementById('inputMaxRPM');
+    var $btnConnect = document.getElementById('btnConnect');
+    var $btnDemo = document.getElementById('btnDemo');
+    var $btnDisconnect = document.getElementById('btnDisconnect');
+    var $autoDetectInfo = document.getElementById('autoDetectInfo');
+    var $statusDot = document.getElementById('statusDot');
+    var $statusLabel = document.getElementById('statusLabel');
+    var $tachoCanvas = document.getElementById('tachoCanvas');
+    var $tachoWrapper = document.getElementById('tachoWrapper');
+    var $tachoCenter = document.getElementById('tachoCenter');
+    var $centerZone = document.getElementById('centerZone');
+    var $rpmValue = document.getElementById('rpmValue');
+    var $gearDisplay = document.getElementById('gearDisplay');
+    var $speedValue = document.getElementById('speedValue');
+    var $speedUnit = document.getElementById('speedUnit');
+    var $shiftLights = document.getElementById('shiftLights');
+    var $lapCurrent = document.getElementById('lapCurrent');
+    var $lapLast = document.getElementById('lapLast');
+    var $lapBest = document.getElementById('lapBest');
+    var $sessionType = document.getElementById('sessionType');
+    var $flagBadge = document.getElementById('flagBadge');
+    var $sessionRemain = document.getElementById('sessionRemain');
+    var $sessionPos = document.getElementById('sessionPos');
+    var $sessionLap = document.getElementById('sessionLap');
+    var $deltaValue = document.getElementById('deltaValue');
+    var $deltaSection = document.getElementById('deltaSection');
+    var $sectorGroup = document.getElementById('sectorGroup');
+    var $deltaSectorsCard = document.getElementById('deltaSectorsCard');
+    var $thrBar = document.getElementById('thrBar');
+    var $brkBar = document.getElementById('brkBar');
+    var $cltBar = document.getElementById('cltBar');
+    var $thrPct = document.getElementById('thrPct');
+    var $brkPct = document.getElementById('brkPct');
+    var $cltPct = document.getElementById('cltPct');
+    var $thrLabel = document.getElementById('thrLabel');
+    var $brkLabel = document.getElementById('brkLabel');
+    var $cltLabel = document.getElementById('cltLabel');
+    var $fuelValue = document.getElementById('fuelValue');
+    var $oilTemp = document.getElementById('oilTemp');
+    var $waterTemp = document.getElementById('waterTemp');
+    var $elecTC = document.getElementById('elecTC');
+    var $elecTC2 = document.getElementById('elecTC2');
+    var $elecABS = document.getElementById('elecABS');
+    var $elecMAP = document.getElementById('elecMAP');
+    var $driverBar = document.getElementById('driverBar');
+    var $driverName = document.getElementById('driverName');
+    var $carName = document.getElementById('carName');
+    var $carNumber = document.getElementById('carNumber');
+    var $driverTemps = document.getElementById('driverTemps');
+    var $trackName = document.getElementById('trackName');
+
+    /* ── Shift light colors ── */
+    var SHIFT_COLORS = [
+        '#00dd44', '#00dd44', '#00dd44', '#44ee00',
+        '#88ee00', '#bbdd00', '#ffcc00', '#ffaa00',
+        '#ff6600', '#ff4400', '#ff2244', '#ff0033'
+    ];
+    var NUM_LIGHTS = 12;
+
+    /* ── Init shift lights ── */
+    for (var i = 0; i < NUM_LIGHTS; i++) {
+        var el = document.createElement('div');
+        el.className = 'shift-light';
+        el.dataset.index = i;
+        $shiftLights.appendChild(el);
+    }
+    var shiftLightEls = $shiftLights.querySelectorAll('.shift-light');
+
+    /* ═══════════════════════════════════ */
+    /*        AUTO-DETECT FROM URL         */
+    /* ═══════════════════════════════════ */
+    function autoDetect() {
+        var hostname = window.location.hostname || '';
+        var port = window.location.port || '';
+        if (hostname && hostname !== '' && hostname !== '0.0.0.0') {
+            $inputIP.value = hostname;
+            if (port && port !== '' && port !== '80') {
+                $inputPort.value = port;
+            }
+            $autoDetectInfo.style.display = '';
+            $autoDetectInfo.textContent = 'Detected: ' + hostname + (port ? ':' + port : '');
+            return true;
+        }
+        return false;
+    }
+
+    /* ═══════════════════════════════════ */
+    /*           CONNECTION LOGIC          */
+    /* ═══════════════════════════════════ */
+    function showDashboard() {
+        $connectScreen.style.display = 'none';
+        $dashboard.classList.add('active');
+        if (!animFrame) drawTacho();
+    }
+    function showConnect() {
+        disconnect();
+        $dashboard.classList.remove('active');
+        $connectScreen.style.display = '';
+    }
+    function setStatus(status) {
+        $statusDot.className = 'status-dot ' + status;
+        $statusLabel.textContent = status === 'connected' ? (demoMode ? 'DEMO' : 'LIVE') :
+                                     status === 'connecting' ? 'CONNECTING...' : 'OFFLINE';
+    }
+    function disconnect() {
+        if (ws) { ws.close(); ws = null; }
+        if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
+        demoMode = false;
+        autoConnected = false;
+        setStatus('disconnected');
+    }
+    function connectWebSocket() {
+        var ip = $inputIP.value.trim();
+        var port = $inputPort.value.trim();
+        maxRPM = parseInt($inputMaxRPM.value) || 8500;
+        if (!ip) return;
+        showDashboard();
+        setStatus('connecting');
+        try {
+            ws = new WebSocket('ws://' + ip + ':' + port + '/');
+            ws.onopen = function() { setStatus('connected'); autoConnected = true; };
+            ws.onmessage = function(e) {
+                try { updateTelemetry(JSON.parse(e.data)); } catch(err) {}
+            };
+            ws.onclose = function() {
+                setStatus('disconnected');
+                autoConnected = false;
+                if (autoConnected) {
+                    setTimeout(function() { if (autoConnected && !demoMode) connectWebSocket(); }, 2000);
+                }
+            };
+            ws.onerror = function() { if (ws) ws.close(); };
+        } catch(err) { setStatus('disconnected'); }
+    }
+
+    /* ═══════════════════════════════════ */
+    /*         TELEMETRY UPDATE            */
+    /* ═══════════════════════════════════ */
+    function parsePct(s) {
+        if (!s) return 0;
+        return parseInt(String(s).replace('%', '')) || 0;
+    }
+
+    function updateTelemetry(t) {
+        if (t.SessionType) $sessionType.textContent = t.SessionType.toUpperCase();
+        if (t.Flag && t.Flag !== '') {
+            $flagBadge.style.display = '';
+            $flagBadge.textContent = t.Flag.toUpperCase();
+            $flagBadge.className = 'flag-badge ' + (t.Flag === 'Yellow' ? 'flag-yellow' : t.Flag === 'Green' ? 'flag-green' : '');
+        } else {
+            $flagBadge.style.display = 'none';
+        }
+        $sessionRemain.textContent = t.Remain || '';
+        $sessionPos.textContent = t.Position ? 'P' + t.Position : '';
+        $sessionLap.textContent = t.Lap ? 'LAP ' + t.Lap : '';
+        $trackName.textContent = t.TrackName || '';
+
+        // RPM (now in rpm-bar, outside tachometer)
+        var rpm = parseInt(String(t.RPM || '0')) || 0;
+        var rpmStr = rpm.toString();
+        $rpmValue.textContent = rpmStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+        // Gear
+        $gearDisplay.textContent = t.Gear || 'N';
+        var gearColor = t.GearColor || 'white';
+        $gearDisplay.style.color = gearColor === 'red' ? '#ff2244' : gearColor === 'orange' ? '#ff8800' : '#ffffff';
+        $gearDisplay.style.textShadow = gearColor === 'red' ? '0 0 30px rgba(255,34,68,0.6)' :
+                                        gearColor === 'orange' ? '0 0 20px rgba(255,136,0,0.4)' : 'none';
+
+        // Speed
+        $speedValue.textContent = t.Speed || '000';
+
+        // Shift lights
+        var rpmPct = rpm / maxRPM;
+        var activeLights = Math.min(NUM_LIGHTS, Math.floor(rpmPct * NUM_LIGHTS));
+        for (var i = 0; i < NUM_LIGHTS; i++) {
+            var el = shiftLightEls[i];
+            if (i < activeLights) {
+                el.classList.add('active');
+                el.style.background = SHIFT_COLORS[i];
+                el.style.boxShadow = '0 0 8px ' + SHIFT_COLORS[i] + '88, inset 0 1px 2px rgba(255,255,255,0.3)';
+            } else {
+                el.classList.remove('active');
+                el.style.background = 'rgba(30,30,50,0.8)';
+                el.style.boxShadow = 'none';
+            }
+        }
+
+        // Lap times
+        $lapCurrent.textContent = t.LapTime || '0:00.000';
+        $lapLast.textContent = t.LastLapTime || '0:00.000';
+        if (t.BestLapTime && t.BestLapTime !== oldBestLap) {
+            if (oldBestLap !== '') {
+                $lapBest.style.textShadow = '0 0 30px rgba(0,221,68,0.9)';
+                setTimeout(function() { $lapBest.style.textShadow = '0 0 6px rgba(0,221,68,0.2)'; }, 1200);
+            }
+            oldBestLap = t.BestLapTime;
+        }
+        $lapBest.textContent = t.BestLapTime || '0:00.000';
+
+        // Delta + Sectors
+        var hasDelta = t.Delta && t.Delta !== '';
+        var hasSector = (t.Sector1Time && t.Sector1Time !== '') || (t.Sector2Time && t.Sector2Time !== '') || (t.Sector3Time && t.Sector3Time !== '');
+        $deltaSectorsCard.style.display = (hasDelta || hasSector) ? '' : 'none';
+        if (hasDelta) {
+            $deltaSection.style.display = 'flex';
+            $deltaValue.textContent = t.Delta;
+            var dc = t.DeltaColor || 'transparent';
+            if (dc.indexOf('00bc00') !== -1) $deltaValue.style.color = '#00dd44';
+            else if (dc.indexOf('bc00') !== -1) $deltaValue.style.color = '#bc00bc';
+            else if (dc.indexOf('c10c') !== -1) $deltaValue.style.color = '#ff2244';
+            else $deltaValue.style.color = '#ffffff';
+        } else { $deltaSection.style.display = 'none'; }
+        if (hasSector) {
+            $sectorGroup.innerHTML = '';
+            var sectors = [
+                { label: 'S1', val: t.Sector1Time, col: t.Sector1Color },
+                { label: 'S2', val: t.Sector2Time, col: t.Sector2Color },
+                { label: 'S3', val: t.Sector3Time, col: t.Sector3Color }
+            ];
+            sectors.forEach(function(s) {
+                if (s.val && s.val !== '') {
+                    var div = document.createElement('div');
+                    div.className = 'sector-item';
+                    var lbl = document.createElement('span');
+                    lbl.className = 'sector-label'; lbl.textContent = s.label;
+                    var val = document.createElement('span');
+                    val.className = 'sector-value'; val.textContent = s.val;
+                    if (s.col && s.col.indexOf('00bc00') !== -1) val.classList.add('green');
+                    else if (s.col && s.col.indexOf('bc00bc') !== -1) val.classList.add('purple');
+                    div.appendChild(lbl); div.appendChild(val);
+                    $sectorGroup.appendChild(div);
+                }
+            });
+        }
+
+        // Pedals
+        var thr = parsePct(t.Throttle), brk = parsePct(t.Brake), clt = parsePct(t.Clutch);
+        $thrBar.style.width = Math.min(100, thr) + '%';
+        $brkBar.style.width = Math.min(100, brk) + '%';
+        $cltBar.style.width = Math.min(100, clt) + '%';
+        $thrBar.style.boxShadow = thr > 0 ? '0 0 8px rgba(0,221,68,0.25)' : 'none';
+        $brkBar.style.boxShadow = brk > 0 ? '0 0 8px rgba(255,34,68,0.25)' : 'none';
+        $cltBar.style.boxShadow = clt > 0 ? '0 0 8px rgba(68,136,255,0.25)' : 'none';
+        $thrPct.textContent = thr + '%'; $brkPct.textContent = brk + '%'; $cltPct.textContent = clt + '%';
+        $thrPct.style.color = thr > 0 ? '#ffffff' : '#444466';
+        $brkPct.style.color = brk > 0 ? '#ffffff' : '#444466';
+        $cltPct.style.color = clt > 0 ? '#ffffff' : '#444466';
+        $thrLabel.style.color = thr > 0 ? '#00dd44' : '#555577';
+        $brkLabel.style.color = brk > 0 ? '#ff2244' : '#555577';
+        $cltLabel.style.color = clt > 0 ? '#4488ff' : '#555577';
+
+        // Fuel
+        $fuelValue.textContent = t.FuelLevel || '0.00l';
+
+        // Temps
+        var oilRaw = (t.OilTemp || '').replace(/&deg;?/gi, '\u00B0');
+        var watRaw = (t.WaterTemp || '').replace(/&deg;?/gi, '\u00B0');
+        $oilTemp.textContent = oilRaw;
+        $waterTemp.textContent = watRaw;
+        if (t.OilTemp) $oilTemp.className = 'temp-value' + (parseFloat(String(t.OilTemp).replace(/[^0-9.]/g, '')) > 115 ? ' warn' : '');
+        if (t.WaterTemp) $waterTemp.className = 'temp-value' + (parseFloat(String(t.WaterTemp).replace(/[^0-9.]/g, '')) > 105 ? ' warn' : '');
+
+        // Electronics
+        var tcActive = t.TC && t.TC !== '0';
+        var tc2Active = t.TC2 && t.TC2 !== '0';
+        var absActive = t.ABS && t.ABS !== '0';
+        var mapVal = t.MAP || '';
+        $elecTC.className = 'elec-badge' + (tcActive ? ' active' : '');
+        $elecTC.textContent = 'TC';
+        $elecTC2.className = 'elec-badge' + (tc2Active ? ' active' : '');
+        $elecTC2.textContent = 'TC2';
+        $elecABS.className = 'elec-badge' + (absActive ? ' active' : '');
+        $elecABS.textContent = 'ABS';
+        $elecMAP.className = 'elec-badge';
+        $elecMAP.textContent = mapVal ? 'MAP ' + mapVal : 'MAP';
+
+        // Driver info
+        var showDriver = t.DriverName || t.CarName;
+        $driverName.textContent = t.DriverName || '';
+        $carName.textContent = t.CarName || '';
+        $carNumber.textContent = t.CarNumber || '';
+        var temps = [];
+        if (t.AirTemp) temps.push(t.AirTemp);
+        if (t.RoadTemp) temps.push(t.RoadTemp);
+        $driverTemps.textContent = temps.join(' | ');
+        $driverBar.style.display = showDriver ? '' : 'none';
+    }
+
+    /* ═══════════════════════════════════ */
+    /*      TACHOMETER — RESIZE LOGIC      */
+    /* ═══════════════════════════════════ */
+    var lastTachoSize = 0;
+
+    function resizeTacho() {
+        if (!$dashboard.classList.contains('active')) return;
+        var zone = $centerZone;
+        var zRect = zone.getBoundingClientRect();
+        var zW = zRect.width;
+        var zH = zRect.height;
+
+        // Available space: subtract pedals card + data row
+        var isLandscape = window.innerWidth > window.innerHeight;
+        var isNarrow = window.innerWidth < 420;
+        var otherContentH = isLandscape ? 70 : (isNarrow ? 110 : 95);
+        // narrow portrait needs more room due to larger fonts & wrapped data-row
+
+        var availH = zH - otherContentH;
+        var tachoSize = Math.max(120, Math.min(zW - 16, availH));
+        tachoSize = Math.floor(tachoSize);
+        if (tachoSize === lastTachoSize) return;
+        lastTachoSize = tachoSize;
+
+        $tachoWrapper.style.width = tachoSize + 'px';
+        $tachoWrapper.style.height = tachoSize + 'px';
+
+        // Scale Gear + Speed text relative to tachometer circle
+        var r = tachoSize * 0.43;
+        var scale = r / 150;
+
+        $gearDisplay.style.fontSize = Math.max(24, Math.round(72 * scale)) + 'px';
+        $speedValue.style.fontSize = Math.max(12, Math.round(32 * scale)) + 'px';
+        $speedUnit.style.fontSize = Math.max(6, Math.round(10 * scale)) + 'px';
+
+        // Position Gear+Speed in the bottom gap of the 270° arc
+        // Circle center at 50% height, gap is below center (~60-90% from top)
+        // Using padding-bottom on tacho-center with justify-content: flex-end
+        // The arc opening bottom is at ~93% (50% + 43%), gap center at ~67%
+        // With flex-end, content aligns to bottom, so padding-bottom pushes it up into the gap
+        $tachoCenter.style.paddingBottom = Math.round(tachoSize * 0.12) + 'px';
+    }
+
+    /* ═══════════════════════════════════ */
+    /*         TACHOMETER CANVAS           */
+    /* ═══════════════════════════════════ */
+    function drawTacho() {
+        var canvas = $tachoCanvas;
+        if (!canvas || !$dashboard.classList.contains('active')) { animFrame = 0; return; }
+
+        resizeTacho();
+
+        var dpr = window.devicePixelRatio || 1;
+        var rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        var w = rect.width, h = rect.height;
+        var cx = w / 2, cy = h * 0.50;
+        var outerR = Math.min(w * 0.43, h * 0.43);
+        var innerR = outerR * 0.68;
+
+        // Parse RPM from the rpm-bar element
+        var rpmStr = $rpmValue.textContent.replace(/[^0-9]/g, '') || '0';
+        var rpm = parseInt(rpmStr) || 0;
+        var targetPct = Math.min(rpm / maxRPM, 1);
+        currentSmoothRPM += (targetPct - currentSmoothRPM) * 0.3;
+        var pct = currentSmoothRPM;
+
+        var startAngle = Math.PI * 0.75;
+        var totalSweep = Math.PI * 1.5;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Arc segments
+        var numSeg = 60;
+        for (var i = 0; i < numSeg; i++) {
+            var segPct = i / numSeg;
+            var a1 = startAngle + segPct * totalSweep;
+            var a2 = startAngle + ((i + 1) / numSeg) * totalSweep + 0.015;
+            var color;
+            if (segPct < 0.5) color = '#00dd44';
+            else if (segPct < 0.7) color = '#88ee00';
+            else if (segPct < 0.8) color = '#ffcc00';
+            else if (segPct < 0.85) color = '#ff8800';
+            else if (segPct < 0.92) color = '#ff4400';
+            else color = '#ff0033';
+            var isActive = segPct <= pct;
+            ctx.beginPath();
+            ctx.arc(cx, cy, outerR, a1, a2);
+            ctx.arc(cx, cy, innerR, a2, a1, true);
+            ctx.closePath();
+            ctx.globalAlpha = isActive ? 1.0 : 0.12;
+            ctx.fillStyle = color;
+            ctx.fill();
+            if (isActive && segPct > 0.82) {
+                ctx.globalAlpha = 0.3;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+        ctx.globalAlpha = 1;
+
+        // Tick marks + labels
+        var numSmallTicks = Math.round(maxRPM / 500);
+        for (var ti = 0; ti <= numSmallTicks; ti++) {
+            var tickRPM = ti * 500;
+            var tickPct = Math.min(tickRPM / maxRPM, 1);
+            var a = startAngle + tickPct * totalSweep;
+            var isMajor = (tickRPM % 1000 === 0);
+            var tickOuter = outerR + (isMajor ? 10 : 5);
+            var tickInner = outerR + 1;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * tickInner, cy + Math.sin(a) * tickInner);
+            ctx.lineTo(cx + Math.cos(a) * tickOuter, cy + Math.sin(a) * tickOuter);
+            ctx.strokeStyle = 'rgba(255,255,255,' + (isMajor ? 0.5 : 0.2) + ')';
+            ctx.lineWidth = isMajor ? 2 : 1;
+            ctx.stroke();
+            if (isMajor && tickRPM > 0) {
+                var labelR = outerR + 14;
+                var lx = cx + Math.cos(a) * labelR;
+                var ly = cy + Math.sin(a) * labelR;
+                var rpmK = Math.round(tickRPM / 1000);
+                var fontSize = Math.max(7, Math.round(9 * (outerR / 150)));
+                ctx.font = 'bold ' + fontSize + 'px monospace';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(rpmK.toString(), lx, ly);
+            }
+        }
+
+        // Needle
+        var needleAngle = startAngle + pct * totalSweep;
+        var needleLen = innerR - 5;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(needleAngle);
+        ctx.beginPath();
+        ctx.moveTo(needleLen, 0);
+        ctx.lineTo(10, -3);
+        ctx.lineTo(10, 3);
+        ctx.closePath();
+        var needleColor = pct < 0.5 ? '#00dd44' : pct < 0.8 ? '#ffcc00' : pct < 0.85 ? '#ff8800' : '#ff2244';
+        ctx.fillStyle = needleColor;
+        ctx.shadowColor = needleColor;
+        ctx.shadowBlur = pct > 0.85 ? 20 : 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+
+        // Center cap
+        var capR = Math.max(8, Math.round(16 * (outerR / 150)));
+        ctx.beginPath();
+        ctx.arc(cx, cy, capR, 0, Math.PI * 2);
+        var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, capR);
+        grad.addColorStop(0, '#444466');
+        grad.addColorStop(1, '#1a1a28');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.strokeStyle = '#333355';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, Math.max(3, Math.round(6 * (outerR / 150))), 0, Math.PI * 2);
+        ctx.fillStyle = '#222240';
+        ctx.fill();
+
+        animFrame = requestAnimationFrame(drawTacho);
+    }
+
+    /* ═══════════════════════════════════ */
+    /*             DEMO MODE               */
+    /* ═══════════════════════════════════ */
+    function startDemo() {
+        demoMode = true;
+        maxRPM = parseInt($inputMaxRPM.value) || 8500;
+        showDashboard();
+        setStatus('connected');
+        var step = 0;
+        demoInterval = setInterval(function() {
+            step++;
+            var rpm = 3000 + Math.sin(step * 0.05) * 2500 + Math.random() * 500;
+            var clampedRPM = Math.max(800, Math.min(maxRPM + 200, rpm));
+            var rpmPct = clampedRPM / maxRPM;
+            var gear = rpmPct < 0.3 ? '2' : rpmPct < 0.45 ? '3' : rpmPct < 0.58 ? '4' : rpmPct < 0.72 ? '5' : '6';
+            var speed = Math.round(rpmPct * 280 + Math.random() * 10);
+            var throttle = rpmPct > 0.4 ? Math.round(60 + Math.random() * 40) : Math.round(20 + Math.random() * 30);
+            var brake = rpmPct < 0.3 ? Math.round(50 + Math.random() * 50) : Math.round(Math.random() * 10);
+            var lapBase = 62000 + Math.round(Math.random() * 8000);
+            function ts(ms) {
+                var m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000), mil = ms % 1000;
+                return m + ':' + String(s).padStart(2, '0') + '.' + String(mil).padStart(3, '0');
+            }
+            var elapsed = (step * 30) % lapBase;
+            var s1 = Math.round(elapsed * 0.33), s2 = Math.round(elapsed * 0.33), s3 = elapsed - s1 - s2;
+            var delta = Math.round(Math.random() * 6000) - 3000;
+            updateTelemetry({
+                SessionType: 'Race', Flag: step % 60 === 0 ? 'Yellow' : '',
+                DriverName: 'Driver', CarName: 'Ferrari 488 GT3', CarNumber: '#77',
+                TrackName: 'Monza',
+                Position: String(1 + Math.floor(Math.random() * 5)),
+                Lap: String(1 + Math.floor(step / 120)),
+                LapTime: ts(elapsed),
+                Delta: (delta > 200 || delta < -200) ? (delta < 0 ? '-' : '+') + ts(Math.abs(delta)).split(':')[1] : '',
+                DeltaColor: delta < -200 ? ' #00bc00' : delta > 200 ? '#c10c0c' : 'transparent',
+                Remain: String(5 - Math.floor(step / 120)) + ' laps',
+                LastLapTime: ts(lapBase + 1200 + Math.round(Math.random() * 2000)),
+                BestLapTime: ts(lapBase + 500),
+                Sector1Time: String(Math.floor(s1 / 1000) + '.' + String(s1 % 1000).padStart(3, '0')),
+                Sector2Time: String(Math.floor(s2 / 1000) + '.' + String(s2 % 1000).padStart(3, '0')),
+                Sector3Time: String(Math.floor(Math.max(0, s3) / 1000) + '.' + String(Math.max(0, s3) % 1000).padStart(3, '0')),
+                Sector1Color: 'transparent', Sector2Color: 'transparent', Sector3Color: 'transparent',
+                AirTemp: (21 + Math.random() * 2).toFixed(1) + '\u00B0C',
+                OilTemp: (95 + Math.random() * 15).toFixed(1) + '\u00B0C',
+                WaterTemp: (88 + Math.random() * 10).toFixed(1) + '\u00B0C',
+                RoadTemp: (28 + Math.random() * 8).toFixed(1) + '\u00B0C',
+                Gear: gear, Speed: String(speed).padStart(3, '0'),
+                RPM: String(Math.round(clampedRPM)).padStart(5, '0'),
+                GearColor: rpmPct > 0.9 ? 'red' : rpmPct > 0.8 ? 'orange' : 'white',
+                Clutch: String(Math.round(Math.random() * 5)) + '%',
+                Brake: String(brake) + '%', Throttle: String(throttle) + '%',
+                FuelLevel: Math.max(0, 45 - step * 0.01).toFixed(2) + 'l',
+                TC: step % 40 < 3 ? '1' : '0', TC2: '0',
+                ABS: brake > 80 ? '1' : '0', MAP: String(Math.floor(Math.random() * 7) + 3),
+                Sector: String(1 + Math.floor((step * 0.05) % 3)), FinishStatus: ''
+            });
+        }, 30);
+    }
+
+    /* ═══════════════════════════════════ */
+    /*         FULLSCREEN TOGGLE           */
+    /* ═══════════════════════════════════ */
+    function toggleFullscreen() {
+        var elem = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement) {
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+            else if (document.msExitFullscreen) document.msExitFullscreen();
+        }
+    }
+    function isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+    }
+
+    // Tap on dashboard toggles fullscreen
+    $dashboard.addEventListener('click', function(e) {
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
+        toggleFullscreen();
+    });
+
+    // Fullscreen state tracking
+    var _fullscreenActive = false;
+    var _origSetStatus = setStatus;
+    setStatus = function(status) {
+        _origSetStatus(status);
+        if (_fullscreenActive) {
+            $statusLabel.textContent = status === 'connected' ? (demoMode ? 'DEMO FS' : 'LIVE FS') :
+                                         status === 'connecting' ? 'CONNECTING...' : 'OFFLINE';
+        }
+    };
+    function onFullscreenChange() {
+        _fullscreenActive = isFullscreen();
+        lastTachoSize = 0; // force recalc
+        if ($dashboard.classList.contains('active')) {
+            var dotClass = $statusDot.className.replace('status-dot ', '');
+            setStatus(dotClass);
+        }
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('mozfullscreenchange', onFullscreenChange);
+
+    /* ═══════════════════════════════════ */
+    /*         INITIALIZATION              */
+    /* ═══════════════════════════════════ */
+    $btnConnect.addEventListener('click', function() { autoConnected = true; connectWebSocket(); });
+    $btnDemo.addEventListener('click', startDemo);
+    $btnDisconnect.addEventListener('click', function() { autoConnected = false; showConnect(); });
+    [$inputIP, $inputPort, $inputMaxRPM].forEach(function(input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (e.target === $inputMaxRPM) startDemo();
+                else { autoConnected = true; connectWebSocket(); }
+            }
+        });
+    });
+    if (autoDetect()) {
+        setTimeout(function() { connectWebSocket(); }, 300);
+    }
+})();
+</script>
+</body>
+</html>
