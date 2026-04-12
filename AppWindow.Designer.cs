@@ -181,6 +181,7 @@ namespace vAzhureRacingHub
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.titlesGames.BackColor = System.Drawing.Color.Transparent;
+            this.titlesGames.ButtonsWithoutOptions = false;
             this.titlesGames.HoverTitle = null;
             this.titlesGames.Location = new System.Drawing.Point(12, 52);
             this.titlesGames.Name = "titlesGames";
@@ -199,6 +200,7 @@ namespace vAzhureRacingHub
             this.titlesDevices.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.titlesDevices.BackColor = System.Drawing.Color.Transparent;
+            this.titlesDevices.ButtonsWithoutOptions = true;
             this.titlesDevices.HoverTitle = null;
             this.titlesDevices.Location = new System.Drawing.Point(12, 280);
             this.titlesDevices.Name = "titlesDevices";

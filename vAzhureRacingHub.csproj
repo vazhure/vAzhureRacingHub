@@ -82,9 +82,10 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="vAzhureRacingAPI">
-      <HintPath>vAzhureRacingAPI\bin\Release\vAzhureRacingAPI.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="vAzhureRacingAPI\vAzhureRacingAPI.csproj">
+      <Project>{B9FCF55F-72AA-4C47-99BC-3FCCF9904FF6}</Project>
+      <Name>vAzhureRacingAPI</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppWindow.cs">
