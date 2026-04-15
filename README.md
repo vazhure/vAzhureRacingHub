@@ -35,6 +35,7 @@ Supported Game Titles:
 * KartKraft
 * Kart Racing Pro
 * Le Mans Ultimate
+* MudRunner (limited)
 * Project Cars 2
 * Project Cars 3
 * Project Motor Racing Game
