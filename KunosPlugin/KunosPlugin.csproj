@@ -47,8 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ACEVO.cs" />
+    <Compile Include="ACEVO_Structs.cs" />
     <Compile Include="ACSharedFilePhisycs.cs" />
     <Compile Include="GameListener.cs" />
+    <Compile Include="GameListenerEvo.cs" />
     <Compile Include="GamePlugin.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
