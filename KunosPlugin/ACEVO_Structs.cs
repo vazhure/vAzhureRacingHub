@@ -7,9 +7,9 @@ namespace Kunos.Structs
     /// </summary>
     public static class ACEVOConstants
     {
-        public const string PhysicsFile = @"Local\acpmf_evo_physics";
-        public const string GraphicsFile = @"Local\acpmf_evo_graphics";
-        public const string StaticFile = @"Local\acpmf_evo_static";
+        public const string PhysicsFile = @"Local\acevo_pmf_physics";
+        public const string GraphicsFile = @"Local\acevo_pmf_graphics";
+        public const string StaticFile = @"Local\acevo_pmf_static";
     }
 
     #region Enums
