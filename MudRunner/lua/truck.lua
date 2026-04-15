@@ -1683,8 +1683,10 @@ function ProcessTruck(truck, truckInput, wheels, exhausts, intakes, steams,
 
     if telemetryState.enabled == false then InitTelemetry() end
 
-    if truckInput ~= nil and truckInput.isInWorld then
-        UpdateTelemetry(truck, truckInput, wheels, elapsedTime)
+    if truck.soundEngineIdle ~= nil then
+        if truckInput ~= nil and truckInput.isInWorld then
+            UpdateTelemetry(truck, truckInput, wheels, elapsedTime)
+        end
     end
 end
 

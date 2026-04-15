@@ -9,20 +9,17 @@
 -- Transport:           Local file (io.open)
 -- Output file:         telemetry_out.txt  (in game working directory)
 --
--- Why file, not pipe:  MudRunner's Lua runtime patches io.open()
---   to block UNC paths (\\.\pipe\...). Named pipes are unreachable
---   from Lua. File I/O with relative paths works fine.
---
 -- SSD wear:            ~300 bytes × 60 Hz = 18 KB/sec = 1.6 GB/day.
 --   Same file overwritten each frame (same NTFS sectors).
 --   Modern SSD endurance: 600+ TBW. 1.6 GB/day = 0.3% per year.
 --   If concerned, change TelemetryUpdateInterval to 0.1 (10 Hz).
 --
--- Compatible with: vAzhureRacingAPI MudRunner Plugin v3+
+-- Compatible with: vAzhureRacingAPI MudRunner Plugin
 ------------------------------------------
 -- ============================================================
 --  >>>>> COPY EVERYTHING BELOW INTO truck.lua <<<<<<
 -- ============================================================
+
 -- ============================================================
 -- TELEMETRY MODULE (Fixed-Width Guaranteed)
 -- ============================================================
@@ -265,8 +262,10 @@ function ProcessTruck(truck, truckInput, wheels, exhausts, intakes, steams,
 
     if telemetryState.enabled == false then InitTelemetry() end
 
-    if truckInput ~= nil and truckInput.isInWorld then
-        UpdateTelemetry(truck, truckInput, wheels, elapsedTime)
+    if truck.soundEngineIdle ~= nil then
+        if truckInput ~= nil and truckInput.isInWorld then
+            UpdateTelemetry(truck, truckInput, wheels, elapsedTime)
+        end
     end
 end
 
