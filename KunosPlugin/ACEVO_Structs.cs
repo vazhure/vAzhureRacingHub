@@ -157,6 +157,8 @@ namespace Kunos.Structs
         public float brake_normalized_temperature;
         /// <summary>Core tyre temperature as a 0–1 fraction of optimal range</summary>
         public float tyre_normalized_temperature_core;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 133)] private byte[] _padding;
     }
 
     /// <summary>
@@ -183,6 +185,8 @@ namespace Kunos.Structs
         public float damage_suspension_lr;
         /// <summary>Damage on the rear-right suspension</summary>
         public float damage_suspension_rr;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 92)] private byte[] _padding;
     }
 
     /// <summary>
@@ -203,6 +207,8 @@ namespace Kunos.Structs
         public sbyte tyres_lr;
         /// <summary>Rear-right tyre change state</summary>
         public sbyte tyres_rr;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 58)] private byte[] _padding;
     }
 
     /// <summary>
@@ -255,6 +261,8 @@ namespace Kunos.Structs
         [MarshalAs(UnmanagedType.I1)] public bool is_pitlimiter_on;
         /// <summary>Selected vehicle performance / power mode index</summary>
         public sbyte active_performance_mode;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 97)] private byte[] _padding;
     }
 
     /// <summary>
@@ -284,9 +292,11 @@ namespace Kunos.Structs
         /// <summary>Index of the currently focused display device</summary>
         public sbyte selected_display_index;
         /// <summary>Active page index on displays</summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public byte[] display_current_page_index;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public sbyte[] display_current_page_index;
         /// <summary>Headlights are on and visible to other drivers</summary>
         [MarshalAs(UnmanagedType.I1)] public bool are_headlights_visible;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 101)] private byte[] _padding;
     }
 
     /// <summary>
@@ -329,6 +339,8 @@ namespace Kunos.Structs
         [MarshalAs(UnmanagedType.I1)] public bool is_ready_to_next_blinking;
         /// <summary>Waiting-for-players lobby screen is shown</summary>
         [MarshalAs(UnmanagedType.I1)] public bool show_waiting_for_players;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 144)] private byte[] _padding;
     }
 
     /// <summary>
@@ -357,6 +369,8 @@ namespace Kunos.Structs
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 15)] public string total_time;
         /// <summary>Current lap has been invalidated (track-limits violation, etc.)</summary>
         [MarshalAs(UnmanagedType.I1)] public bool is_invalid;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 142)] private byte[] _padding;
     }
 
     /// <summary>
@@ -383,6 +397,8 @@ namespace Kunos.Structs
         public float auto_steer;
         /// <summary>Arcade-style stability aid level (0.0 = off, 1.0 = maximum)</summary>
         public float arcade_stability_control;
+        
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 49)] private byte[] _padding;
     }
     #endregion
 
@@ -502,7 +518,7 @@ namespace Kunos.Structs
         /// <summary>Tyre outer-edge temperature per wheel in °C [FL, FR, RL, RR]</summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] public float[] tyreTempO;
         /// <summary>Car is driven by AI (0 = player, 1 = AI)</summary>
-        int isAIControlled;
+        public int isAIControlled;
         /// <summary>3-D world-space contact point of each tyre with the road [FL,FR,RL,RR][X,Y,Z]</summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)] public float[] tyreContactPoint;
         /// <summary>Road-surface normal vector at each tyre contact point [FL,FR,RL,RR][X,Y,Z]</summary>
@@ -593,7 +609,7 @@ namespace Kunos.Structs
         /// <summary>Unique ID of the player's own car (Part B)</summary>
         public ulong player_car_id_b;
         /// <summary>Engine speed in RPM for HUD display</summary>
-        public short rpm;
+        public ushort rpm;
         /// <summary>Rev limiter is cutting fuel/ignition (bouncing off limiter)</summary>
         [MarshalAs(UnmanagedType.I1)] public bool is_rpm_limiter_on;
         /// <summary>Engine RPM is in the upshift window</summary>
@@ -625,15 +641,15 @@ namespace Kunos.Structs
         /// <summary>Maximum ERS charge energy for this lap has been stored</summary>
         [MarshalAs(UnmanagedType.I1)] public bool is_max_charge_kj_per_lap_reached;
         /// <summary>Displayed speed in km/h</summary>
-        public short display_speed_kmh;
+        public ushort display_speed_kmh;
         /// <summary>Displayed speed in mph</summary>
-        public short display_speed_mph;
+        public ushort display_speed_mph;
         /// <summary>Displayed speed in m/s</summary>
-        public short display_speed_ms;
+        public ushort display_speed_ms;
         /// <summary>Speed delta vs. pit-lane limit (negative = under limit)</summary>
         public float pitspeeding_delta;
         /// <summary>Current gear as an integer (same encoding as physics gear)</summary>
-        public short gear_int;
+        public ushort gear_int;
         /// <summary>Engine RPM as a fraction of redline (0.0–1.0)</summary>
         public float rpm_percent;
         /// <summary>Throttle pedal position as a fraction (0.0–1.0)</summary>
@@ -913,5 +929,5 @@ namespace Kunos.Structs
             finally { handle.Free(); }
         }
     }
-    #endregion
 }
+#endregion
