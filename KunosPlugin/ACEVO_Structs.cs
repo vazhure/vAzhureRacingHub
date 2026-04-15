@@ -120,7 +120,7 @@ namespace Kunos.Structs
     /// <summary>
     /// Complete state of a single tyre corner. Embedded four times in SPageFileGraphicEvo (lf, rf, lr, rr).
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SMEvoTyreState
     {
         /// <summary>Combined tyre slip magnitude</summary>
@@ -292,7 +292,7 @@ namespace Kunos.Structs
     /// <summary>
     /// Server-side session lifecycle information.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SMEvoSessionState
     {
         /// <summary>Name of the current session phase (e.g. 'Race', 'Qualify')</summary>
@@ -334,7 +334,7 @@ namespace Kunos.Structs
     /// <summary>
     /// Lap timing and delta values displayed on the HUD.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SMEvoTimingState
     {
         /// <summary>Current lap time as a formatted string</summary>
@@ -502,7 +502,7 @@ namespace Kunos.Structs
         /// <summary>Tyre outer-edge temperature per wheel in °C [FL, FR, RL, RR]</summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] public float[] tyreTempO;
         /// <summary>Car is driven by AI (0 = player, 1 = AI)</summary>
-        [MarshalAs(UnmanagedType.I1)] public bool isAIControlled;
+        int isAIControlled;
         /// <summary>3-D world-space contact point of each tyre with the road [FL,FR,RL,RR][X,Y,Z]</summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)] public float[] tyreContactPoint;
         /// <summary>Road-surface normal vector at each tyre contact point [FL,FR,RL,RR][X,Y,Z]</summary>
@@ -530,9 +530,9 @@ namespace Kunos.Structs
         /// <summary>Lateral slip angle per tyre in radians [FL, FR, RL, RR]</summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] public float[] slipAngle;
         /// <summary>Traction control currently cutting power (0 = no, 1 = yes)</summary>
-        [MarshalAs(UnmanagedType.I1)] public bool tcinAction;
+        public int tcinAction;
         /// <summary>ABS currently modulating brakes (0 = no, 1 = yes)</summary>
-        [MarshalAs(UnmanagedType.I1)] public bool absInAction;
+        public int absInAction;
         /// <summary>Suspension structural damage per corner (0.0–1.0) [FL, FR, RL, RR]</summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] public float[] suspensionDamage;
         /// <summary>Representative tyre surface temperature per wheel in °C [FL, FR, RL, RR]</summary>
@@ -550,11 +550,11 @@ namespace Kunos.Structs
         /// <summary>Brake-disc remaining life per corner (0.0–1.0) [FL, FR, RL, RR]</summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] public float[] discLife;
         /// <summary>Ignition switch state (0 = off, 1 = on)</summary>
-        [MarshalAs(UnmanagedType.I1)] public bool ignitionOn;
+        public int ignitionOn;
         /// <summary>Starter motor currently cranking (0 = no, 1 = yes)</summary>
-        [MarshalAs(UnmanagedType.I1)] public bool starterEngineOn;
+        public int starterEngineOn;
         /// <summary>Engine is running (0 = stopped, 1 = running)</summary>
-        [MarshalAs(UnmanagedType.I1)] public bool isEngineRunning;
+        public int isEngineRunning;
         /// <summary>Vibration intensity transmitted from kerb strikes</summary>
         public float kerbVibration;
         /// <summary>Vibration intensity caused by tyre slip</summary>
@@ -577,7 +577,7 @@ namespace Kunos.Structs
     /// <summary>
     /// Main HUD and graphics telemetry page. Updated each rendered frame. Contains embedded sub-structs for tyres, damage, electronics, timing, and session state.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SPageFileGraphicEvo
     {
         /// <summary>Incrementing counter — detect new frames by comparing to previous value</summary>
@@ -862,7 +862,7 @@ namespace Kunos.Structs
     /// <summary>
     /// Static session metadata. Written once when a session loads and does not change while driving.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SPageFileStaticEvo
     {
         /// <summary>Shared-memory interface version string</summary>
