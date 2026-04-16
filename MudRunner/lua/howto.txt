@@ -1,0 +1,4 @@
+1. Backup truck.lua from SteamLibrary\steamapps\common\MudRunner\Media.zip\scripts\
+2. Replace truck.lua from SteamLibrary\steamapps\common\MudRunner\Media.zip\scripts\ with ProgramData\vAzhureRacingHub\Plugins\MudRunner\truck.lua 
+3. In vAzhure Racing Hub application select title "MudRunner" press Options button and select your SteamLibrary\steamapps\common\MudRunner\MudRunner.exe file location
+4. Press PLAY or run game manually

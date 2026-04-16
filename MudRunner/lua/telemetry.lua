@@ -19,11 +19,9 @@
 -- ============================================================
 --  >>>>> COPY EVERYTHING BELOW INTO truck.lua <<<<<<
 -- ============================================================
-
 -- ============================================================
 -- TELEMETRY MODULE (Fixed-Width Guaranteed)
 -- ============================================================
-
 TelemetryFileName = "telemetry_out.txt"
 TelemetryUpdateInterval = 0.016
 TelemetryScreenDebug = true
@@ -92,6 +90,43 @@ local function InitTelemetry()
     end
 end
 
+local function CalcVehicleOrientation(w1, w2, w3, w4)
+    local frontX = (w1.x + w2.x) * 0.5
+    local frontZ = (w1.z + w2.z) * 0.5
+    local rearX = (w3.x + w4.x) * 0.5
+    local rearZ = (w3.z + w4.z) * 0.5
+
+    local wheelbase = math.sqrt((frontX - rearX) ^ 2 + (frontZ - rearZ) ^ 2)
+    local frontY = (w1.y + w2.y) * 0.5
+    local rearY = (w3.y + w4.y) * 0.5
+
+    local pitchRad = math.atan2(frontY - rearY, wheelbase)
+    local pitchDeg = math.deg(pitchRad)
+
+    local leftY = (w1.y + w3.y) * 0.5
+    local rightY = (w2.y + w4.y) * 0.5
+    local trackWidth = math.sqrt((w1.x - w2.x) ^ 2 + (w1.z - w2.z) ^ 2)
+    local rollRad = math.atan2(leftY - rightY, trackWidth)
+    local rollDeg = math.deg(rollRad)
+
+    local yawRad = math.atan2(frontX - rearX, frontZ - rearZ)
+    local yawDeg = math.deg(yawRad)
+    if yawDeg < 0 then yawDeg = yawDeg + 360 end
+
+    return pitchDeg, rollDeg, yawDeg
+end
+
+local function getSafeWheelData(wheelsTable, idx)
+    local w = wheelsTable and wheelsTable[idx]
+    if not w or not w.org then return {x = 0, y = 0, z = 0, r = 0} end
+    return {
+        x = clamp(w.org.x, -9999.9999, 9999.9999),
+        y = clamp(w.org.y, -9999.9999, 9999.9999),
+        z = clamp(w.org.z, -9999.9999, 9999.9999),
+        r = clamp(w.radius or 0, -9999.9999, 9999.9999)
+    }
+end
+
 -- ============================================================
 --  MAIN TELEMETRY UPDATE (Fixed-Width)
 -- ============================================================
@@ -131,6 +166,11 @@ local function UpdateTelemetry(truck, truckInput, wheels, elapsedTime)
     local angVelX = angVec.x or 0
     local angVelY = angVec.y or 0
     local angVelZ = angVec.z or 0
+
+    local wheel1 = getSafeWheelData(wheels, 1)
+    local wheel2 = getSafeWheelData(wheels, 2)
+    local wheel3 = getSafeWheelData(wheels, 3)
+    local wheel4 = getSafeWheelData(wheels, 4)
 
     local engineTension = tonumber(truck.engineTension or 0)
     local turbo = tonumber(truck.turbo or 0)
@@ -232,19 +272,29 @@ local function UpdateTelemetry(truck, truckInput, wheels, elapsedTime)
     speedKmh = clamp(speedKmh, 0, 9999.99)
     telemetryState.elapsedTime = clamp(telemetryState.elapsedTime, 0, 99999.999)
 
+    local pitch, roll, yaw = CalcVehicleOrientation(wheel1, wheel2, wheel3,
+                                                    wheel4)
+
     local line = string.format(
                      "T|%010.3f|%07.2f|%08.4f|%06.3f|%06.3f|%02d|%02d|%02d|%02d|%02d|%02d|" ..
                          "%010.4f|%010.4f|%010.4f|%010.4f|%010.4f|%010.4f|%010.4f|%010.4f|%010.4f|" ..
                          "%010.4f|%010.4f|%010.4f|%012.2f|%012.2f|%012.2f|%05d|%05d|%06.3f|%06.3f|" ..
-                         "%06.3f|%07.4f|%07.2f|%07.2f|%02d",
-                     telemetryState.elapsedTime, speedKmh, steerAngle, throttle,
-                     brake, gear, handbrake, diffLock, awd, engineRunning,
-                     headlights, linVelX, linVelY, linVelZ, angVelX, angVelY,
-                     angVelZ, accelX, accelY, accelZ,
+                         "%06.3f|%07.4f|%07.2f|%07.2f|%02d|" ..
+                         "%010.4f|%010.4f|%010.4f|%010.4f|" ..
+                         "%010.4f|%010.4f|%010.4f|%010.4f|" ..
+                         "%010.4f|%010.4f|%010.4f|%010.4f|" ..
+                         "%010.4f|%010.4f|%010.4f|%010.4f|" ..
+                         "%010.4f|%010.4f|%010.4f", telemetryState.elapsedTime,
+                     speedKmh, steerAngle, throttle, brake, gear, handbrake,
+                     diffLock, awd, engineRunning, headlights, linVelX, linVelY,
+                     linVelZ, angVelX, angVelY, angVelZ, accelX, accelY, accelZ,
                      telemetryState.smoothSurge, telemetryState.smoothSway,
                      telemetryState.smoothHeave, posX, posY, posZ, estimatedRPM,
                      maxRPM, engineTension, turbo, damageFactor,
-                     avgSuspCompression, maxMudDepth, maxWaterDepth, wheelCount)
+                     avgSuspCompression, maxMudDepth, maxWaterDepth, wheelCount,
+                     wheel1.x, wheel1.y, wheel1.z, wheel1.r, wheel2.x, wheel2.y,
+                     wheel2.z, wheel2.r, wheel3.x, wheel3.y, wheel3.z, wheel3.r,
+                     wheel4.x, wheel4.y, wheel4.z, wheel4.r, pitch, roll, yaw)
 
     telemetrySendLine(line)
 end
