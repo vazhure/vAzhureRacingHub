@@ -29,7 +29,7 @@ namespace MudRunner
         private const int PollIntervalMs = 10;       // 200 Hz — well above Lua's 60 Hz
         private const int SlowPollMs = 500;          // When file not found
         private const double ConnectionTimeoutSec = 2.0;
-        private const int fileSize = 295; // bytes
+        private const int fileSize = 504; // bytes
 
         /// <summary>
         /// Sentinel value meaning "no valid data read yet".

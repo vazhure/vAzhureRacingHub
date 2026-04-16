@@ -42,6 +42,7 @@ namespace MudRunner
             public byte IsPowered;
             public byte IsSteered;
             public byte Padding;
+            public Vec3 pos;
         }
 
         #endregion
@@ -147,6 +148,9 @@ namespace MudRunner
             public WheelData[] Wheels;
 
             public bool bValid;
+            internal float Pitch;
+            internal float Roll;
+            internal float Yaw;
         }
 
         #endregion
@@ -174,7 +178,7 @@ namespace MudRunner
                 packet.Wheels = new WheelData[MaxWheels];
 
                 string[] parts = line.Split('|');
-                if (parts.Length < 36)
+                if (parts.Length < 55)
                     return packet;
 
                 int i = 1; // Skip "T" prefix
@@ -238,6 +242,21 @@ namespace MudRunner
 
                 // Wheels
                 packet.WheelCount = ParseByte(parts[i++]);
+
+                packet.Wheels = new WheelData[4];
+
+                for (int t = 0; t < 4; t++)
+                {
+                    float x = ParseFloat(parts[i++]);
+                    float y = ParseFloat(parts[i++]);
+                    float z = ParseFloat(parts[i++]);
+                    float r = ParseFloat(parts[i++]);
+                    packet.Wheels[0] = new WheelData() { pos = new Vec3() { X = x, Y = y, Z = z }, Radius = r };
+                }
+
+                packet.Pitch = ParseFloat(parts[i++]);
+                packet.Roll = ParseFloat(parts[i++]);
+                packet.Yaw = ParseFloat(parts[i++]);
 
                 // Determine surface type
                 if (packet.MaxWaterDepth > 0.1f)

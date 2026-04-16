@@ -406,10 +406,14 @@ namespace MudRunner
                 Surge = packet.SmoothSurge / 98.1f,  // Forward acceleration
                 Sway = packet.SmoothSway / 98.1f,    // Lateral acceleration
                 Heave = packet.SmoothHeave / 98.1f,  // Vertical acceleration
+
+                Pitch = packet.Pitch / 180.0f,
+                Roll = packet.Roll / 180.0f,
+                Yaw = packet.Yaw / 180.0f,
             };
 
 #if DEBUG
-            Console.WriteLine($"Surge: {carData.MotionData.Surge:0.000}; Sway: {carData.MotionData.Sway:0.000}; Heave: {carData.MotionData.Heave:0.000}");
+            Console.WriteLine($"Pitch: {carData.MotionData.Pitch:0.000}; Roll: {carData.MotionData.Roll:0.000}; Yaw: {carData.MotionData.Yaw:0.000}");
 #endif
             // === Fuel ===
             // MudRunner does NOT expose fuel to Lua API.
