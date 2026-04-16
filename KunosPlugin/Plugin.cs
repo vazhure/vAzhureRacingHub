@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Kunos.Structs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using vAzhureRacingAPI;
@@ -56,6 +58,20 @@ namespace KunosPlugin
 
             listener = new GameListener(new GamePlugin[] { ac, acc, acevo, acrally });
             listener.StartThread();
+
+#if DEBUG
+            Console.WriteLine($"TyreState      : {Marshal.SizeOf<SMEvoTyreState>()} (256)");
+            Console.WriteLine($"DamageState    : {Marshal.SizeOf<SMEvoDamageState>()} (128)");
+            Console.WriteLine($"PitInfo        : {Marshal.SizeOf<SMEvoPitInfo>()} (64)");
+            Console.WriteLine($"Electronics    : {Marshal.SizeOf<SMEvoElectronics>()} (128)");
+            Console.WriteLine($"Instrumentation: {Marshal.SizeOf<SMEvoInstrumentation>()} (128)");
+            Console.WriteLine($"SessionState   : {Marshal.SizeOf<SMEvoSessionState>()} (256)");
+            Console.WriteLine($"TimingState    : {Marshal.SizeOf<SMEvoTimingState>()} (256)");
+            Console.WriteLine($"AssistsState   : {Marshal.SizeOf<SMEvoAssistsState>()} (64)");
+            Console.WriteLine($"Physics        : {Marshal.SizeOf<SPageFilePhysics>()} (800)");
+            Console.WriteLine($"StaticEvo      : {Marshal.SizeOf<SPageFileStaticEvo>()} (208)");
+            Console.WriteLine($"GraphicEvo     : {Marshal.SizeOf<SPageFileGraphicEvo>()}");
+#endif
 
             return true;
         }

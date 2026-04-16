@@ -12,6 +12,10 @@ namespace KunosPlugin
     /// </summary>
     internal static class GameListenerEvo
     {
+        static readonly byte[] physBytes = new byte[Marshal.SizeOf<SPageFilePhysicsEvo>()];
+        static readonly byte[] gfxBytes = new byte[Marshal.SizeOf<SPageFileGraphicEvo>()];
+        static readonly byte[] statBytes = new byte[Marshal.SizeOf<SPageFileStaticEvo>()];
+
         public static void Process(GamePlugin game, ref int packetId, out bool hasNewData)
         {
             hasNewData = false;
@@ -19,19 +23,16 @@ namespace KunosPlugin
 
             try
             {
-                using (var memPhys = MemoryMappedFile.OpenExisting(ACEVOConstants.PhysicsFile, MemoryMappedFileRights.Read))
-                using (var memGfx = MemoryMappedFile.OpenExisting(ACEVOConstants.GraphicsFile, MemoryMappedFileRights.Read))
-                using (var memStat = MemoryMappedFile.OpenExisting(ACEVOConstants.StaticFile, MemoryMappedFileRights.Read))
+                using (var memPhys = MemoryMappedFile.OpenExisting(ACEVOConstants.PhysicsFile, MemoryMappedFileRights.ReadWrite))
+                using (var memGfx = MemoryMappedFile.OpenExisting(ACEVOConstants.GraphicsFile, MemoryMappedFileRights.ReadWrite))
+                using (var memStat = MemoryMappedFile.OpenExisting(ACEVOConstants.StaticFile, MemoryMappedFileRights.ReadWrite))
                 {
-                    var physBytes = new byte[Marshal.SizeOf<SPageFilePhysics_EVO>()];
-                    var gfxBytes = new byte[Marshal.SizeOf<SPageFileGraphicEvo>()];
-                    var statBytes = new byte[Marshal.SizeOf<SPageFileStaticEvo>()];
 
                     using (var vs = memPhys.CreateViewStream(0, physBytes.Length, MemoryMappedFileAccess.Read)) vs.Read(physBytes, 0, physBytes.Length);
                     using (var vs = memGfx.CreateViewStream(0, gfxBytes.Length, MemoryMappedFileAccess.Read)) vs.Read(gfxBytes, 0, gfxBytes.Length);
                     using (var vs = memStat.CreateViewStream(0, statBytes.Length, MemoryMappedFileAccess.Read)) vs.Read(statBytes, 0, statBytes.Length);
 
-                    var physics = SPageFilePhysics_EVO.FromBytes(physBytes);
+                    var physics = SPageFilePhysicsEvo.FromBytes(physBytes);
 
                     // Проверяем обновление пакета
                     if (physics.packetId != packetId)
@@ -52,71 +53,71 @@ namespace KunosPlugin
             }
         }
 
-        private static void MapTelemetry(GamePlugin game, SPageFileStaticEvo stat, SPageFileGraphicEvo gfx, SPageFilePhysics_EVO phys)
+        private static void MapTelemetry(GamePlugin game, SPageFileStaticEvo stat, SPageFileGraphicEvo gfx, SPageFilePhysicsEvo phys)
         {
-            var car    = game.DataSet.CarData;
-            var sess   = game.DataSet.SessionInfo;
+            var car = game.DataSet.CarData;
+            var sess = game.DataSet.SessionInfo;
             var motion = car.MotionData;
-            var weather= game.DataSet.WeatherData;
+            var weather = game.DataSet.WeatherData;
 
             // --- Static & Environment ---
-            sess.TrackName   = stat.track?.TrimEnd('\0') ?? string.Empty;
-            sess.TrackConfig = stat.track_configuration?.TrimEnd('\0') ?? string.Empty;
+            sess.TrackName = stat.track;//  ACEVOExtensions.GetString(stat.track);
+            sess.TrackConfig = stat.track_configuration; // ACEVOExtensions.GetString(stat.track_configuration);
             sess.TrackLength = stat.track_length_m;
-            sess.SessionState= stat.session_name?.TrimEnd('\0') ?? string.Empty;
+            sess.SessionState = stat.session_name;// ACEVOExtensions.GetString(stat.session_name);
             weather.AmbientTemp = stat.starting_ambient_temperature_c;
-            weather.TrackTemp   = stat.starting_ground_temperature_c;
+            weather.TrackTemp = stat.starting_ground_temperature_c;
 
-            car.DriverName = $"{gfx.driver_name?.TrimEnd('\0')} {gfx.driver_surname?.TrimEnd('\0')}".Trim();
-            car.CarName    = Plugin.sVechicleInfo.GetVehicleName(gfx.car_model?.TrimEnd('\0'));
+            car.DriverName = $"{gfx.driver_name} {gfx.driver_surname}".Trim();
+            car.CarName = Plugin.sVechicleInfo.GetVehicleName(gfx.car_model);
             car.FuelCapacity = gfx.max_fuel;
-            car.MaxRPM       = (uint)phys.currentMaxRpm;
+            car.MaxRPM = (uint)phys.currentMaxRpm;
 
             // --- Session & Timing ---
             sess.CurrentLapNumber = gfx.session_state.current_lap;
-            sess.TotalLapsCount   = gfx.session_state.total_lap;
-            car.Position          = (int)gfx.current_pos;
-            car.InPits            = gfx.is_in_pit_lane || gfx.is_in_pit_box;
-            car.Distance          = gfx.npos;
-            sess.RemainingTime    = gfx.session_state.time_left_ms > 0 ? gfx.session_state.time_left_ms / 1000 : -1;
-            sess.RemainingLaps    = sess.TotalLapsCount > 0 ? sess.TotalLapsCount - sess.CurrentLapNumber : -1;
+            sess.TotalLapsCount = gfx.session_state.total_lap;
+            car.Position = (int)gfx.current_pos;
+            car.InPits = gfx.is_in_pit_lane || gfx.is_in_pit_box;
+            car.Distance = gfx.npos;
+            sess.RemainingTime = gfx.session_state.time_left_ms > 0 ? gfx.session_state.time_left_ms / 1000 : -1;
+            sess.RemainingLaps = sess.TotalLapsCount > 0 ? sess.TotalLapsCount - sess.CurrentLapNumber : -1;
 
             sess.CurrentLapTime = gfx.current_lap_time_ms;
-            sess.LastLapTime    = gfx.last_laptime_ms;
-            sess.BestLapTime    = gfx.best_laptime_ms;
-            sess.CurrentDelta   = gfx.delta_time_ms;
+            sess.LastLapTime = gfx.last_laptime_ms;
+            sess.BestLapTime = gfx.best_laptime_ms;
+            sess.CurrentDelta = gfx.delta_time_ms;
 
             // --- Flags ---
             car.Flags = MapFlags(gfx.flag);
             sess.Flag = gfx.flag.ToString().Replace("AC_", "").Replace("_", " ");
 
             // --- Electronics ---
-            car.TcLevel   = (short)gfx.electronics.tc_level;
-            car.AbsLevel  = (short)gfx.electronics.abs_level;
+            car.TcLevel = (short)gfx.electronics.tc_level;
+            car.AbsLevel = (short)gfx.electronics.abs_level;
             car.EngineMap = (short)(gfx.electronics.engine_map_level + 1);
             car.Electronics = CarElectronics.None;
             if (gfx.electronics.is_pitlimiter_on) car.Electronics |= CarElectronics.Limiter;
-            if (gfx.electronics.is_drs_open)      car.Electronics |= CarElectronics.DRS;
-            if (gfx.tc_active)                    car.Electronics |= CarElectronics.TCS;
-            if (gfx.abs_active)                   car.Electronics |= CarElectronics.ABS;
+            if (gfx.electronics.is_drs_open) car.Electronics |= CarElectronics.DRS;
+            if (gfx.tc_active) car.Electronics |= CarElectronics.TCS;
+            if (gfx.abs_active) car.Electronics |= CarElectronics.ABS;
 
             // --- Physics & Motion ---
             car.Steering = phys.steerAngle * (float)Math.PI * 2.0f;
             car.Throttle = phys.gas;
-            car.Brake    = phys.brake;
-            car.Clutch   = 1.0f - phys.clutch;
-            car.Speed    = phys.speedKmh;
-            car.RPM      = (uint)phys.rpms;
-            car.Gear     = (short)phys.gear;
-            car.FuelLevel= phys.fuel;
-            car.BrakeBias= phys.brakeBias * 100.0f;
+            car.Brake = phys.brake;
+            car.Clutch = 1.0f - phys.clutch;
+            car.Speed = phys.speedKmh;
+            car.RPM = (uint)phys.rpms;
+            car.Gear = (short)phys.gear;
+            car.FuelLevel = phys.fuel;
+            car.BrakeBias = phys.brakeBias * 100.0f;
 
             motion.LocalAcceleration = new float[] { phys.accG[0] / 9.81f, phys.accG[1] / 9.81f, phys.accG[2] / 9.81f };
-            motion.LocalVelocity     = phys.localVelocity;
-            motion.Pitch             = phys.pitch / (float)Math.PI;
-            motion.Roll              = phys.roll / (float)Math.PI; 
-            motion.Yaw               = phys.heading / (float)Math.PI;
-            motion.ABSVibration      = phys.absVibrations;
+            motion.LocalVelocity = phys.localVelocity;
+            motion.Pitch = phys.pitch / (float)Math.PI;
+            motion.Roll = phys.roll / (float)Math.PI;
+            motion.Yaw = phys.heading / (float)Math.PI;
+            motion.ABSVibration = phys.absVibrations;
 
             car.Tires = new AMTireData[]
             {
@@ -126,8 +127,8 @@ namespace KunosPlugin
                 MapTire(gfx.tyre_rr, phys.brakeTemp[3], phys.wheelsPressure[3])
             };
 
-            car.Valid   = true;
-            sess.Valid  = true;
+            car.Valid = true;
+            sess.Valid = true;
             weather.Valid = true;
         }
 
@@ -136,10 +137,10 @@ namespace KunosPlugin
             return new AMTireData
             {
                 BrakeTemperature = brakeTemp,
-                Pressure         = pressurePSI * 6.89476f, // PSI → kPa
-                Wear             = 0.0f, // EVO Shared Memory пока не отдаёт износ шин напрямую
-                Temperature      = new double[] { tyre.tyre_temperature_left, tyre.tyre_temperature_center, tyre.tyre_temperature_right },
-                Compound         = tyre.tyre_compound_front?.TrimEnd('\0') ?? string.Empty
+                Pressure = pressurePSI * 6.89476f, // PSI → kPa
+                Wear = 0.0f, // EVO Shared Memory пока не отдаёт износ шин напрямую
+                Temperature = new double[] { tyre.tyre_temperature_left, tyre.tyre_temperature_center, tyre.tyre_temperature_right },
+                Compound = tyre.tyre_compound_front
             };
         }
 
