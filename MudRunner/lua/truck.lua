@@ -1539,6 +1539,62 @@ local function CalcVehicleOrientation(w1, w2, w3, w4)
     return pitchDeg, rollDeg, yawDeg
 end
 
+-- Вычисление локальных ускорений (Surge/Sway/Heave) из мировых
+local function CalcLocalAccelerations(w1, w2, w3, w4, accelWorld)
+    -- Центры осей
+    local frontX = (w1.x + w2.x) * 0.5
+    local frontZ = (w1.z + w2.z) * 0.5
+    local rearX  = (w3.x + w4.x) * 0.5
+    local rearZ  = (w3.z + w4.z) * 0.5
+    
+    -- Forward: направление "носа" (в горизонтальной плоскости)
+    local fwdX = frontX - rearX
+    local fwdZ = frontZ - rearZ
+    local fwdLen = math.sqrt(fwdX*fwdX + fwdZ*fwdZ)
+    if fwdLen < 0.001 then fwdLen = 0.001 end
+    fwdX = fwdX / fwdLen
+    fwdZ = fwdZ / fwdLen
+    local fwdY = 0  -- проецируем на горизонталь для стабильности
+    
+    -- Right: вектор вправо (перпендикулярно forward, в горизонтальной плоскости)
+    local rightX = fwdZ   -- поворот на 90° по часовой
+    local rightZ = -fwdX
+    local rightY = 0
+    
+    -- Up: нормаль к плоскости колёс (реальный "пол" автомобиля)
+    -- Вектор из заднего левого в переднее левое
+    local v1x, v1y, v1z = w1.x - w3.x, w1.y - w3.y, w1.z - w3.z
+    -- Вектор из заднего левого в заднее правое
+    local v2x, v2y, v2z = w2.x - w3.x, w2.y - w3.y, w2.z - w3.z
+    -- Cross product = нормаль к плоскости
+    local upX = v1y*v2z - v1z*v2y
+    local upY = v1z*v2x - v1x*v2z
+    local upZ = v1x*v2y - v1y*v2x
+    local upLen = math.sqrt(upX*upX + upY*upY + upZ*upZ)
+    if upLen < 0.001 then upLen = 0.001 end
+    upX = upX / upLen
+    upY = upY / upLen
+    upZ = upZ / upLen
+    
+    -- Пересчитываем Right как cross(Up, Forward) для ортогональности
+    rightX = upY*fwdZ - upZ*fwdY
+    rightY = upZ*fwdX - upX*fwdZ
+    rightZ = upX*fwdY - upY*fwdX
+    local rLen = math.sqrt(rightX*rightX + rightY*rightY + rightZ*rightZ)
+    if rLen > 0.001 then
+        rightX = rightX / rLen
+        rightY = rightY / rLen
+        rightZ = rightZ / rLen
+    end
+    
+    -- Проекция мирового ускорения на локальные оси
+    local surge = accelWorld.x*fwdX + accelWorld.y*fwdY + accelWorld.z*fwdZ
+    local sway  = accelWorld.x*rightX + accelWorld.y*rightY + accelWorld.z*rightZ
+    local heave = accelWorld.x*upX + accelWorld.y*upY + accelWorld.z*upZ
+    
+    return surge, sway, heave
+end
+
 local function getSafeWheelData(wheelsTable, idx)
     local w = wheelsTable and wheelsTable[idx]
     if not w or not w.org then return {x = 0, y = 0, z = 0, r = 0} end
@@ -1615,14 +1671,15 @@ local function UpdateTelemetry(truck, truckInput, wheels, elapsedTime)
         accelZ = (linVelZ - telemetryState.prevLinVelZ) / dt
     end
 
-    telemetryState.smoothSurge = telemetrySmooth(accelX,
-                                                 telemetryState.smoothSurge,
-                                                 alpha)
-    telemetryState.smoothSway = telemetrySmooth(accelZ,
-                                                telemetryState.smoothSway, alpha)
-    telemetryState.smoothHeave = telemetrySmooth(accelY,
-                                                 telemetryState.smoothHeave,
-                                                 alpha)
+	-- Локальные ускорения (Surge/Sway/Heave)
+	local surge, sway, heave = CalcLocalAccelerations(wheel1, wheel2, wheel3, wheel4, 
+                                                   {x=accelX, y=accelY, z=accelZ})
+
+	-- Сглаживание уже локальных величин
+	local alpha = 0.3
+	telemetryState.smoothSurge = telemetrySmooth(surge, telemetryState.smoothSurge, alpha)
+	telemetryState.smoothSway  = telemetrySmooth(sway,  telemetryState.smoothSway,  alpha)
+	telemetryState.smoothHeave = telemetrySmooth(heave, telemetryState.smoothHeave, alpha)
 
     telemetryState.prevLinVelX = linVelX
     telemetryState.prevLinVelY = linVelY
