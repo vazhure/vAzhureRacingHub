@@ -115,57 +115,41 @@ namespace GT7Telemetry
             }
         }
 
-        private void HeartbeatLoop()
-        {
-            // Heartbeat: отправляем каждые ~16 секунд (1000 пакетов ≈ 16.6 сек при 60Hz)
-            // На практике лучше отправлять чаще, например каждые 5 секунд для надёжности
-            byte[] heartbeat = new byte[4];
-            heartbeat[0] = (byte)'A'; // Тип пакета A
-            heartbeat[1] = 0;
-            heartbeat[2] = 0;
-            heartbeat[3] = 0;
-            
-            lastHeartbeatTime = DateTime.Now;
-            
-            while (isRunning)
-            {
-                try
-                {
-                    // Отправляем heartbeat на PS
-                    udpClient?.Send(heartbeat, heartbeat.Length, psEndPoint);
-                    Log($"Heartbeat отправлен на {playstationIP}:{sendPort}");
-                }
-                catch (Exception ex)
-                {
-                    if (isRunning) Log($"Ошибка heartbeat: {ex.Message}");
-                }
-                
-                // Ждём 5 секунд перед следующим heartbeat
-                for (int i = 0; i < 50 && isRunning; i++)
-                {
-                    Thread.Sleep(100);
-                }
-            }
-        }
+		private void HeartbeatLoop()
+		{
+			byte[] heartbeat = new byte[4];
+			heartbeat[0] = (byte)'B';  // <-- БЫЛО 'A', СТАЛО 'B'
+			heartbeat[1] = 0;
+			heartbeat[2] = 0;
+			heartbeat[3] = 0;
+			
+			while (isRunning)
+			{
+				try
+				{
+					udpClient?.Send(heartbeat, heartbeat.Length, psEndPoint);
+				}
+				catch (Exception ex) { /* ... */ }
+				
+				Thread.Sleep(5000); // Каждые 5 секунд
+			}
+		}
 
         private void DecryptPacket(byte[] data)
         {
             // Извлекаем IV из позиции 0x40 (64 байт)
             // IV = 4 байта, начиная с offset 0x40
-            if (data.Length < 68) return;
-            
-            byte[] iv = new byte[4];
-            Buffer.BlockCopy(data, 0x40, iv, 0, 4);
-            
-            uint iv1 = BitConverter.ToUInt32(iv, 0);
-            
-            // XOR с константой (0xDEADBEAF для пакета A)
-            uint iv2 = iv1 ^ 0xDEADBEAF;
-            
-            // Формируем 8-байтный nonce: [iv2][iv1]
-            byte[] nonce = new byte[8];
-            Buffer.BlockCopy(BitConverter.GetBytes(iv2), 0, nonce, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(iv1), 0, nonce, 4, 4);
+			if (data.Length < 68) return;
+			
+			byte[] iv = new byte[4];
+			Buffer.BlockCopy(data, 0x40, iv, 0, 4);
+			uint iv1 = BitConverter.ToUInt32(iv, 0);
+			
+			uint iv2 = iv1 ^ 0xDEADBEEF;  // <-- 0xDEADBEAF (для A), 0xDEADBEEF (для B)
+			
+			byte[] nonce = new byte[8];
+			Buffer.BlockCopy(BitConverter.GetBytes(iv2), 0, nonce, 0, 4);
+			Buffer.BlockCopy(BitConverter.GetBytes(iv1), 0, nonce, 4, 4);
             
             // Переинициализируем Salsa20 с новым nonce
             string keyString = "Simulator Interface Packet GT7 ver 0.0";
