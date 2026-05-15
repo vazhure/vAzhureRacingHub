@@ -105,7 +105,7 @@ namespace ForzaMotorsport
         public int WheelOnRumbleStripFrontLeft;
         public int WheelOnRumbleStripFrontRight;
         public int WheelOnRumbleStripRearLeft;
-        public int heelOnRumbleStripRearRight;
+        public int WheelOnRumbleStripRearRight;
         // = from 0 to 1, where 1 is the deepest puddle
         public float WheelInPuddleDepthFrontLeft;
         public float WheelInPuddleDepthFrontRight;
@@ -246,7 +246,7 @@ namespace ForzaMotorsport
         public int WheelOnRumbleStripFrontLeft;
         public int WheelOnRumbleStripFrontRight;
         public int WheelOnRumbleStripRearLeft;
-        public int heelOnRumbleStripRearRight;
+        public int WheelOnRumbleStripRearRight;
         /// <summary>
         /// from 0 to 1, where 1 is the deepest puddle
         /// </summary>
@@ -377,9 +377,10 @@ namespace ForzaMotorsport
         public byte[] HorizonCarDash;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct FH8
     {
-        // = 1 when race is on. = 0 when in menus/race stopped …
+        // = 1 when race is on. = 0 when in menus/race stopped Â…
         public int IsRaceOn;
         
         // Can overflow to 0 eventually
@@ -429,7 +430,7 @@ namespace ForzaMotorsport
         public int WheelOnRumbleStripFrontLeft;
         public int WheelOnRumbleStripFrontRight;
         public int WheelOnRumbleStripRearLeft;
-        public int heelOnRumbleStripRearRight;
+        public int WheelOnRumbleStripRearRight;
         
         // = from 0 to 1, where 1 is the deepest puddle
         public float WheelInPuddleDepthFrontLeft;
@@ -492,7 +493,7 @@ namespace ForzaMotorsport
         public float LastLap;
         public float CurrentLap;
         public float CurrentRaceTime;
-        public short LapNumber;
+        public ushort LapNumber;
         public byte RacePosition;
         public byte Accel;
         public byte Brake;
@@ -510,5 +511,7 @@ namespace ForzaMotorsport
         
         // ID for track
         public int TrackOrdinal;
+
+        public static readonly int nSize = Marshal.SizeOf(typeof(FH8));
     }
 }
