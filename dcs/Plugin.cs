@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using IL2;
 using vAzhureRacingAPI;
 
 namespace DCS
@@ -23,16 +19,19 @@ namespace DCS
         private DCSGame game;
         private XPlaneGame xPlaneGame11;
         private XPlaneGame xPlaneGame12;
+        private IL2Game il2Game;
 
         public bool Initialize(IVAzhureRacingApp app)
         {
             game = new DCSGame();
             xPlaneGame11 = new XPlaneGame();
             xPlaneGame12 = new XPlaneGame(12);
+            il2Game = new IL2Game();
 
             app.RegisterGame(game);
             app.RegisterGame(xPlaneGame11);
             app.RegisterGame(xPlaneGame12);
+            app.RegisterGame(il2Game);
 
             return true;
         }
@@ -43,6 +42,7 @@ namespace DCS
             game.Dispose();
             xPlaneGame11.Stop();
             xPlaneGame12.Stop();
+            il2Game.Dispose();
         }
     }
 }

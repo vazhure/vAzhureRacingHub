@@ -83,9 +83,29 @@ namespace DCS.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon Il_2 {
+            get {
+                object obj = ResourceManager.GetObject("Il_2", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon X_Plane {
             get {
                 object obj = ResourceManager.GetObject("X_Plane", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon X_Plane12 {
+            get {
+                object obj = ResourceManager.GetObject("X_Plane12", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

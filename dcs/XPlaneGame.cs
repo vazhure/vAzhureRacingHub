@@ -14,7 +14,7 @@ namespace DCS
 {
     public class XPlaneGame : IGamePlugin
     {
-        private int Version { get; set; } = 11; 
+        private int Version { get; set; } = 11;
         public string Name => $"X-Plane {Version}";
 
         public uint SteamGameID => Version == 11 ? 269950U : 2014780;
@@ -37,7 +37,7 @@ namespace DCS
         private readonly ProcessMonitor monitor;
         private readonly TelemetryDataSet dataSet;
 
-        CustomSharedMemClient customSharedMemClient;
+        private static CustomSharedMemClient customSharedMemClient = null;
 
         public static readonly string sXPlaneMMFName = @"Local\XPlaneMotionData";
 
@@ -46,30 +46,32 @@ namespace DCS
             Version = version;
             dataSet = new TelemetryDataSet(this);
 
-            monitor = new ProcessMonitor(ExecutableProcessName);
-            monitor.OnProcessRunningStateChanged += (process, bRunning) =>
+            if (customSharedMemClient == null)
             {
-                if (bRunning)
+                monitor = new ProcessMonitor(ExecutableProcessName);
+                customSharedMemClient = new CustomSharedMemClient();
+                customSharedMemClient.OnUserFunc += delegate (object sender, EventArgs ea)
                 {
-                    if (Version == 11)
+                    ProcessSharedMemory();
+                };
+
+                monitor.OnProcessRunningStateChanged += (process, bRunning) =>
+                {
+                    if (bRunning)
                     {
-                        customSharedMemClient = new CustomSharedMemClient();
                         customSharedMemClient.StartThread();
-                        customSharedMemClient.OnUserFunc += delegate (object sender, EventArgs ea)
-                        {
-                            ProcessSharedMemory();
-                        };
                     }
-                }
-                else
-                {
-                    customSharedMemClient?.StopTrhead();
-                    dataSet.LoadDefaults();
-                    OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
-                }
-                OnGameStateChanged?.Invoke(this, EventArgs.Empty);
-            };
-            monitor.Start();
+                    else
+                    {
+                        customSharedMemClient?.StopTrhead();
+                        dataSet.LoadDefaults();
+                        OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
+                    }
+                    OnGameStateChanged?.Invoke(this, EventArgs.Empty);
+                };
+
+                monitor.Start();
+            }
         }
 
         private readonly byte[] dataStatic = new byte[XPlaneTelemetrySize];
@@ -98,9 +100,9 @@ namespace DCS
                     else
                         dataSet.CarData.MotionData = new AMMotionData()
                         {
-                            Pitch = xPlaneTelemetry.Pitch / 180.0f, // to radians
-                            Roll = xPlaneTelemetry.Roll / 180.0f, // to radians
-                            Yaw = xPlaneTelemetry.Yaw / 180.0f, // to radians
+                            Pitch = xPlaneTelemetry.Pitch / 180.0f, // to [-1..1]
+                            Roll = xPlaneTelemetry.Roll / 180.0f, // to [-1..1]
+                            Yaw = xPlaneTelemetry.Yaw / 180.0f, // to [-1..1]
                             Heave = (xPlaneTelemetry.Normal - 9.81f) / 9.81f,
                             Surge = -xPlaneTelemetry.Axil / 9.81f,
                             Sway = xPlaneTelemetry.Side / 9.81f
@@ -109,7 +111,7 @@ namespace DCS
                     OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
                 }
             }
-            catch 
+            catch
             {
                 AMMotionData data = new AMMotionData()
                 {
@@ -153,6 +155,7 @@ namespace DCS
         internal void Stop()
         {
             customSharedMemClient?.StopTrhead();
+            monitor?.Stop();
 
 #if DEBUG
             if (telemetry.Count > 0)

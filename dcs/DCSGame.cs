@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
-using static DCS.DCSGame;
+
+#if DEBUG
+using System.Collections.Generic;
+using System.Data;
+using System.Threading;
+#endif
+
 
 namespace DCS
 {
@@ -128,6 +131,8 @@ namespace DCS
     private readonly List<Telemetry> telemetry_cache = new List<Telemetry>(10000000);
 #endif
 
+        private readonly AMMotionData defaults = new AMMotionData();
+
         public override void OnDataReceived(ref byte[] bytes)
         {
             try
@@ -142,20 +147,55 @@ namespace DCS
 
                 if (telemetry != null)
                 {
-                    if (telemetry.missionStartTime > 0)
+                    
+                    bool hasValidData = telemetry.aDIPitch != 0 || telemetry.aDIBank != 0 ||
+                               telemetry.accelerationUnits != null;
+
+                    if (hasValidData)
                     {
-                        var motion = dataSet.CarData.MotionData = new AMMotionData()
+                        //var motion = dataSet.CarData.MotionData = new AMMotionData()
+                        //{
+                        //    Roll = (float)(telemetry.aDIBank / Math.PI),
+                        //    Pitch = (float)(telemetry.aDIPitch / Math.PI),
+                        //    Yaw = (float)(telemetry.aDIYaw / Math.PI),
+                        //    Surge = telemetry.accelerationUnits.x,
+                        //    Sway = -telemetry.accelerationUnits.z,
+                        //    Heave = -(telemetry.accelerationUnits.y - 1f),
+                        //};
+
+                        // Углы — нормализация в [-1, 1]
+                        // Roll/Pitch от DCS в радианах, Yaw в градусах!
+                        float roll = (float)(telemetry.aDIBank / Math.PI);
+                        float pitch = (float)(telemetry.aDIPitch / Math.PI);
+                        float yaw = (float)(telemetry.aDIYaw / 180.0);  // градусы → [-1, 1]
+
+                        // [-1, 1] (wrap)
+                        roll = ((roll + 1f) % 2f) - 1f;
+                        pitch = ((pitch + 1f) % 2f) - 1f;
+                        yaw = ((yaw + 1f) % 2f) - 1f;
+
+                        float surge = telemetry.accelerationUnits.x;
+                        float sway = -telemetry.accelerationUnits.z;
+                        float heave = -(telemetry.accelerationUnits.y - 1f);
+
+                        // Ограничения
+                        const float MAX_ACC = 2f;
+                        surge = Math2.Clamp(surge, -MAX_ACC, MAX_ACC);
+                        sway = Math2.Clamp(sway, -MAX_ACC, MAX_ACC);
+                        heave = Math2.Clamp(heave, -MAX_ACC, MAX_ACC);
+
+                        dataSet.CarData.MotionData = new AMMotionData()
                         {
-                            Roll = (float)(telemetry.aDIBank / Math.PI),
-                            Pitch = (float)(telemetry.aDIPitch / Math.PI),
-                            Yaw = (float)(telemetry.aDIYaw / Math.PI),
-                            Surge = telemetry.accelerationUnits.x,
-                            Sway = -telemetry.accelerationUnits.z,
-                            Heave = -(telemetry.accelerationUnits.y - 1f),
+                            Roll = roll,
+                            Pitch = pitch,
+                            Yaw = yaw,
+                            Surge = surge,
+                            Sway = sway,
+                            Heave = heave
                         };
                     }
                     else
-                        dataSet.CarData.MotionData = new AMMotionData();
+                        dataSet.CarData.MotionData = defaults;
 
                     OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(dataSet));
                 }
