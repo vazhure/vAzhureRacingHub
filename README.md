@@ -48,8 +48,10 @@ Supported Game Titles:
 * BeamNG.Drive
 * Wreckfest
 * Wreckfest 2
-* DCS World (beta)
-* X-Plane 11 (beta)
+* DCS World
+* X-Plane 11
+* X-Plane 12
+* IL-2 Series
 
 WIP:
 * F1 2018
