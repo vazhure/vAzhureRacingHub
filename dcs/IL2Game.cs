@@ -478,9 +478,9 @@ namespace IL2
                 pitch = ((pitch + 1f) % 2f) - 1f;
                 yaw = ((yaw + 1f) % 2f) - 1f;
 
-                float surge = telemetry.accX;
-                float sway = telemetry.accY;
-                float heave = telemetry.accZ;
+                float surge = telemetry.accX / 98.1f;
+                float sway = -telemetry.accY / 98.1f;
+                float heave = -telemetry.accZ / 98.1f;
 
                 const float MAX_ACC = 2f;
                 surge = Math2.Clamp(surge, -MAX_ACC, MAX_ACC);
@@ -490,7 +490,7 @@ namespace IL2
                 dataSet.CarData.MotionData = new AMMotionData()
                 {
                     Roll = roll,
-                    Pitch = pitch,
+                    Pitch = -pitch,
                     Yaw = yaw,
                     Surge = surge,
                     Sway = sway,
