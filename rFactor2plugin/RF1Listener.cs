@@ -2,9 +2,11 @@
 using System.Drawing;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using vAzhureRacingAPI;
 
 namespace rFactor2plugin
@@ -398,6 +400,164 @@ namespace rFactor2plugin
         public void ShowSettings(IVAzhureRacingApp app)
         {
             // TODO:
+        }
+
+        public void Start(IVAzhureRacingApp app)
+        {
+            if (!Utils.RunSteamGame(SteamGameID))
+            {
+                app.SetStatusText($"Steam Service is not running. Run {Name} manually!");
+            }
+        }
+    }
+
+    public class CopaPetrobrasDeMarcas : Game, IGamePlugin
+    {
+        public string Name => "Copa Petrobras de Marcas";
+
+        public uint SteamGameID => 359800U;
+
+        public string[] ExecutableProcessName => new string[] { "Marcas" };
+
+        internal string sIconPath = "";
+        internal string sExecutablePpath = "";
+
+        public string UserIconPath { get => sIconPath; set => sIconPath = value; }
+        public string UserExecutablePath { get => sExecutablePpath; set => sExecutablePpath = value; }
+
+        internal bool bRunning = false;
+        public bool IsRunning => bRunning;
+
+        public event EventHandler<TelemetryUpdatedEventArgs> OnTelemetry;
+        public event EventHandler OnGameStateChanged;
+        public event EventHandler OnGameIconChanged;
+
+        readonly ProcessMonitor processMonitor = new ProcessMonitor(new string[] { "Marcas" });
+        private readonly RF1Listener rF1Listener;
+
+        internal override void NotifyTelemetry(TelemetryDataSet tds)
+        {
+            OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(tds));
+        }
+
+        public CopaPetrobrasDeMarcas()
+        {
+            rF1Listener = new RF1Listener(this);
+
+            rF1Listener.OnThreadError += delegate (object sender, EventArgs e)
+            {
+                rF1Listener.StopTrhead();
+                Thread.Sleep(1000);
+                rF1Listener.StartThread();
+            };
+
+            processMonitor.OnProcessRunningStateChanged += delegate (object sender, bool running)
+            {
+                bRunning = running;
+                OnGameStateChanged?.Invoke(this, new EventArgs());
+                if (running)
+                    rF1Listener.StartThread();
+                else
+                    rF1Listener.StopTrhead();
+            };
+
+            processMonitor.Start();
+        }
+
+        public void Quit()
+        {
+            processMonitor.Stop();
+            rF1Listener.StopTrhead();
+            rF1Listener.Finish();
+        }
+
+        public Icon GetIcon()
+        {
+            return Properties.Resources.Marcas;
+        }
+
+        public void ShowSettings(IVAzhureRacingApp app)
+        {
+            try
+            {
+                if (MessageBox.Show(
+                        $"Copy rFactorSharedMemoryMap.dll to {Name} Plugins folder?",
+                        "Patch",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+                {
+                    return;
+                }
+
+                string sourceFile = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                    "rFactorSharedMemoryMap.dll");
+
+                if (!File.Exists(sourceFile))
+                {
+                    app.SetStatusText($"Failed to patch {Name}: rFactorSharedMemoryMap.dll not found in plugin folder");
+                    return;
+                }
+
+                // Если путь уже сохранён и валиден — используем его, иначе спрашиваем
+                string gamePath = UserExecutablePath;
+                if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+                {
+                    using (var dialog = new FolderBrowserDialog())
+                    {
+                        dialog.Description = $"Select {Name} installation folder";
+                        dialog.ShowNewFolderButton = false;
+
+                        // Пытаемся открыть в типичном месте Steam
+                        string steamPath = Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                            "Steam", "steamapps", "common");
+                        if (Directory.Exists(steamPath))
+                            dialog.SelectedPath = steamPath;
+
+                        if (dialog.ShowDialog() != DialogResult.OK)
+                        {
+                            app.SetStatusText($"{Name}: folder selection cancelled");
+                            return;
+                        }
+
+                        gamePath = dialog.SelectedPath;
+                        UserExecutablePath = gamePath; // Сохраняем для следующего раза
+                    }
+                }
+
+                string pluginsPath = Path.Combine(gamePath, "Plugins");
+                string destFile = Path.Combine(pluginsPath, "rFactorSharedMemoryMap.dll");
+
+                // Если файл уже есть — спрашиваем о перезаписи
+                if (File.Exists(destFile))
+                {
+                    if (MessageBox.Show(
+                            "rFactorSharedMemoryMap.dll already exists in Plugins folder. Overwrite?",
+                            "Confirm",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question) != DialogResult.Yes)
+                    {
+                        app.SetStatusText($"{Name}: copy cancelled by user");
+                        return;
+                    }
+                }
+
+                if (!Directory.Exists(pluginsPath))
+                    Directory.CreateDirectory(pluginsPath);
+
+                File.Copy(sourceFile, destFile, overwrite: true);
+                app.SetStatusText($"{Name}: rFactorSharedMemoryMap.dll copied to {pluginsPath}");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                app.SetStatusText($"Failed to patch {Name}: access denied (run as admin)");
+            }
+            catch (Exception ex)
+            {
+                app.SetStatusText($"Failed to patch {Name}: {ex.Message}");
+            }
         }
 
         public void Start(IVAzhureRacingApp app)

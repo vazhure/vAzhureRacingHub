@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 using vAzhureRacingAPI;
 
 namespace rFactor2plugin
 {
     public class RFactor2Plugin : ICustomPlugin
     {
-        readonly RFactor2GamePlugin rFactor2GamePlugin = new RFactor2GamePlugin();
-        readonly LeMansUltimatePlugin leMansUltimatePlugin = new LeMansUltimatePlugin();
+        RFactor2GamePlugin rFactor2GamePlugin;
+        LeMansUltimatePlugin leMansUltimatePlugin;
         RF2Listener listener = null;
         RF1Game rF1 = null;
         Automobilista automobilista = null;
+        CopaPetrobrasDeMarcas copa = null;
 
         public string Name => "rFactor 2";
 
@@ -25,21 +27,26 @@ namespace rFactor2plugin
 
         public bool Initialize(IVAzhureRacingApp app)
         {
+            rFactor2GamePlugin = new RFactor2GamePlugin();
+            leMansUltimatePlugin = new LeMansUltimatePlugin();
+
             Console.WriteLine($"Plugin Initialization: {Name}");
             automobilista = new Automobilista();
+            copa = new CopaPetrobrasDeMarcas();
             app.RegisterGame(automobilista);
+            app.RegisterGame(copa);
             rF1 = new RF1Game();
             app.RegisterGame(rF1);
             app.RegisterGame(rFactor2GamePlugin);
             app.RegisterGame(leMansUltimatePlugin);
+
             listener = new RF2Listener(new GamePlugin[] { rFactor2GamePlugin, leMansUltimatePlugin }, app);
             listener.StartThread();
             listener.OnThreadError += delegate (object sender, EventArgs e)
             {
-                app.SetStatusText($"Ошибка процесса плагина {Name}");
                 // Перезапуск процесса
                 listener.StopTrhead();
-                System.Threading.Thread.Sleep(1000); // Делаем паузу, чтоб не загружать процессор
+                Thread.Sleep(1000); // Делаем паузу, чтоб не загружать процессор
                 listener.StartThread();
             };
             return true;
@@ -50,6 +57,7 @@ namespace rFactor2plugin
             listener?.StopTrhead();
             rF1.Quit();
             automobilista.Quit();
+            copa.Quit();
         }
     }
 
@@ -72,17 +80,33 @@ namespace rFactor2plugin
         public event EventHandler OnGameStateChanged;
         public event EventHandler OnGameIconChanged;
 
-        public RFactor2GamePlugin() => TelemetryData = new TelemetryDataSet(this);
+        private bool _bRunning = false;
+        private readonly ProcessMonitor monitor;
+
+        public RFactor2GamePlugin()
+        {
+            TelemetryData = new TelemetryDataSet(this);
+            monitor = new ProcessMonitor(ExecutableProcessName);
+
+            monitor.OnProcessRunningStateChanged += (_, bRunning) =>
+            {
+                _bRunning = bRunning;
+
+                if (!Running)
+                {
+                    TelemetryData?.LoadDefaults();
+                    OnTelemetry?.Invoke(this, new TelemetryUpdatedEventArgs(TelemetryData));
+                }
+
+                OnGameStateChanged?.Invoke(this, new EventArgs());
+            };
+
+            monitor.Start();
+        }
 
         public TelemetryDataSet TelemetryData { get; private set; }
 
-        public bool IsRunning
-        {
-            get
-            {
-                return Utils.IsProcessRunning(ExecutableProcessName);
-            }
-        }
+        public bool IsRunning => _bRunning;
 
         public override bool Running => IsRunning;
 
