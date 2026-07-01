@@ -54,6 +54,7 @@ Supported Game Titles:
 * IL-2 Series
 
 WIP:
+* eXpanSIM
 * F1 2018
 * F1 2019
 * F1 2020
