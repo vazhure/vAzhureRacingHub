@@ -1,0 +1,7 @@
+{
+    "DebugMode": false,
+    "VehicleV1": {
+        "TelemetryV1": "Inherit",
+        "DashboardV1": "Inherit"
+    }
+}
