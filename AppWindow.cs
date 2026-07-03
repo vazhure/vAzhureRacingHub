@@ -1,12 +1,11 @@
-﻿/// 
+﻿///
 /// Разработчик:
 /// Журавлев Андрей Владимирович
 /// e-mail: avjuravlev@yandex.ru
 /// Developer:
 /// Andrey Zhuravlev
 /// e-mail: avjuravlev@yandex.com
-/// 
-
+///
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,7 +17,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using vAzhureRacingAPI;
-
 namespace vAzhureRacingHub
 {
     /// <summary>
@@ -26,11 +24,18 @@ namespace vAzhureRacingHub
     /// </summary>
     public partial class AppWindow : MovableForm, IVAzhureRacingApp
     {
-        public static readonly string LocalApplicationData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "vAzhureRacingHub");
-        public static readonly string localSettingFile = Path.Combine(LocalApplicationData, "settings.json");
-        public static readonly string localSettingPluginsPath = Path.Combine(LocalApplicationData, "Plugins");
+        // [FIX] Разделение путей: старый (только для чтения/миграции) и новый (для записи любому пользователю)
+        /// <summary>Старая директория настроек (ProgramData). Требует прав админа для записи. Оставлена для обратной совместимости.</summary>
+        private static readonly string OldSettingsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "vAzhureRacingHub");
+        private static readonly string OldSettingsFile = Path.Combine(OldSettingsDir, "settings.json");
+        public static readonly string LocalApplicationData = OldSettingsDir;
 
-        /// <summary>
+        /// <summary>Новая директория настроек (LocalAppData). Полностью доступна на запись для стандартных пользователей.</summary>
+        public static readonly string NewSettingsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "vAzhureRacingHub");
+        public static readonly string NewSettingsFile = Path.Combine(NewSettingsDir, "settings.json");
+        public static readonly string NewPluginsDir = Path.Combine(NewSettingsDir, "Plugins");
+
+        ///  <summary>
         /// Конструктор класса
         /// </summary>
         public AppWindow()
@@ -41,30 +46,51 @@ namespace vAzhureRacingHub
             OnSoundLevelChanged += AppWindow_OnSoundLevelChanged;
         }
 
+        /// <summary>
+        /// [FIX] Безопасная загрузка настроек с приоритетом нового пути и миграцией со старого.
+        /// </summary>
         private void LoadSettings()
         {
-            settings.PluginsFolder = localSettingPluginsPath;
+            if (!Directory.Exists(NewSettingsDir))
+                try { Directory.CreateDirectory(NewSettingsDir); } catch { }
 
-            if (Directory.Exists(LocalApplicationData))
+            if (File.Exists(NewSettingsFile))
             {
-                if (AppSettings.LoadFromFile(localSettingFile) is AppSettings s)
+                var loaded = AppSettings.LoadFromFile(NewSettingsFile);
+                if (loaded != null)
                 {
-                    settings = s;
+                    settings = loaded;
+                    return;
                 }
             }
-            else
+
+            if (File.Exists(OldSettingsFile))
             {
-                try
+                var loaded = AppSettings.LoadFromFile(OldSettingsFile);
+                if (loaded != null)
                 {
-                    Directory.CreateDirectory(LocalApplicationData);
-                    Directory.CreateDirectory(localSettingPluginsPath);
+                    settings = loaded;
+
+                    // [MIGRATION]
+                    try
+                    {
+                        File.Copy(OldSettingsFile, NewSettingsFile, overwrite: true);
+                        System.Diagnostics.Debug.WriteLine("[vAzhureRacingHub] Settings migrated from ProgramData to LocalAppData.");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[vAzhureRacingHub] Migration failed: {ex.Message}");
+                    }
+                    return;
                 }
-                catch { }
             }
+
+            // 3. Если настроек нет нигде, оставляем дефолтный объект (инициализирован в поле класса)
+            System.Diagnostics.Debug.WriteLine("[vAzhureRacingHub] No settings found. Using defaults.");
         }
 
         private const int WM_DEVICECHANGE = 0x0219;                 // device change event 
-        private const int DBT_DEVICEARRIVAL = 0x8000;               // system detected a new device 
+        private const int DBT_DEVICEARRIVAL = 0x8000;                // system detected a new device 
         private const int DBT_DEVICEREMOVEPENDING = 0x8003;         // about to remove, still available 
         private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
         private const int DBT_DEVTYP_PORT = 0x00000003;
@@ -74,20 +100,20 @@ namespace vAzhureRacingHub
         {
             public int dbcp_size;
             public int dbcp_devicetype;
-            public int dbcp_reserved; // MSDN say "do not use"
+            public int dbcp_reserved; // MSDN say  "do not use "
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 255)]
             public string dbcp_name;
         }
 
-        /// <summary>
+        ///  <summary>
         /// Сообщения Windows
         /// </summary>
-        /// <param name="m"></param>
+        ///  <param name="m"></param>
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == WM_DEVICECHANGE && m.LParam != IntPtr.Zero)
             {
-                DEV_BROADCAST_PORT hdr_port = new DEV_BROADCAST_PORT() { dbcp_name = "" };
+                DEV_BROADCAST_PORT hdr_port = new DEV_BROADCAST_PORT() { dbcp_name = " " };
                 try
                 {
                     hdr_port = (DEV_BROADCAST_PORT)Marshal.PtrToStructure(m.LParam, typeof(DEV_BROADCAST_PORT));
@@ -188,28 +214,39 @@ namespace vAzhureRacingHub
             ClosePlugins();
         }
 
+        /// <summary>
+        /// [FIX] Сохранение настроек строго в новое расположение (LocalAppData).
+        /// Добавлена проверка существования директории и вывод ошибки пользователю.
+        /// </summary>
         private void SaveSettings()
         {
-            string oldSettings = ObjectSerializeHelper.GetJson(AppSettings.LoadFromFile(localSettingFile));
-            string newSettings = ObjectSerializeHelper.GetJson(settings);
-            if (oldSettings != newSettings)
+            // Гарантируем наличие директории перед записью
+            if (!Directory.Exists(NewSettingsDir))
+            {
+                try { Directory.CreateDirectory(NewSettingsDir); } catch { }
+            }
+
+            // Читаем текущий файл для сравнения (оптимизация: не десериализуем дважды)
+            string oldJson = File.Exists(NewSettingsFile) ? File.ReadAllText(NewSettingsFile) : null;
+            string newJson = ObjectSerializeHelper.GetJson(settings);
+
+            if (oldJson != newJson)
             {
                 try
                 {
-                    settings.SaveToFile(localSettingFile);
-
+                    File.WriteAllText(NewSettingsFile, newJson);
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(e.Message);
+                    MessageBox.Show(this, $"Не удалось сохранить настройки:\n{e.Message}", "Ошибка сохранения", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
 
-        /// <summary>
+        ///  <summary>
         /// Закрытие приложения
         /// </summary>
-        /// <param name="e"></param>
+        ///  <param name="e"></param>
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
@@ -223,7 +260,7 @@ namespace vAzhureRacingHub
             }
         }
 
-        /// <summary>
+        ///  <summary>
         /// Загрузка плагинов
         /// </summary>
         private void LoadPlugins()
@@ -243,8 +280,7 @@ namespace vAzhureRacingHub
                                 {
                                     initializedPlugins.Add(customPlugin);
                                 }
-                                else
-                                    if (customPlugin is IDisposable p)
+                                else if (customPlugin is IDisposable p)
                                     p?.Dispose();
                             }
                             catch { }
@@ -255,7 +291,7 @@ namespace vAzhureRacingHub
             }
         }
 
-        /// <summary>
+        ///  <summary>
         /// Завершение работы с плагинами
         /// </summary>
         private void ClosePlugins()
@@ -266,7 +302,6 @@ namespace vAzhureRacingHub
                 try
                 {
                     customPlugin.Quit(this);
-
                 }
                 catch { Console.WriteLine($"{customPlugin.Name} finished with error..."); }
             });
@@ -292,10 +327,10 @@ namespace vAzhureRacingHub
             btnSound.Checked = SoundLevel != 0;
         }
 
-        /// <summary>
+        ///  <summary>
         /// Отрисовка формы
         /// </summary>
-        /// <param name="e"></param>
+        ///  <param name="e"></param>
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -320,10 +355,10 @@ namespace vAzhureRacingHub
             }
         }
 
-        /// <summary>
+        ///  <summary>
         /// Изменение размеров клиентской области окна
         /// </summary>
-        /// <param name="e"></param>
+        ///  <param name="e"></param>
         protected override void OnClientSizeChanged(EventArgs e)
         {
             base.OnClientSizeChanged(e);
@@ -331,20 +366,20 @@ namespace vAzhureRacingHub
             Invalidate();
         }
 
-        /// <summary>
+        ///  <summary>
         /// Кнопка завершения
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        ///  <param name="sender"></param>
+        ///  <param name="e"></param>
         private void BtnExit_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        /// <summary>
+        ///  <summary>
         /// Отображение формы
         /// </summary>
-        /// <param name="e"></param>
+        ///  <param name="e"></param>
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
@@ -362,7 +397,7 @@ namespace vAzhureRacingHub
             UpdateMaximizeButton();
         }
 
-        /// <summary>
+        ///  <summary>
         /// Обновление кнопки разворачивания/сворачивания окна
         /// </summary>
         private void UpdateMaximizeButton()
@@ -370,7 +405,7 @@ namespace vAzhureRacingHub
             btnExpand.Image = WindowState == FormWindowState.Maximized ? Properties.Resources.restore_window32 : Properties.Resources.expand_window;
         }
 
-        /// <summary>
+        ///  <summary>
         /// Версия приложения
         /// </summary>
         public ulong Version => 1U;
@@ -393,27 +428,27 @@ namespace vAzhureRacingHub
         public IList<ICustomPlugin> Plugins => customPlugins;
 
 
-        /// <summary>
+        ///  <summary>
         /// Разворачивание/сворачивание окна
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        ///  <param name="sender"></param>
+        ///  <param name="e"></param>
         private void BtnExpand_Click(object sender, EventArgs e)
         {
             WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
         }
 
-        /// <summary>
+        ///  <summary>
         /// Минимизация окна
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        ///  <param name="sender"></param>
+        ///  <param name="e"></param>
         private void BtnMinimize_Click(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Minimized;
         }
 
-        /// <summary>
+        ///  <summary>
         /// Активация окна
         /// </summary>
         public void AcivateForm()
@@ -421,11 +456,11 @@ namespace vAzhureRacingHub
             Activate();
         }
 
-        /// <summary>
+        ///  <summary>
         /// Регистрация пользовательского устройства
         /// </summary>
-        /// <param name="customDevice"></param>
-        /// <returns></returns>
+        ///  <param name="customDevice"></param>
+        ///  <returns></returns>
         public bool RegisterDevice(ICustomDevicePlugin customDevice)
         {
             if (customDevices.Find(p => p.DeviceID == customDevice.DeviceID) == null)
@@ -456,11 +491,11 @@ namespace vAzhureRacingHub
             }
         }
 
-        /// <summary>
+        ///  <summary>
         /// Отмена регистрация пользовательского устройства
         /// </summary>
-        /// <param name="customDevice"></param>
-        /// <returns></returns>
+        ///  <param name="customDevice"></param>
+        ///  <returns></returns>
         public bool UnRegisterDevice(ICustomDevicePlugin customDevice)
         {
             customDevices.Remove(customDevice);
@@ -470,12 +505,12 @@ namespace vAzhureRacingHub
             return false;
         }
 
-        /// <summary>
+        ///  <summary>
         /// Отображение окна о программе
         /// </summary>
         public void About()
         {
-            MessageBox.Show(this, "version 1.0.092\r\nRelease Date: 2026-04-12", "vAzhure Racing Hub");
+            MessageBox.Show(this, "version 1.0.098\r\nRelease Date: 2026-07-03", "vAzhure Racing Hub");
         }
 
         AppSettings settings = new AppSettings();
@@ -492,7 +527,7 @@ namespace vAzhureRacingHub
             }
         }
 
-        /// <summary>
+        ///  <summary>
         /// Отображение окна настроек
         /// </summary>
         public void ShowSettings()
@@ -503,7 +538,7 @@ namespace vAzhureRacingHub
             }
         }
 
-        /// <summary>
+        ///  <summary>
         /// Уровень звука
         /// </summary>
         public int SoundLevel
@@ -524,16 +559,16 @@ namespace vAzhureRacingHub
 
         public int ApplicationSoundVolume => SoundLevel;
 
-        /// <summary>
+        ///  <summary>
         /// Сохраненный уровень звука
         /// </summary>
         int nPrevSoundLevel = 0;
 
-        /// <summary>
+        ///  <summary>
         /// Включение/отключение звука
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        ///  <param name="sender"></param>
+        ///  <param name="e"></param>
         private void BtnSound_OnSwitch(object sender, EventArgs e)
         {
             if (btnSound.Checked == false)
@@ -587,7 +622,6 @@ namespace vAzhureRacingHub
                     try
                     {
                         devicePlugin.OnTelemetry(this, e.TelemetryInfo);
-
                     }
                     catch { }
                 });
@@ -642,35 +676,33 @@ namespace vAzhureRacingHub
         {
             public int Volume { get; set; } = 25;
             public string PluginsFolder { get; set; } = "";
-            /// <summary>
+            ///  <summary>
             /// Заблокированные плагины
             /// </summary>
             public List<string> DisabledPlugins { get; set; } = new List<string>();
-            /// <summary>
+            ///  <summary>
             /// Заблокированные игры
             /// </summary>
             public List<string> DisabledGames { get; set; } = new List<string>();
-            /// <summary>
+            ///  <summary>
             /// Пользовательские приложения
             /// </summary>
             public List<UserApp> UserApps { get; set; } = new List<UserApp>();
 
-            public ServerSettings Server { get; set; } = new ServerSettings();
-
-            /// <summary>
+            ///  <summary>
             /// Создание полной копии объекта
             /// </summary>
-            /// <returns></returns>
+            ///  <returns></returns>
             public object Clone()
             {
                 return MemberwiseClone();
             }
 
-            /// <summary>
+            ///  <summary>
             /// Чтение настроек из файла
             /// </summary>
-            /// <param name="path"></param>
-            /// <returns></returns>
+            ///  <param name="path"></param>
+            ///  <returns></returns>
             public static AppSettings LoadFromFile(string path)
             {
                 try
