@@ -1,6 +1,5 @@
 using System;
 using System.IO.MemoryMappedFiles;
-using System.Runtime.InteropServices;
 using System.Threading;
 using vAzhureRacingAPI;
 
@@ -37,53 +36,55 @@ namespace eXpanSIM
                     if (telemetry.Valid == 1 && telemetry.VehicleSpawned == 1)
                     {
                         // Orientation (radians -> normalized [-1, 1])
-                        motionData.Roll = (float)(telemetry.Roll / Math.PI);
-                        motionData.Pitch = (float)(telemetry.Pitch / Math.PI);
+                        motionData.Roll = -(float)(telemetry.Roll / Math.PI);
+                        motionData.Pitch = -(float)(telemetry.Pitch / Math.PI);
                         motionData.Yaw = (float)(telemetry.Yaw / Math.PI);
 
                         // Accelerations (m/s^2 -> g-forces for motion platform)
-                        const double G = 9.81;
-                        motionData.Surge = (float)(telemetry.AccZ / G);
-                        motionData.Sway = (float)(telemetry.AccX / G);
+                        const double G = 98.1;
+                        motionData.Surge = -(float)(telemetry.AccZ / G);
+                        motionData.Sway = -(float)(telemetry.AccX / G);
                         motionData.Heave = (float)(telemetry.AccY / G);
 
                         // Angular velocities
-                        motionData.LocalRot = new float[]
-                        {
+                        motionData.LocalRot =
+                        [
                             (float)telemetry.AngVelX,
                             (float)telemetry.AngVelY,
                             (float)telemetry.AngVelZ
-                        };
+                        ];
 
                         // Angular accelerations
-                        motionData.LocalRotAcceleration = new float[]
-                        {
+                        motionData.LocalRotAcceleration =
+                        [
                             (float)telemetry.AngAccX,
                             (float)telemetry.AngAccY,
                             (float)telemetry.AngAccZ
-                        };
+                        ];
 
                         // Position
-                        motionData.Position = new double []
-                        {
+                        motionData.Position =
+                        [
                             telemetry.PosX,
                             telemetry.PosY,
                             telemetry.PosZ
-                        };
+                        ];
 
                         // Velocity
-                        motionData.LocalVelocity = new float[]
-                        {
+                        motionData.LocalVelocity =
+                        [
                             (float)telemetry.VelX,
                             (float)telemetry.VelY,
                             (float)telemetry.VelZ
-                        };
+                        ];
 
                         // Dashboard data
                         carData.Speed = (float)(telemetry.Speed * 3.6); // m/s -> km/h
                         carData.RPM = telemetry.Rpm;
+                        carData.MaxRPM = telemetry.MaxRpm;
                         carData.FuelLevel = (float)telemetry.FuelTankReserveNorm;
                         carData.Distance = telemetry.DistanceTraveled;
+                        carData.Gear = (short)(telemetry.Gear + 1);
 
                         sessionInfo.Valid = true;
                         carData.Valid = true;

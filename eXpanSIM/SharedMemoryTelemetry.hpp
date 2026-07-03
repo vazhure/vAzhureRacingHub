@@ -63,6 +63,8 @@ namespace expansim_bridge
         double FuelConsumptionLpH;
         double FuelTankReserveNorm; // 0.0 - 1.0
 
+        int32_t Gear; // Gear
+
         // Session state
         uint32_t VehicleSpawned;    // 1 = vehicle active
         uint32_t Reserved[15];      // For future expansion
@@ -80,6 +82,7 @@ namespace expansim_bridge
         double DistanceTraveled = 0.0;
         double FuelConsumptionLpH = 0.0;
         double FuelTankReserveNorm = 0.0;
+        int32_t Gear;
     };
 
     class SharedMemoryTelemetry

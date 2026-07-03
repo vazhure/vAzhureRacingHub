@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 
 namespace eXpanSIM
@@ -56,6 +55,8 @@ namespace eXpanSIM
         public double DistanceTraveled;    // meters
         public double FuelConsumptionLpH;
         public double FuelTankReserveNorm; // 0.0 - 1.0
+
+        public int Gear;
 
         // Session state
         public uint VehicleSpawned;        // 1 = vehicle active
