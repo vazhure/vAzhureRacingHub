@@ -52,9 +52,10 @@ Supported Game Titles:
 * X-Plane 11
 * X-Plane 12
 * IL-2 Series
+* eXpanSIM
 
 WIP:
-* eXpanSIM
+* OMSI 2 / OpenOMSI
 * F1 2018
 * F1 2019
 * F1 2020
