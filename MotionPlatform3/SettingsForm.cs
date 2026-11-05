@@ -323,12 +323,15 @@ namespace MotionPlatform3
                     case DEVICE_MODE.HOMEING: text = "HOMEING"; color = Color.Yellow; textClr = Color.Black; break;
                     case DEVICE_MODE.READY: text = "READY"; color = Color.Green; break;
                     case DEVICE_MODE.PARKING: text = "PARKING"; color = Color.Green; break;
+                    case DEVICE_MODE.UNPARKING: text = "UNPARKING"; color = Color.Green; break;
+                    case DEVICE_MODE.PARKED: text = "PARKED"; color = Color.Green; break;
+                    case DEVICE_MODE.DISABLED: text = "DISABLED"; color = Color.Green; break;
                 }
 
                 btnTestSpeed.Enabled = _plugin.IsDeviceReady;
 
                 string state = $"Homed: {e.State.flags.HasFlag(DEVICE_FLAGS.STATE_HOMED)}\r\n{e.State.speedMMperSEC} mm/sec";
-                float stepsPerMM = _plugin.settings.StepsPerMM;
+                float stepsPerMM = Math.Abs(e.State.max - e.State.min) / (_plugin.settings.ActuatorTravelMM > 0 ? _plugin.settings.ActuatorTravelMM  : 100);
                 int mid = (e.State.min + e.State.max) / 2;
                 string pos = $"POS: {(e.State.currentpos - mid) / stepsPerMM:0.0} mm";
                 string target = $"TARGET: {(e.State.targetpos - mid) / stepsPerMM:0.0} mm";
@@ -569,6 +572,8 @@ namespace MotionPlatform3
             string sSpeed = FormatSimHubCommand(_plugin.GenerateCommand(COMMAND.CMD_SET_SPEED, speed, speed, speed, speed));
             string sHome = FormatSimHubCommand(_plugin.GenerateCommand(COMMAND.CMD_HOME, 1, 1, 1, 1));
             string sState = FormatSimHubCommand(_plugin.GenerateCommand(COMMAND.CMD_GET_STATE, 1, 1, 1, 1));
+            string sPIDEn = FormatSimHubCommand(_plugin.GenerateCommand(COMMAND.CMD_SET_PID_ENABLE, 1, 1, 1, 1));
+            string sPIDdis = FormatSimHubCommand(_plugin.GenerateCommand(COMMAND.CMD_SET_PID_ENABLE, 0, 0, 0, 0));
 
             motionsettings.Output.Settings.GenericProtocolDefinition.SettingsBuilder.Settings = new SimHub.ProtocolSetting[]
             {
@@ -674,21 +679,13 @@ namespace MotionPlatform3
                 new SimHub.StartCommand() { Command = sSpeed },
                 new SimHub.StartCommand() { Command = sHome, CommandDelay = 3000 },
                 new SimHub.StartCommand() { Command = sState },
-                new SimHub.StartCommand() { Command = "PIDEN=<Setting,pid_enable,0><13><10>", CommandDelay = 50 },
-                new SimHub.StartCommand() { Command = "PIDBLEND=<Setting,pid_blend,0><13><10>", CommandDelay = 50 },
-                new SimHub.StartCommand() { Command = "SYNCEXEC=<Setting,experimental_sync_exec,0><13><10>", CommandDelay = 50 },
-                new SimHub.StartCommand() { Command = "KP=<Setting,pid_kp,0.00><13><10>", CommandDelay = 50 },
-                new SimHub.StartCommand() { Command = "KI=<Setting,pid_ki,0.00><13><10>", CommandDelay = 50 },
-                new SimHub.StartCommand() { Command = "KD=<Setting,pid_kd,0><13><10>", CommandDelay = 50 },
-                new SimHub.StartCommand() { Command = "KS=<Setting,pid_ks,0><13><10>", CommandDelay = 50 }
+                //new SimHub.StartCommand() { Command = sPIDEn },
             };
 
             var baseUpdateCommand = motionsettings.Output.Settings.GenericProtocolDefinition.UpdateCommands?.FirstOrDefault() ?? new SimHub.UpdateCommand();
             motionsettings.Output.Settings.GenericProtocolDefinition.UpdateCommands = new SimHub.UpdateCommand[]
             {
                 new SimHub.UpdateCommand() { Command = baseUpdateCommand.Command, CommandDelay = baseUpdateCommand.CommandDelay },
-                new SimHub.UpdateCommand() { Command = "PIDCFG=<Setting,pid_enable,0>,<Setting,pid_blend,0><13><10>", CommandDelay = 0 },
-                new SimHub.UpdateCommand() { Command = "SYNCEXEC=<Setting,experimental_sync_exec,0><13><10>", CommandDelay = 0 }
             };
 
             using (SaveFileDialog saveFileDialog = new SaveFileDialog()

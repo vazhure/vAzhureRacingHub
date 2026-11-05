@@ -9,7 +9,7 @@ namespace MotionPlatform3
     {
         private readonly Plugin _plugin;
         private int _heaveUnits;
-        private float _stepsPerMM;
+        //private float _stepsPerMM;
 
         readonly CancellationTokenSource cancellationToken = new CancellationTokenSource();
         Task task;
@@ -67,7 +67,7 @@ namespace MotionPlatform3
             sliderRoll.Minimum = (int)(-maxAngleX * 100f);
             sliderRoll.Maximum = (int)(maxAngleX * 100f);
 
-            _stepsPerMM = _plugin.settings.StepsPerMM;
+            //_stepsPerMM = _plugin.settings.StepsPerMM;
             task = Task.Run(() =>
             {
                 while (!cancellationToken.IsCancellationRequested)
@@ -119,6 +119,7 @@ namespace MotionPlatform3
         {
             BeginInvoke((Action)delegate
                 {
+                    float _stepsPerMM = Math.Abs(_plugin.FrontAxisState.max - _plugin.FrontAxisState.min) / (_plugin.settings.ActuatorTravelMM > 0 ? _plugin.settings.ActuatorTravelMM : 100);
                     lblHeave.Text = $"{_heave * sliderHeave.Maximum / _stepsPerMM:0.0} mm";
                     lblPitch.Text = $"{sliderPitch.Maximum * 0.01f * _pitch:0.0}°";
                     lblRoll.Text = $"{sliderPitch.Maximum * 0.01f * _roll:0.0}°";

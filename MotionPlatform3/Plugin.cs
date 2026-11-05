@@ -967,7 +967,7 @@ namespace MotionPlatform3
         public float HeaveCutoff { get; set; } = 8.0f;       // 4Hz for smoothness
         public float SwaySurgeCutoff { get; set; } = 8.0f;    // 5Hz intermediate
 
-        public float StepsPerMM { get; set; } = 200;
+        //public float StepsPerMM { get; set; } = 200;
         /// <summary>
         /// Inversion flags
         /// </summary>
@@ -1102,13 +1102,15 @@ namespace MotionPlatform3
 
     public enum DEVICE_MODE : byte
     {
-        UNKNOWN,
-        CONNECTED,
-        DISABLED,
-        HOMEING,
-        PARKING,
-        READY,
-        ALARM
+        UNKNOWN = 0,
+        CONNECTED = 1,
+        DISABLED = 2,
+        HOMEING = 3,
+        PARKING = 4,
+        READY = 5,
+        ALARM = 6,
+        PARKED = 7,
+        UNPARKING = 8
     };
 
     [Flags]
