@@ -321,6 +321,15 @@ namespace RennsportPlugin
                 if (tp.bHeadlightSwitch) el |= CarElectronics.Headlight;
                 if (tp.bPitSpeedLimiter) el |= CarElectronics.Limiter;
                 if (tp.bIgnition) el |= CarElectronics.Ignition;
+
+                car.DirectionsLight = DirectionsLight.None;
+
+                if (carLiveOk)
+                {
+                    if (carLive.CarLeft > 0) car.DirectionsLight |= DirectionsLight.Left;
+                    if (carLive.CarRight > 0) car.DirectionsLight |= DirectionsLight.Right;
+                }
+
                 car.Electronics = el;
                 car.AIControlled = !userControl;
 
@@ -339,9 +348,9 @@ namespace RennsportPlugin
                 motion.Pitch = (float)(tp.Pitch / Math.PI);        // нормализованные рад (-1=±180°)
                 motion.Roll = (float)(tp.Roll / Math.PI);
                 motion.Yaw = (float)(tp.Yaw / Math.PI);
-                motion.Sway = -tp.LatAccel;
-                motion.Heave = tp.VertAccel;
-                motion.Surge = -tp.LonAccel;
+                motion.Sway = -tp.LatAccel / 30f;
+                motion.Heave = tp.VertAccel / 30f;
+                motion.Surge = tp.LonAccel / 30f;
                 motion.LocalAcceleration = new[] { motion.Sway, motion.Heave, motion.Surge };
                 motion.LocalRot = new[] { tp.YawRate, tp.PitchRate, tp.RollRate };
                 motion.LocalVelocity = new float[] { 0, 0, 0 };
@@ -398,7 +407,7 @@ namespace RennsportPlugin
                                 name = TrimString(c.ShortName);
                             if (string.IsNullOrEmpty(name) && c.CarNumber != 0)
                                 name = $"Car {c.CarNumber}";
-                            car.DriverName = name;
+                            car.DriverName = name;                                                        
                         }
                     }
                     ses.DriversCount = drivers;
@@ -408,7 +417,11 @@ namespace RennsportPlugin
                 // Black (bDisqualified) → Black; стартовые огни горят → "";
                 // иначе Green.
                 if (tp.bPitSpeedLimiter) ses.Flag = "Pit";
-                else if (carLiveOk && carLive.bFinished != 0) ses.Flag = "Chequered";
+                else if (carLiveOk && carLive.bFinished != 0)
+                {
+                    ses.Flag = "Chequered";
+                    car.Flags = TelemetryFlags.FlagChequered;
+                }
                 else if (carLiveOk && carLive.bDisqualified != 0) ses.Flag = "Black";
                 else if (startLight > 0) ses.Flag = "";
                 else
