@@ -36,11 +36,13 @@ Supported Game Titles:
 * Kart Racing Pro
 * Le Mans Ultimate
 * MudRunner (limited)
+* OpenOmsi / Omsi 2
 * Project Cars 2
 * Project Cars 3
 * Project Motor Racing Game
 * Race 07
 * RaceRoom Racing Experience
+* Rennsport
 * rFactor
 * rFactor 2
 * Richard Burns Rally
@@ -55,7 +57,6 @@ Supported Game Titles:
 * eXpanSIM
 
 WIP:
-* OMSI 2 / OpenOMSI
 * F1 2018
 * F1 2019
 * F1 2020
