@@ -2,6 +2,9 @@
 /// RaceRoom Shared Memory API definitions.
 /// Source: https://github.com/sector3studios/r3e-api
 /// </summary>
+/// 
+/// 2026-11-06 v.3.6
+
 using System;
 using System.Runtime.InteropServices;
 
@@ -36,7 +39,7 @@ namespace RaceRoom.Structs
             /// <summary>
             /// Current minor version number to test against.
             /// </summary>
-            R3E_VERSION_MINOR = 5
+            R3E_VERSION_MINOR = 6 
         }
 
         /// <summary>
@@ -100,6 +103,36 @@ namespace RaceRoom.Structs
             Green = 5,
             /// <summary>Session has ended (checkered flag).</summary>
             Checkered = 6,
+        }
+
+        /// <summary>
+        /// How the race is started.
+        /// </summary>
+        public enum StartMode
+        {
+            /// <summary>Data not available.</summary>
+            Unavailable = -1,
+            /// <summary>Standing start.</summary>
+            Standing = 0,
+            /// <summary>Rolling start.</summary>
+            Rolling = 1,
+            /// <summary>Formation lap start.</summary>
+            Formation = 2,
+        }
+
+        /// <summary>
+        /// Phase of the start procedure for a specific car/group.
+        /// </summary>
+        public enum StartPhase
+        {
+            /// <summary>Data not available.</summary>
+            Unavailable = -1,
+            /// <summary>Waiting for the car's own start group.</summary>
+            Waiting = 0,
+            /// <summary>Start group leader is in the start corridor, green is imminent.</summary>
+            Corridor = 1,
+            /// <summary>The car's start group has gone green.</summary>
+            Green = 2,
         }
 
         /// <summary>
@@ -1037,10 +1070,23 @@ namespace RaceRoom.Structs
         /// </summary>
         /// <remarks>Unit: Euler angles (radians)</remarks>
         public Vector3<Single> Orientation;
-        /// <summary>Reserved fields for future expansion.</summary>
-        public Single Unused1;
-        public Single Unused2;
-        public Single Unused3;
+        /// <summary>
+        /// Race start group the car belongs to (staggered starts release groups separately).
+        /// </summary>
+        /// <remarks>0-based, -1 = N/A (not a race session)</remarks>
+        public Int32 StartGroup;
+
+        /// <summary>
+        /// Where the car is in its own start procedure.
+        /// </summary>
+        /// <remarks>See Constant.StartPhase enum.</remarks>
+        public Int32 StartPhase;
+
+        /// <summary>
+        /// The car's slot in its start group's formation order (0 = group leader).
+        /// </summary>
+        /// <remarks>-1 = N/A or not in the formation order (e.g. pit lane start, retired)</remarks>
+        public Int32 FormationSlot;
     }
 
     /// <summary>
@@ -1178,9 +1224,17 @@ namespace RaceRoom.Structs
         /// </summary>
         /// <remarks>-1 = N/A</remarks>
         public Int32 MaxIncidentPoints;
-        /// <summary>Reserved fields for future expansion.</summary>
-        public Single EventUnused1;
-        public Single EventUnused2;
+        /// <summary>
+        /// How the race is started.
+        /// </summary>
+        /// <remarks>See Constant.StartMode enum, -1 = N/A (not a race session)</remarks>
+        public Int32 StartMode;
+
+        /// <summary>
+        /// Number of race start groups released separately (1 = single start).
+        /// </summary>
+        /// <remarks>-1 = N/A (not a race session)</remarks>
+        public Int32 StartGroupCount;
         #endregion
 
         #region Pit Stop Information
@@ -1749,6 +1803,50 @@ namespace RaceRoom.Structs
         /// <remarks>Maximum 128 entries</remarks>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
         public DriverData[] DriverData;
+        #endregion
+
+        #region Start procedure (current vehicle), added in 3.6
+        /// <summary>
+        /// Speed the current vehicle should hold. For the start group leader this is the leader's speed limit.
+        /// </summary>
+        /// <remarks>Unit: Meter per second (m/s). All -1 = N/A unless the current vehicle is waiting for its start group's green.</remarks>
+        public Single FormationSpeedLimit;
+
+        /// <summary>
+        /// Below this speed the start group leader counts as too slow (leader only).
+        /// </summary>
+        /// <remarks>Unit: Meter per second (m/s)</remarks>
+        public Single FormationPaceFloor;
+
+        /// <summary>
+        /// Lap distance where the start corridor begins.
+        /// </summary>
+        /// <remarks>Unit: Meters (m)</remarks>
+        public Single StartCorridorLapDistance;
+
+        /// <summary>
+        /// Side of the track the current vehicle should keep.
+        /// </summary>
+        /// <remarks>0 = left, 1 = right</remarks>
+        public Int32 FormationSide;
+
+        /// <summary>
+        /// Slot id of the car the current vehicle should follow (-1 = none, e.g. start group leader).
+        /// </summary>
+        /// <remarks>Matches DriverInfo.SlotId in DriverData</remarks>
+        public Int32 FormationFollowSlotId;
+
+        /// <summary>
+        /// Time left until the current vehicle may leave the pit lane after a delayed pit lane start.
+        /// </summary>
+        /// <remarks>Unit: Seconds</remarks>
+        public Single PitlaneStartDelayRemaining;
+
+        /// <summary>
+        /// Start offence recorded against the current vehicle, penalised when its start group goes green.
+        /// </summary>
+        /// <remarks>0 = none, 1 = jumped the start, 2 = wrong side of the track</remarks>
+        public Int32 StartPenaltyPending;
         #endregion
 
         /// <summary>
