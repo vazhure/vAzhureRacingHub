@@ -146,7 +146,7 @@ UDP JSON, 60 Гц, плоский объект. Полная структура 
 msbuild LibreCorsaPlugin.csproj /p:VAzhureApiDllPath=C:\path\to\api\bin\Release /p:Configuration=Release
 ```
 
-Нужен .NET Framework 4.7.2 и `System.Text.Json` NuGet (как в vAzhureRacingAPI).
+Нужен .NET Framework 4.8 и `System.Text.Json` NuGet (как в vAzhureRacingAPI).
 
 ---
 
